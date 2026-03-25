@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Anime Duell · Arcade-Stick</title>
+  <title>Anime Fight · Fullbody + Joystick-Panel</title>
   <style>
     * {
       box-sizing: border-box;
@@ -12,93 +12,85 @@
     }
 
     body {
-      background: linear-gradient(145deg, #0a0b1a 0%, #05070f 100%);
+      background: linear-gradient(145deg, #0a0b1a 0%, #03050c 100%);
       min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
       font-family: 'Segoe UI', 'Poppins', system-ui, -apple-system, sans-serif;
       margin: 0;
-      padding: 24px;
+      padding: 20px;
     }
 
-    /* Hauptcontainer – größer, für iPad/Tablet optimiert */
     .game-container {
-      max-width: 1100px;
+      max-width: 1200px;
       width: 100%;
-      background: rgba(0, 0, 0, 0.55);
+      background: rgba(0, 0, 0, 0.6);
       backdrop-filter: blur(6px);
-      border-radius: 80px;
-      padding: 24px 28px 32px;
-      box-shadow: 0 30px 45px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.1);
+      border-radius: 70px;
+      padding: 20px 25px 30px;
+      box-shadow: 0 30px 45px rgba(0,0,0,0.7), inset 0 1px 1px rgba(255,255,255,0.1);
       border: 1px solid rgba(255,200,80,0.5);
     }
 
-    /* Arena mit größerer Canvas */
+    /* Arena mit Canvas für ganze Charaktere */
     .arena {
-      background: radial-gradient(circle at 30% 20%, #1e2a3a, #080c18);
+      background: radial-gradient(circle at 30% 40%, #1f2a36, #070c14);
       border-radius: 60px;
-      padding: 16px;
-      margin-bottom: 28px;
-      box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 12px 25px rgba(0,0,0,0.5);
+      padding: 15px;
+      margin-bottom: 25px;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.6), 0 12px 28px black;
     }
 
     canvas {
       display: block;
       width: 100%;
       height: auto;
-      background: #11151f;
+      background: #0f1420;
       border-radius: 48px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.5);
       cursor: pointer;
     }
 
-    /* Statistiken nebeneinander, grösser */
+    /* Stats */
     .stats-row {
       display: flex;
       flex-wrap: wrap;
       gap: 25px;
-      margin: 25px 0 20px;
+      margin: 20px 0 18px;
     }
 
     .stat-panel {
       flex: 1;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(5px);
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(6px);
       border-radius: 48px;
-      padding: 18px 20px;
+      padding: 16px 22px;
       border-left: 6px solid;
-      box-shadow: 0 8px 18px black;
+      box-shadow: 0 6px 14px black;
     }
 
-    .stat-panel.player {
-      border-left-color: #3b82f6;
-    }
-    .stat-panel.enemy {
-      border-left-color: #ef4444;
-    }
+    .stat-panel.player { border-left-color: #3b82f6; }
+    .stat-panel.enemy { border-left-color: #ef4444; }
 
     .stat-header {
       display: flex;
       justify-content: space-between;
       font-weight: bold;
       font-size: 1.4rem;
-      letter-spacing: 1px;
       margin-bottom: 12px;
     }
     .stat-name {
-      background: linear-gradient(135deg, #fff3cf, #ffda88);
+      background: linear-gradient(135deg, #ffefc0, #ffcf70);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
-      text-shadow: 0 2px 3px rgba(0,0,0,0.2);
     }
     .stat-number {
       color: #facc15;
       font-weight: 800;
       font-size: 1.4rem;
     }
-
     .bar-bg {
       background: #2a1e1e;
       border-radius: 40px;
@@ -112,125 +104,135 @@
       height: 100%;
       background: linear-gradient(90deg, #f97316, #ef4444);
       border-radius: 40px;
-      transition: width 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+      transition: width 0.25s;
     }
     .energy-fill {
       width: 100%;
       height: 100%;
       background: linear-gradient(90deg, #3b82f6, #06b6d4);
       border-radius: 40px;
-      transition: width 0.2s ease;
+      transition: width 0.2s;
     }
     .energy-label {
-      margin-top: 8px;
+      margin-top: 6px;
       font-size: 0.9rem;
       color: #bbd9ff;
       display: flex;
       justify-content: space-between;
-      font-weight: 500;
     }
 
-    /* Kampflog – größere Schrift */
+    /* Kampflog */
     .combat-log {
-      background: #03070fee;
+      background: #03070fdd;
       backdrop-filter: blur(12px);
       border-radius: 48px;
-      padding: 16px 24px;
-      margin: 20px 0 28px;
+      padding: 14px 24px;
+      margin: 20px 0 25px;
       font-size: 1rem;
       font-weight: 500;
       color: #faeec2;
       border: 1px solid #facc1566;
-      min-height: 90px;
-      max-height: 120px;
+      min-height: 85px;
+      max-height: 110px;
       overflow-y: auto;
       font-family: monospace;
-      letter-spacing: 0.5px;
-      box-shadow: inset 0 0 8px #00000044;
     }
-
     .log-text {
       display: block;
       animation: fadeSlide 0.2s ease;
       word-break: break-word;
     }
-
     @keyframes fadeSlide {
-      from { opacity: 0; transform: translateY(6px);}
+      from { opacity: 0; transform: translateY(5px);}
       to { opacity: 1; transform: translateY(0);}
     }
 
-    /* JOYSTICK-STYLE BUTTONS (große runde Tasten) */
+    /* JOYSTICK-PANEL – wie ein echter Arcade-Stick */
     .joystick-panel {
+      background: #1e1b2a;
+      border-radius: 70px;
+      padding: 20px 20px;
+      margin-top: 12px;
+      box-shadow: inset 0 0 0 2px rgba(255,215,100,0.3), 0 12px 28px black;
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 30px;
-      margin-top: 15px;
-      margin-bottom: 10px;
+      gap: 25px;
+      align-items: center;
     }
 
-    .stick-btn {
+    /* einzelne "Joystick-Buttons" – groß, rund, mit Griff-Design */
+    .joy-btn {
       width: 130px;
       height: 130px;
       border-radius: 50%;
-      background: radial-gradient(circle at 35% 35%, #2c2f3f, #131722);
-      border: 3px solid rgba(255,215,100,0.7);
-      box-shadow: 0 12px 20px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.2);
+      background: radial-gradient(circle at 35% 35%, #2b2f3f, #141823);
+      border: 3px solid #ffcd7e;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.2);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       font-weight: bold;
-      font-size: 1.5rem;
+      font-size: 1.3rem;
       color: #ffefcf;
       cursor: pointer;
       transition: 0.05s linear;
       touch-action: manipulation;
-      backdrop-filter: blur(4px);
+      text-align: center;
     }
-    .stick-btn:active {
+    .joy-btn:active {
       transform: scale(0.94);
-      box-shadow: 0 6px 12px black;
+      box-shadow: 0 4px 10px black;
     }
-    .stick-btn span {
-      font-size: 2.2rem;
+    .joy-icon {
+      font-size: 2.4rem;
       display: block;
       margin-bottom: 6px;
     }
-    .stick-btn .cost {
-      font-size: 0.8rem;
-      background: #00000099;
-      padding: 3px 8px;
+    .joy-cost {
+      font-size: 0.7rem;
+      background: #000000aa;
+      padding: 2px 8px;
       border-radius: 30px;
-      margin-top: 4px;
+      margin-top: 5px;
     }
-    .stick-btn.special {
-      background: radial-gradient(circle at 35% 35%, #4e2a7c, #251a3a);
-      border-color: #e0aaff;
+    .joy-btn.special {
+      background: radial-gradient(circle at 35% 35%, #5a2e8a, #2a1a3e);
+      border-color: #e5aaff;
     }
-    .stick-btn.heal {
-      background: radial-gradient(circle at 35% 35%, #2b7a5c, #164034);
-      border-color: #8bffc0;
+    .joy-btn.heal {
+      background: radial-gradient(circle at 35% 35%, #2c8866, #154e38);
+      border-color: #9bffcf;
     }
-    .stick-btn.restart {
-      background: radial-gradient(circle at 35% 35%, #8f3e4e, #4c1e2a);
-      border-color: #ffb5b5;
-      width: 110px;
-      height: 110px;
+    .joy-btn.restart {
+      background: radial-gradient(circle at 35% 35%, #a34a5a, #54222e);
+      border-color: #ffbcbc;
+      width: 120px;
+      height: 120px;
     }
 
-    @media (max-width: 750px) {
-      .game-container {
-        padding: 16px 20px 24px;
-      }
-      .stick-btn {
+    /* Joystick-Knopf für "Angriff" mit einem kleinen Stick-Symbol */
+    .joy-stick-decoration {
+      position: relative;
+    }
+    .joy-stick-decoration::after {
+      content: "🕹️";
+      font-size: 1.4rem;
+      position: absolute;
+      bottom: -10px;
+      right: -10px;
+      opacity: 0.7;
+    }
+
+    @media (max-width: 800px) {
+      .joy-btn {
         width: 100px;
         height: 100px;
-        font-size: 1.2rem;
+        font-size: 1rem;
       }
-      .stick-btn span {
-        font-size: 1.8rem;
+      .joy-icon {
+        font-size: 2rem;
       }
       .stat-header {
         font-size: 1.1rem;
@@ -242,42 +244,38 @@
         font-size: 0.85rem;
       }
     }
-
     @media (max-width: 550px) {
-      .stick-btn {
-        width: 85px;
-        height: 85px;
+      .joy-btn {
+        width: 80px;
+        height: 80px;
       }
-      .stick-btn span {
-        font-size: 1.5rem;
+      .joy-icon {
+        font-size: 1.6rem;
       }
       .joystick-panel {
         gap: 15px;
       }
     }
 
-    button:disabled {
+    button:disabled, .joy-btn.disabled {
       opacity: 0.5;
-      transform: scale(0.98);
+      pointer-events: none;
       filter: grayscale(0.2);
-      cursor: not-allowed;
     }
-
     footer {
       text-align: center;
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       color: #6c7fa0;
-      margin-top: 24px;
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
 <div class="game-container">
   <div class="arena">
-    <canvas id="fightCanvas" width="800" height="320" style="width:100%; height:auto; max-width:800px; margin:0 auto; display:block;"></canvas>
+    <canvas id="fightCanvas" width="900" height="380" style="width:100%; height:auto; max-width:900px; margin:0 auto; display:block;"></canvas>
   </div>
 
-  <!-- Statistikbereich -->
   <div class="stats-row">
     <div class="stat-panel player">
       <div class="stat-header">
@@ -291,7 +289,6 @@
       </div>
       <div class="bar-bg"><div class="energy-fill" id="playerEnergyFill" style="width:50%"></div></div>
     </div>
-
     <div class="stat-panel enemy">
       <div class="stat-header">
         <span class="stat-name">🔥 RYUJIN · Dämonenklaue</span>
@@ -306,52 +303,47 @@
     </div>
   </div>
 
-  <!-- Kampf-Log -->
   <div class="combat-log" id="combatLog">
-    <span class="log-text">⚔️ Drücke den JOYSTICK für Angriff, Spezial oder Heilung!</span>
+    <span class="log-text">⚔️ Drücke einen JOYSTICK-KNOPF, um anzugreifen!</span>
   </div>
 
-  <!-- JOYSTICKS / große runde Buttons -->
+  <!-- JOYSTICK-PANEL – Arcade-Stil -->
   <div class="joystick-panel">
-    <div class="stick-btn" id="attackJoystick">
-      <span>⚡</span> ANGRIFF
-      <div class="cost">—</div>
+    <div class="joy-btn" id="attackJoy">
+      <span class="joy-icon">⚡</span> ANGRIFF
+      <div class="joy-cost">—</div>
     </div>
-    <div class="stick-btn special" id="specialJoystick">
-      <span>✨</span> SPEZIAL
-      <div class="cost">25 E</div>
+    <div class="joy-btn special" id="specialJoy">
+      <span class="joy-icon">✨</span> SPEZIAL
+      <div class="joy-cost">25 E</div>
     </div>
-    <div class="stick-btn heal" id="healJoystick">
-      <span>🌸</span> HEILEN
-      <div class="cost">20 E</div>
+    <div class="joy-btn heal" id="healJoy">
+      <span class="joy-icon">🌸</span> HEILEN
+      <div class="joy-cost">20 E</div>
     </div>
-    <div class="stick-btn restart" id="restartJoystick">
-      <span>🔄</span> NEU
+    <div class="joy-btn restart" id="restartJoy">
+      <span class="joy-icon">🔄</span> NEU
     </div>
   </div>
-  <footer>★ Rundenkampf – jeder Zug kostet nichts, Spezial & Heilung verbrauchen Energie ★</footer>
+  <footer>★ JOYSTICK-STEUERUNG | Rundenkampf: Energie für Spezial & Heilung ★</footer>
 </div>
 
 <script>
   (function() {
-    // ----- SPIELSTATUS -----
+    // ------ SPIELSTATUS ------
     let player = {
-      maxHp: 100,
-      hp: 100,
-      maxEnergy: 100,
-      energy: 50
+      maxHp: 100, hp: 100,
+      maxEnergy: 100, energy: 50
     };
     let enemy = {
-      maxHp: 100,
-      hp: 100,
-      maxEnergy: 100,
-      energy: 40
+      maxHp: 100, hp: 100,
+      maxEnergy: 100, energy: 40
     };
-
     let gameActive = true;
-    let actionLock = false;     // verhindert Spamming während Gegnerzug
-    let canvas = document.getElementById('fightCanvas');
-    let ctx = canvas.getContext('2d');
+    let actionLock = false;
+
+    const canvas = document.getElementById('fightCanvas');
+    const ctx = canvas.getContext('2d');
 
     // DOM-Elemente
     const playerHpText = document.getElementById('playerHpText');
@@ -365,12 +357,11 @@
     const combatLogDiv = document.getElementById('combatLog');
 
     // Joystick-Elemente
-    const attackJoy = document.getElementById('attackJoystick');
-    const specialJoy = document.getElementById('specialJoystick');
-    const healJoy = document.getElementById('healJoystick');
-    const restartJoy = document.getElementById('restartJoystick');
+    const attackJoy = document.getElementById('attackJoy');
+    const specialJoy = document.getElementById('specialJoy');
+    const healJoy = document.getElementById('healJoy');
+    const restartJoy = document.getElementById('restartJoy');
 
-    // Hilfsfunktionen
     function addLogMessage(msg, isError = false) {
       const logEntry = document.createElement('span');
       logEntry.className = 'log-text';
@@ -378,23 +369,20 @@
       logEntry.innerHTML = isError ? `⚠️ ${msg}` : `✦ ${msg}`;
       combatLogDiv.appendChild(logEntry);
       logEntry.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      while(combatLogDiv.children.length > 14) {
-        combatLogDiv.removeChild(combatLogDiv.firstChild);
-      }
+      while(combatLogDiv.children.length > 14) combatLogDiv.removeChild(combatLogDiv.firstChild);
     }
 
     function updateUI() {
-      const playerHpPercent = (player.hp / player.maxHp) * 100;
-      const enemyHpPercent = (enemy.hp / enemy.maxHp) * 100;
-      playerHealthFill.style.width = `${Math.max(0, playerHpPercent)}%`;
-      enemyHealthFill.style.width = `${Math.max(0, enemyHpPercent)}%`;
+      const pHp = (player.hp / player.maxHp) * 100;
+      const eHp = (enemy.hp / enemy.maxHp) * 100;
+      playerHealthFill.style.width = `${Math.max(0, pHp)}%`;
+      enemyHealthFill.style.width = `${Math.max(0, eHp)}%`;
       playerHpText.innerText = Math.max(0, player.hp);
       enemyHpText.innerText = Math.max(0, enemy.hp);
-
-      const playerEnPercent = (player.energy / player.maxEnergy) * 100;
-      const enemyEnPercent = (enemy.energy / enemy.maxEnergy) * 100;
-      playerEnergyFill.style.width = `${Math.max(0, playerEnPercent)}%`;
-      enemyEnergyFill.style.width = `${Math.max(0, enemyEnPercent)}%`;
+      const pEn = (player.energy / player.maxEnergy) * 100;
+      const eEn = (enemy.energy / enemy.maxEnergy) * 100;
+      playerEnergyFill.style.width = `${Math.max(0, pEn)}%`;
+      enemyEnergyFill.style.width = `${Math.max(0, eEn)}%`;
       playerEnergyText.innerText = player.energy;
       enemyEnergyText.innerText = enemy.energy;
     }
@@ -406,15 +394,15 @@
       enemy.energy = Math.min(enemy.maxEnergy, Math.max(0, enemy.energy));
     }
 
-    function disableJoysticks(disabled) {
-      const joysticks = [attackJoy, specialJoy, healJoy];
-      joysticks.forEach(joy => {
-        if (disabled) joy.style.pointerEvents = 'none';
-        else joy.style.pointerEvents = 'auto';
+    function disableJoy(disabled) {
+      const joys = [attackJoy, specialJoy, healJoy];
+      joys.forEach(j => {
+        if (disabled) j.style.pointerEvents = 'none';
+        else j.style.pointerEvents = 'auto';
       });
     }
 
-    function enableJoysticks() {
+    function enableJoy() {
       if (gameActive && !checkGameOver()) {
         attackJoy.style.pointerEvents = 'auto';
         specialJoy.style.pointerEvents = 'auto';
@@ -426,20 +414,19 @@
       }
     }
 
-    // Spielende prüfen
     function checkGameOver() {
       if (!gameActive) return true;
       let over = false;
       if (player.hp <= 0) {
         gameActive = false;
         over = true;
-        addLogMessage("💀 KAI wurde besiegt... Niederlage. Drücke NEU für einen weiteren Kampf!");
-        disableJoysticks(true);
+        addLogMessage("💀 KAI wurde besiegt... Niederlage. Drücke NEU für Revanche!");
+        disableJoy(true);
       } else if (enemy.hp <= 0) {
         gameActive = false;
         over = true;
-        addLogMessage("🏆 SIEG! RYUJIN ist am Boden. Du bist der Anime-Champion!");
-        disableJoysticks(true);
+        addLogMessage("🏆 SIEG! RYUJIN ist am Boden. Du bist der Champion!");
+        disableJoy(true);
       }
       if (over) {
         attackJoy.style.pointerEvents = 'none';
@@ -451,37 +438,32 @@
       return false;
     }
 
-    // Energie-Regeneration nach Runde
     function regenerateAfterRound() {
-      let oldPlayerEn = player.energy;
-      let oldEnemyEn = enemy.energy;
+      let oldP = player.energy;
+      let oldE = enemy.energy;
       player.energy = Math.min(player.maxEnergy, player.energy + 10);
       enemy.energy = Math.min(enemy.maxEnergy, enemy.energy + 8);
-      if (oldPlayerEn !== player.energy) addLogMessage(`🌀 Energie +10 (KAI) → ${player.energy}`);
-      if (oldEnemyEn !== enemy.energy) addLogMessage(`🌑 Zorn +8 (RYUJIN) → ${enemy.energy}`);
+      if (oldP !== player.energy) addLogMessage(`🌀 Energie +10 (KAI) → ${player.energy}`);
+      if (oldE !== enemy.energy) addLogMessage(`🌑 Zorn +8 (RYUJIN) → ${enemy.energy}`);
       clampStats();
       updateUI();
       drawCanvas();
     }
 
-    // Gegnerzug (KI)
     async function enemyTurn() {
-      if (!gameActive) return;
-      if (enemy.hp <= 0) return;
+      if (!gameActive || enemy.hp <= 0) return;
       addLogMessage(`⚔️ RYUJIN greift an!`);
       let damage = 0;
       let energyCost = 0;
       let willSpecial = (enemy.energy >= 25 && Math.random() < 0.45);
-
       if (willSpecial && enemy.energy >= 25) {
-        damage = Math.floor(Math.random() * 13) + 16; // 16–28
+        damage = Math.floor(Math.random() * 13) + 16;
         energyCost = 25;
         addLogMessage(`💢 RYUJIN „Dämonen-Klingensturm!“ ${damage} Schaden!`);
       } else {
-        damage = Math.floor(Math.random() * 10) + 8; // 8–17
+        damage = Math.floor(Math.random() * 10) + 8;
         addLogMessage(`🗡️ RYUJIN führt einen brutalen Hieb aus! ${damage} Schaden.`);
       }
-
       player.hp = Math.max(0, player.hp - damage);
       if (energyCost > 0) {
         enemy.energy = Math.max(0, enemy.energy - energyCost);
@@ -489,12 +471,10 @@
       }
       clampStats();
       updateUI();
-      drawCanvas(true);  // Aufblitz
-
+      drawCanvas(true);
       if (player.hp <= 0) {
-        addLogMessage(`💔 KAI bricht zusammen ... keine Kraft mehr.`);
+        addLogMessage(`💔 KAI bricht zusammen ...`);
         checkGameOver();
-        return;
       }
     }
 
@@ -504,13 +484,12 @@
       clampStats();
       updateUI();
       drawCanvas();
-      enableJoysticks();
+      enableJoy();
       actionLock = false;
       checkGameOver();
       if (!gameActive) actionLock = true;
     }
 
-    // Spieleraktion mit Sperre
     async function playerAction(actionFn) {
       if (actionLock || !gameActive) {
         addLogMessage("Warte, der Gegner ist am Zug ...", true);
@@ -518,38 +497,33 @@
       }
       if (checkGameOver()) return false;
       actionLock = true;
-      disableJoysticks(true);
-
+      disableJoy(true);
       let success = await actionFn();
       if (!success) {
         actionLock = false;
-        enableJoysticks();
+        enableJoy();
         return false;
       }
-
       clampStats();
       updateUI();
       drawCanvas();
-
       if (checkGameOver()) {
         actionLock = false;
         return true;
       }
-
       await enemyTurn();
       if (checkGameOver()) {
         actionLock = false;
-        disableJoysticks(true);
+        disableJoy(true);
         return true;
       }
-
       await finishRound();
       return true;
     }
 
-    // ----- SPIELERAKTIONEN (deutsch) -----
+    // ----- Aktionen (deutsch) -----
     function playerAttack() {
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
         let damage = Math.floor(Math.random() * 11) + 10; // 10–20
         addLogMessage(`⚡ KAI „Sturmfaust!“ ${damage} Schaden!`);
         enemy.hp = Math.max(0, enemy.hp - damage);
@@ -561,7 +535,7 @@
     }
 
     function playerSpecial() {
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
         if (player.energy < 25) {
           addLogMessage(`Nicht genug Energie! Spezial kostet 25 (aktuell ${player.energy})`, true);
           resolve(false);
@@ -579,13 +553,13 @@
     }
 
     function playerHeal() {
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
         if (player.energy < 20) {
           addLogMessage(`Nicht genug Energie! Heilen kostet 20 (aktuell ${player.energy})`, true);
           resolve(false);
           return;
         }
-        let healAmount = Math.floor(Math.random() * 14) + 12; // 12–25
+        let healAmount = Math.floor(Math.random() * 14) + 12;
         let newHp = Math.min(player.maxHp, player.hp + healAmount);
         let actualHeal = newHp - player.hp;
         player.hp = newHp;
@@ -598,129 +572,116 @@
       });
     }
 
-    // Neustart
     function restartGame() {
       gameActive = true;
       actionLock = false;
-      player = {
-        maxHp: 100,
-        hp: 100,
-        maxEnergy: 100,
-        energy: 50,
-      };
-      enemy = {
-        maxHp: 100,
-        hp: 100,
-        maxEnergy: 100,
-        energy: 40,
-      };
+      player = { maxHp: 100, hp: 100, maxEnergy: 100, energy: 50 };
+      enemy = { maxHp: 100, hp: 100, maxEnergy: 100, energy: 40 };
       clampStats();
       updateUI();
       drawCanvas();
-      combatLogDiv.innerHTML = '<span class="log-text">⚔️ Neustart! Die Joysticks sind bereit. Wähle deine Attacke!</span>';
-      addLogMessage("Volle Gesundheit und Energie! Zeig, was du drauf hast.");
+      combatLogDiv.innerHTML = '<span class="log-text">⚔️ NEUSTART! Joysticks sind bereit. Wähle deine Attacke!</span>';
+      addLogMessage("Volle Gesundheit & Energie. Kämpfe!");
       attackJoy.style.pointerEvents = 'auto';
       specialJoy.style.pointerEvents = 'auto';
       healJoy.style.pointerEvents = 'auto';
-      checkGameOver(); // sichert gameActive = true
+      checkGameOver();
     }
 
-    // ----- CANVAS: größere Zeichenfläche, coole Anime-Darstellung -----
+    // ========== CANVAS: GANZE CHARAKTERE (Full Body) ==========
     function drawCanvas(flashEffect = false) {
       if (!ctx) return;
-      ctx.clearRect(0, 0, 800, 320);
-      ctx.fillStyle = "#10141f";
-      ctx.fillRect(0, 0, 800, 320);
-      // Boden
-      ctx.fillStyle = "#201a2a";
-      ctx.fillRect(0, 240, 800, 80);
-      ctx.fillStyle = "#3a2a3c";
-      for(let i=0; i<14; i++) ctx.fillRect(20+i*55, 260, 40, 12);
+      ctx.clearRect(0, 0, 900, 380);
+      // Hintergrund Dojo
+      ctx.fillStyle = "#11161f";
+      ctx.fillRect(0, 0, 900, 380);
+      ctx.fillStyle = "#2a2332";
+      ctx.fillRect(0, 280, 900, 100);
+      for (let i=0; i<12; i++) ctx.fillRect(40+i*70, 310, 50, 12);
 
-      // Spieler (links)
-      ctx.beginPath();
-      ctx.arc(180, 190, 50, 0, Math.PI*2);
+      // ------ Spieler (KAI) Fullbody ------
+      ctx.save();
+      // Körper
       ctx.fillStyle = "#f7cf9f";
-      ctx.fill();
-      ctx.strokeStyle = "#b56f3a";
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      // Augen
-      ctx.fillStyle = "#1f1f2a";
       ctx.beginPath();
-      ctx.arc(155, 177, 9, 0, Math.PI*2);
-      ctx.arc(205, 177, 9, 0, Math.PI*2);
+      ctx.ellipse(190, 240, 28, 38, 0, 0, Math.PI*2);
       ctx.fill();
-      ctx.fillStyle = "white";
+      ctx.fillStyle = "#d4a56e";
+      ctx.fillRect(175, 260, 30, 28);
+      // Kopf
       ctx.beginPath();
-      ctx.arc(151, 173, 3, 0, Math.PI*2);
-      ctx.arc(201, 173, 3, 0, Math.PI*2);
+      ctx.arc(190, 185, 26, 0, Math.PI*2);
       ctx.fill();
-      ctx.fillStyle = "#000";
-      ctx.beginPath();
-      ctx.arc(152, 176, 1.6, 0, Math.PI*2);
-      ctx.arc(202, 176, 1.6, 0, Math.PI*2);
-      ctx.fill();
-      // Haare
       ctx.fillStyle = "#2c5f8a";
       ctx.beginPath();
-      ctx.moveTo(145, 130);
-      ctx.quadraticCurveTo(180, 100, 215, 130);
-      ctx.lineTo(198, 146);
-      ctx.lineTo(180, 137);
-      ctx.lineTo(162, 146);
+      ctx.moveTo(173, 153);
+      ctx.quadraticCurveTo(190, 130, 207, 153);
       ctx.fill();
-      ctx.fillStyle = "#d45a2a";
-      ctx.fillRect(145, 148, 70, 7);
-      // Mund
-      if(player.hp/player.maxHp > 0.4) {
-        ctx.beginPath();
-        ctx.arc(180, 210, 14, 0.1, Math.PI - 0.1);
-        ctx.stroke();
-      } else {
-        ctx.beginPath();
-        ctx.arc(180, 215, 10, 0, Math.PI);
-        ctx.stroke();
-      }
-      // Gegner (rechts)
-      ctx.beginPath();
-      ctx.arc(620, 190, 52, 0, Math.PI*2);
+      ctx.fillStyle = "#1f2a36";
+      ctx.fillRect(176, 175, 8, 6);
+      ctx.fillRect(196, 175, 8, 6);
+      ctx.fillStyle = "white";
+      ctx.fillRect(177, 173, 3, 3);
+      ctx.fillRect(197, 173, 3, 3);
+      ctx.fillStyle = "#b54a2a";
+      ctx.fillRect(183, 200, 14, 4);
+      // Gi (Kampfanzug)
+      ctx.fillStyle = "#2c3e66";
+      ctx.fillRect(170, 235, 40, 28);
+      ctx.fillStyle = "#e0b070";
+      ctx.fillRect(179, 250, 22, 12);
+      // Arme + Faust
+      ctx.fillStyle = "#f7cf9f";
+      ctx.fillRect(150, 225, 22, 16);
+      ctx.fillRect(208, 225, 22, 16);
+      
+      // ------ Gegner (RYUJIN) Fullbody ------
       ctx.fillStyle = "#e0ac77";
-      ctx.fill();
-      ctx.fillStyle = "#4a2a2a";
-      ctx.fillRect(595, 174, 14, 9);
-      ctx.fillRect(631, 174, 14, 9);
-      ctx.fillStyle = "#d97a4a";
-      ctx.fillRect(599, 184, 10, 6);
-      ctx.fillRect(635, 184, 10, 6);
       ctx.beginPath();
-      ctx.moveTo(612, 200);
-      ctx.lineTo(628, 204);
-      ctx.lineWidth = 2.5;
-      ctx.strokeStyle = "#a13e2a";
-      ctx.stroke();
+      ctx.ellipse(710, 240, 30, 42, 0, 0, Math.PI*2);
+      ctx.fill();
+      ctx.fillStyle = "#b56f3a";
+      ctx.fillRect(695, 262, 30, 30);
+      ctx.beginPath();
+      ctx.arc(710, 184, 28, 0, Math.PI*2);
+      ctx.fill();
+      // Dämonenhörner
       ctx.fillStyle = "#6b2e2e";
       ctx.beginPath();
-      ctx.moveTo(603, 140);
-      ctx.lineTo(620, 113);
-      ctx.lineTo(637, 140);
+      ctx.moveTo(692, 152);
+      ctx.lineTo(710, 125);
+      ctx.lineTo(728, 152);
       ctx.fill();
-      if(enemy.hp > 0) {
-        ctx.beginPath();
-        ctx.arc(620, 190, 56, 0, Math.PI*2);
-        ctx.strokeStyle = "#ff7a44";
-        ctx.lineWidth = 2.2;
-        ctx.stroke();
-      }
-      if(flashEffect) {
-        ctx.fillStyle = "rgba(255,220,120,0.35)";
-        ctx.fillRect(0, 0, 800, 320);
-      }
+      ctx.fillStyle = "#4a2a2a";
+      ctx.fillRect(694, 173, 10, 7);
+      ctx.fillRect(716, 173, 10, 7);
+      ctx.fillStyle = "#f08080";
+      ctx.fillRect(698, 181, 6, 4);
+      ctx.fillRect(720, 181, 6, 4);
+      ctx.fillStyle = "#2a2a2a";
+      ctx.fillRect(702, 198, 16, 5);
+      // Rüstung
+      ctx.fillStyle = "#5a3a2a";
+      ctx.fillRect(695, 233, 30, 30);
+      ctx.fillStyle = "#c98a5a";
+      ctx.fillRect(702, 252, 16, 12);
+      // Klaue
+      ctx.fillStyle = "#8b5a3a";
+      ctx.fillRect(670, 225, 22, 16);
+      ctx.fillRect(728, 225, 22, 16);
+      
+      // Namen
       ctx.font = "bold 20px 'Segoe UI'";
-      ctx.fillStyle = "#fff0cf";
-      ctx.fillText("KAI", 135, 90);
-      ctx.fillStyle = "#ffbb99";
-      ctx.fillText("RYUJIN", 565, 85);
+      ctx.fillStyle = "#ffefb0";
+      ctx.fillText("KAI", 150, 110);
+      ctx.fillStyle = "#ffb77c";
+      ctx.fillText("RYUJIN", 670, 100);
+      
+      if(flashEffect) {
+        ctx.fillStyle = "rgba(255,210,100,0.4)";
+        ctx.fillRect(0, 0, 900, 380);
+      }
+      ctx.restore();
     }
 
     // Event-Bindung
@@ -729,13 +690,12 @@
     healJoy.addEventListener('click', () => playerAction(playerHeal));
     restartJoy.addEventListener('click', () => restartGame());
 
-    // Initialisierung
     function init() {
       updateUI();
       drawCanvas();
       gameActive = true;
       actionLock = false;
-      enableJoysticks();
+      enableJoy();
     }
     init();
   })();
