@@ -17,12 +17,11 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: 'Segoe UI', 'Poppins', 'Kanji', system-ui, -apple-system, 'Helvetica Neue', sans-serif;
+            font-family: 'Segoe UI', 'Poppins', system-ui, -apple-system, 'Helvetica Neue', sans-serif;
             margin: 0;
             padding: 16px;
         }
 
-        /* Game container */
         .game-container {
             background: #000000aa;
             border-radius: 64px;
@@ -31,7 +30,6 @@
             backdrop-filter: blur(2px);
         }
 
-        /* Canvas area */
         .canvas-wrapper {
             display: flex;
             justify-content: center;
@@ -49,7 +47,6 @@
             cursor: pointer;
         }
 
-        /* Health bars */
         .health-bars {
             display: flex;
             justify-content: space-between;
@@ -89,7 +86,7 @@
             justify-content: space-between;
         }
 
-        /* JOYSTICK & BUTTONS PANEL (anime arcade style) */
+        /* Controls panel with JOYSTICK */
         .controls-panel {
             margin-top: 20px;
             display: flex;
@@ -97,49 +94,46 @@
             justify-content: space-between;
             align-items: center;
             gap: 20px;
-            padding: 12px 12px 8px;
+            padding: 12px 20px;
             background: rgba(0, 0, 0, 0.55);
             border-radius: 68px;
             backdrop-filter: blur(8px);
         }
 
-        .dpad {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .dpad-row {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-        }
-
-        .joystick-btn {
-            background: #1e1a2fcc;
-            backdrop-filter: blur(4px);
-            border: 2px solid #ffdf9c;
-            width: 75px;
-            height: 75px;
-            border-radius: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.4rem;
-            font-weight: bold;
-            color: #ffe6b3;
-            text-shadow: 0 2px 3px black;
-            box-shadow: 0 8px 0 #3a2c1f;
-            transition: all 0.05s linear;
+        /* Joystick container */
+        .joystick-container {
+            position: relative;
+            width: 130px;
+            height: 130px;
+            background: rgba(30, 25, 45, 0.8);
+            border-radius: 50%;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.6), inset 0 0 5px rgba(255,255,200,0.5);
             touch-action: none;
-            cursor: pointer;
-            background: radial-gradient(circle at 30% 20%, #2a253f, #0f0c1c);
         }
 
-        .joystick-btn:active {
-            transform: translateY(4px);
-            box-shadow: 0 2px 0 #3a2c1f;
+        .joystick-base {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #3a2f5a, #1f1a2f);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .joystick-thumb {
+            position: absolute;
+            width: 55px;
+            height: 55px;
+            background: radial-gradient(circle at 35% 35%, #f5e6d3, #c9aa6f);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 4px 12px black;
+            transition: transform 0.02s linear;
+            pointer-events: none;
         }
 
         .action-buttons {
@@ -147,29 +141,34 @@
             gap: 24px;
         }
 
-        .action {
+        .action-btn {
             background: radial-gradient(circle at 30% 30%, #e64b2e, #9b2c1d);
             border: 2px solid #ffc285;
             width: 85px;
             height: 85px;
-            font-size: 2rem;
+            border-radius: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.9rem;
             font-weight: bold;
             color: #fff3cf;
+            text-shadow: 0 2px 3px black;
             box-shadow: 0 8px 0 #541e12;
+            transition: all 0.05s linear;
+            touch-action: manipulation;
+            cursor: pointer;
+        }
+
+        .action-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #541e12;
         }
 
         .reset-btn {
             background: #2c3e66;
-            width: 70px;
-            height: 70px;
-            font-size: 1.7rem;
             box-shadow: 0 8px 0 #141c32;
-            color: #f5e6d3;
-        }
-
-        .reset-btn:active {
-            transform: translateY(4px);
-            box-shadow: 0 2px 0 #141c32;
+            font-size: 1.7rem;
         }
 
         .fight-tip {
@@ -187,16 +186,21 @@
         }
 
         @media (max-width: 780px) {
-            .joystick-btn, .action {
-                width: 65px;
-                height: 65px;
-                font-size: 1.9rem;
+            .joystick-container {
+                width: 110px;
+                height: 110px;
+            }
+            .joystick-thumb {
+                width: 45px;
+                height: 45px;
+            }
+            .action-btn {
+                width: 75px;
+                height: 75px;
+                font-size: 1.5rem;
             }
             .health-fill {
                 height: 18px;
-            }
-            .controls-panel {
-                gap: 12px;
             }
         }
     </style>
@@ -219,26 +223,20 @@
             </div>
         </div>
 
-        <!-- Virtual Joystick + Action Buttons (full touch) -->
+        <!-- Joystick + Action buttons -->
         <div class="controls-panel">
-            <div class="dpad">
-                <div class="dpad-row">
-                    <div class="joystick-btn" id="btnUp">▲</div>
-                </div>
-                <div class="dpad-row">
-                    <div class="joystick-btn" id="btnLeft">◀</div>
-                    <div class="joystick-btn" id="btnDown">▼</div>
-                    <div class="joystick-btn" id="btnRight">▶</div>
-                </div>
+            <div class="joystick-container" id="joystickZone">
+                <div class="joystick-base"></div>
+                <div class="joystick-thumb" id="joystickThumb"></div>
             </div>
             <div class="action-buttons">
-                <div class="joystick-btn action" id="btnPunch">✧ PUNCH</div>
-                <div class="joystick-btn action" id="btnKick">⚡ KICK</div>
-                <div class="joystick-btn reset-btn" id="btnReset">🔄</div>
+                <div class="action-btn" id="btnPunch">✧ PUNCH</div>
+                <div class="action-btn" id="btnKick">⚡ KICK</div>
+                <div class="action-btn reset-btn" id="btnReset">🔄</div>
             </div>
         </div>
         <div class="fight-tip">
-            ⚔️ TOUCH JOYSTICK → MOVE | ▼ BLOCK | ▲ JUMP | PUNCH/KICK | ANIME BATTLE!
+            🎮 DRAG THE JOYSTICK → MOVE | ⬆️ JUMP (flick up) | ⬇️ BLOCK (hold down)
         </div>
     </div>
 </div>
@@ -250,105 +248,48 @@
         const ctx = canvas.getContext('2d');
 
         // ---------- GAME DIMENSIONS ----------
-        const GROUND_Y = 420;    // where feet land
+        const GROUND_Y = 420;
         const PLAYER_WIDTH = 48;
         const PLAYER_HEIGHT = 78;
 
-        // Game state
         let gameRunning = true;
-        let winner = null; // "player", "enemy"
+        let winner = null;
 
-        // ---------- PLAYER ----------
+        // ---------- PLAYER & ENEMY ----------
         let player = {
-            x: 130,
-            y: GROUND_Y - PLAYER_HEIGHT,
-            vx: 0,
-            vy: 0,
-            width: PLAYER_WIDTH,
-            height: PLAYER_HEIGHT,
-            facingRight: true,
-            health: 100,
-            maxHealth: 100,
-            grounded: true,
-            state: "idle",      // idle, punch, kick, hit, block, jump
-            attackTimer: 0,
-            hitTimer: 0,
-            blockActive: false,
-            invincibleTimer: 0,
-            canAct: true,
-            attackCooldown: 0,
-            // combat
-            lastAttackDamage: 0
+            x: 130, y: GROUND_Y - PLAYER_HEIGHT, vx: 0, vy: 0,
+            width: PLAYER_WIDTH, height: PLAYER_HEIGHT, facingRight: true,
+            health: 100, maxHealth: 100, grounded: true,
+            state: "idle", attackTimer: 0, hitTimer: 0, blockActive: false,
+            invincibleTimer: 0, attackCooldown: 0
         };
 
-        // ---------- ENEMY (AI) ----------
         let enemy = {
-            x: canvas.width - 150,
-            y: GROUND_Y - PLAYER_HEIGHT,
-            vx: 0,
-            vy: 0,
-            width: PLAYER_WIDTH,
-            height: PLAYER_HEIGHT,
-            facingRight: false,
-            health: 100,
-            maxHealth: 100,
-            grounded: true,
-            state: "idle",
-            attackTimer: 0,
-            hitTimer: 0,
-            blockActive: false,
-            invincibleTimer: 0,
-            attackCooldown: 0,
-            aiMoveCooldown: 0
+            x: canvas.width - 150, y: GROUND_Y - PLAYER_HEIGHT, vx: 0, vy: 0,
+            width: PLAYER_WIDTH, height: PLAYER_HEIGHT, facingRight: false,
+            health: 100, maxHealth: 100, grounded: true,
+            state: "idle", attackTimer: 0, hitTimer: 0, blockActive: false,
+            invincibleTimer: 0, attackCooldown: 0
         };
 
-        // Helper: reset game
         function resetGame() {
             gameRunning = true;
             winner = null;
-            // reset player
             player = {
                 ...player,
-                x: 130,
-                y: GROUND_Y - PLAYER_HEIGHT,
-                vx: 0,
-                vy: 0,
-                facingRight: true,
-                health: 100,
-                maxHealth: 100,
-                grounded: true,
-                state: "idle",
-                attackTimer: 0,
-                hitTimer: 0,
-                blockActive: false,
-                invincibleTimer: 0,
-                canAct: true,
-                attackCooldown: 0,
-                lastAttackDamage: 0
+                x: 130, y: GROUND_Y - PLAYER_HEIGHT, vx: 0, vy: 0, facingRight: true,
+                health: 100, maxHealth: 100, grounded: true, state: "idle",
+                attackTimer: 0, hitTimer: 0, blockActive: false, invincibleTimer: 0, attackCooldown: 0
             };
-            // reset enemy
             enemy = {
                 ...enemy,
-                x: canvas.width - 150,
-                y: GROUND_Y - PLAYER_HEIGHT,
-                vx: 0,
-                vy: 0,
-                facingRight: false,
-                health: 100,
-                maxHealth: 100,
-                grounded: true,
-                state: "idle",
-                attackTimer: 0,
-                hitTimer: 0,
-                blockActive: false,
-                invincibleTimer: 0,
-                attackCooldown: 0,
-                aiMoveCooldown: 0
+                x: canvas.width - 150, y: GROUND_Y - PLAYER_HEIGHT, vx: 0, vy: 0, facingRight: false,
+                health: 100, maxHealth: 100, grounded: true, state: "idle",
+                attackTimer: 0, hitTimer: 0, blockActive: false, invincibleTimer: 0, attackCooldown: 0
             };
             updateHealthBars();
         }
 
-        // UI update
         function updateHealthBars() {
             const playerPercent = (player.health / player.maxHealth) * 100;
             const enemyPercent = (enemy.health / enemy.maxHealth) * 100;
@@ -358,73 +299,82 @@
             document.getElementById('enemyHpText').innerText = Math.floor(enemy.health);
         }
 
-        // ---------- INPUT SYSTEM (touch + mouse fallback) ----------
-        let input = {
-            left: false,
-            right: false,
-            jumpRequest: false,
-            block: false,
-            punchRequest: false,
-            kickRequest: false
-        };
+        // ---------- JOYSTICK (touch + mouse) ----------
+        const joystickZone = document.getElementById('joystickZone');
+        const thumb = document.getElementById('joystickThumb');
+        let active = false;
+        let centerX = 0, centerY = 0;
+        let stickVector = { x: 0, y: 0 };  // -1..1
 
-        // Button elements
-        const btnLeft = document.getElementById('btnLeft');
-        const btnRight = document.getElementById('btnRight');
-        const btnUp = document.getElementById('btnUp');
-        const btnDown = document.getElementById('btnDown');
-        const btnPunch = document.getElementById('btnPunch');
-        const btnKick = document.getElementById('btnKick');
-        const btnReset = document.getElementById('btnReset');
-
-        function attachButton(btn, onTouchStart, onTouchEnd) {
-            const startHandler = (e) => {
-                e.preventDefault();
-                onTouchStart(e);
-            };
-            const endHandler = (e) => {
-                e.preventDefault();
-                onTouchEnd(e);
-            };
-            btn.addEventListener('pointerdown', startHandler);
-            btn.addEventListener('pointerup', endHandler);
-            btn.addEventListener('pointercancel', endHandler);
-            btn.addEventListener('pointerleave', endHandler);
-            // mouse support for debugging
-            btn.addEventListener('mousedown', startHandler);
-            btn.addEventListener('mouseup', endHandler);
+        function updateThumbPosition(normX, normY) {
+            const maxDist = joystickZone.clientWidth / 2 - thumb.clientWidth / 2;
+            const px = normX * maxDist;
+            const py = normY * maxDist;
+            thumb.style.transform = `translate(calc(-50% + ${px}px), calc(-50% + ${py}px))`;
         }
 
-        // Movement
-        attachButton(btnLeft, () => { input.left = true; }, () => { input.left = false; });
-        attachButton(btnRight, () => { input.right = true; }, () => { input.right = false; });
-        attachButton(btnUp, () => { input.jumpRequest = true; }, () => {});
-        attachButton(btnDown, () => { input.block = true; }, () => { input.block = false; });
-        attachButton(btnPunch, () => { input.punchRequest = true; }, () => {});
-        attachButton(btnKick, () => { input.kickRequest = true; }, () => {});
-        btnReset.addEventListener('click', (e) => {
+        function handleStart(e) {
             e.preventDefault();
-            resetGame();
-        });
+            const rect = joystickZone.getBoundingClientRect();
+            centerX = rect.left + rect.width / 2;
+            centerY = rect.top + rect.height / 2;
+            active = true;
+            handleMove(e);
+        }
+
+        function handleMove(e) {
+            if (!active) return;
+            e.preventDefault();
+            let clientX, clientY;
+            if (e.touches) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            let dx = clientX - centerX;
+            let dy = clientY - centerY;
+            const radius = joystickZone.clientWidth / 2;
+            let distance = Math.hypot(dx, dy);
+            let normX = 0, normY = 0;
+            if (distance > radius) {
+                dx = dx / distance * radius;
+                dy = dy / distance * radius;
+                distance = radius;
+            }
+            normX = dx / radius;
+            normY = dy / radius;
+            stickVector.x = normX;
+            stickVector.y = normY;
+            updateThumbPosition(normX, normY);
+        }
+
+        function handleEnd(e) {
+            active = false;
+            stickVector.x = 0;
+            stickVector.y = 0;
+            thumb.style.transform = 'translate(-50%, -50%)';
+        }
+
+        joystickZone.addEventListener('touchstart', handleStart);
+        joystickZone.addEventListener('touchmove', handleMove);
+        joystickZone.addEventListener('touchend', handleEnd);
+        joystickZone.addEventListener('mousedown', handleStart);
+        window.addEventListener('mousemove', (e) => { if (active) handleMove(e); });
+        window.addEventListener('mouseup', handleEnd);
 
         // ---------- GAME MECHANICS ----------
         function applyDamage(target, amount, isBlocking) {
             if (target.invincibleTimer > 0) return false;
             let finalDamage = amount;
-            if (isBlocking && target.blockActive) {
-                finalDamage = Math.floor(amount * 0.4);
-                // block spark visual
-            }
+            if (isBlocking && target.blockActive) finalDamage = Math.floor(amount * 0.4);
             target.health = Math.max(0, target.health - finalDamage);
-            target.invincibleTimer = 0.45; // hit invincibility frames
+            target.invincibleTimer = 0.45;
             target.hitTimer = 0.25;
             target.state = "hit";
-            // small knockback
-            if (target === player) {
-                player.vx += (player.facingRight ? -3 : 3);
-            } else {
-                enemy.vx += (enemy.facingRight ? -2 : 2);
-            }
+            if (target === player) player.vx += (player.facingRight ? -3 : 3);
+            else enemy.vx += (enemy.facingRight ? -2 : 2);
             updateHealthBars();
             if (target.health <= 0) {
                 gameRunning = false;
@@ -433,22 +383,15 @@
             return true;
         }
 
-        // attack from source (attacker, defender, damage, rangeOffset)
         function performAttack(attacker, defender, damage, rangeFront, isPlayerAttack) {
             if (!gameRunning) return false;
             if (attacker.attackCooldown > 0) return false;
             if (attacker.state === "hit") return false;
-            // calculate distance (center to center)
             const attackerCenter = attacker.x + attacker.width/2;
             const defenderCenter = defender.x + defender.width/2;
             const distance = Math.abs(attackerCenter - defenderCenter);
             const attackRange = rangeFront + 20;
-            let facingCondition = false;
-            if (isPlayerAttack) {
-                facingCondition = (attacker.facingRight && defenderCenter > attackerCenter) || (!attacker.facingRight && defenderCenter < attackerCenter);
-            } else {
-                facingCondition = (attacker.facingRight && defenderCenter > attackerCenter) || (!attacker.facingRight && defenderCenter < attackerCenter);
-            }
+            const facingCondition = (attacker.facingRight && defenderCenter > attackerCenter) || (!attacker.facingRight && defenderCenter < attackerCenter);
             if (distance <= attackRange && facingCondition) {
                 const isBlocking = defender.blockActive && defender.state !== "hit" && defender.state !== "attack";
                 applyDamage(defender, damage, isBlocking);
@@ -458,27 +401,18 @@
             return false;
         }
 
-        // Start attack animation and hit check
         function startPlayerAttack(type) {
-            if (!gameRunning) return false;
-            if (player.attackCooldown > 0) return false;
-            if (player.state === "hit") return false;
-            let damage = 0;
-            let range = 55;
-            if (type === 'punch') { damage = 9; range = 52; }
-            if (type === 'kick') { damage = 14; range = 60; }
+            if (!gameRunning) return;
+            if (player.attackCooldown > 0) return;
+            if (player.state === "hit") return;
+            let damage = type === 'punch' ? 9 : 14;
+            let range = type === 'punch' ? 52 : 60;
             player.state = type;
             player.attackTimer = 0.28;
-            // instant hit detection
-            const hitLanded = performAttack(player, enemy, damage, range, true);
-            if (hitLanded) {
-                // sfx feel
-            }
+            performAttack(player, enemy, damage, range, true);
             player.attackCooldown = 0.55;
-            return true;
         }
 
-        // AI attack
         function aiTryAttack() {
             if (!gameRunning) return;
             if (enemy.attackCooldown > 0) return;
@@ -495,30 +429,48 @@
             }
         }
 
-        // Block management
-        function updateBlock() {
-            if (!gameRunning) return;
-            if (player.state === "hit" || player.attackTimer > 0) {
-                player.blockActive = false;
+        // ---------- INPUT FROM JOYSTICK ----------
+        // Movement flags derived from joystick
+        let moveLeft = false, moveRight = false;
+        let jumpTrigger = false;    // one-shot
+        let blockActive = false;
+        let lastUpState = false;     // to detect rising edge for jump
+
+        function updateJoystickInput() {
+            const deadzone = 0.2;
+            const xVal = Math.abs(stickVector.x) > deadzone ? stickVector.x : 0;
+            moveLeft = xVal < -0.2;
+            moveRight = xVal > 0.2;
+
+            const yVal = stickVector.y;
+            const isUp = yVal < -0.5;    // up region
+            const isDown = yVal > 0.5;   // down region
+
+            // Jump: rising edge detection
+            if (isUp && !lastUpState) {
+                jumpTrigger = true;
             } else {
-                player.blockActive = input.block;
-                if (player.blockActive) player.state = "block";
-                else if (player.state === "block" && player.attackTimer === 0 && player.hitTimer === 0) player.state = "idle";
+                jumpTrigger = false;
             }
+            lastUpState = isUp;
+
+            // Block: hold down
+            blockActive = isDown;
         }
 
-        // ---------- PHYSICS & MOVEMENT (delta time) ----------
+        // ---------- PHYSICS & TIMERS (delta time) ----------
         let lastTimestamp = 0;
         let deltaTime = 1/60;
 
         function updateMovement(delta) {
             if (!gameRunning) return;
-            // Player movement (only if not attacking/hit)
+
+            // Player movement (only if not locked)
             let canMove = (player.attackTimer <= 0 && player.hitTimer <= 0);
             if (canMove) {
                 let acc = 0;
-                if (input.left) acc = -1;
-                if (input.right) acc = 1;
+                if (moveLeft) acc = -1;
+                if (moveRight) acc = 1;
                 player.vx += acc * 14 * delta;
                 player.vx *= 0.92;
                 if (Math.abs(player.vx) < 0.2) player.vx = 0;
@@ -531,16 +483,13 @@
             }
 
             // Jump
-            if (input.jumpRequest && player.grounded && canMove && player.attackTimer <= 0 && player.hitTimer <= 0) {
+            if (jumpTrigger && player.grounded && canMove && player.attackTimer <= 0 && player.hitTimer <= 0) {
                 player.vy = -370;
                 player.grounded = false;
                 player.state = "jump";
-                input.jumpRequest = false;
-            } else {
-                input.jumpRequest = false;
             }
 
-            // gravity
+            // Gravity & ground
             player.vy += 1200 * delta;
             player.y += player.vy * delta;
             if (player.y >= GROUND_Y - PLAYER_HEIGHT) {
@@ -548,14 +497,12 @@
                 player.vy = 0;
                 player.grounded = true;
                 if (player.state === "jump" && player.attackTimer === 0 && player.hitTimer === 0) player.state = "idle";
-            } else {
-                player.grounded = false;
-            }
+            } else player.grounded = false;
 
-            // bounds
+            // Boundaries
             player.x = Math.min(canvas.width - player.width - 25, Math.max(30, player.x));
 
-            // AI movement
+            // Enemy AI movement
             let aiCanMove = (enemy.attackTimer <= 0 && enemy.hitTimer <= 0);
             if (aiCanMove && gameRunning) {
                 let diff = player.x - enemy.x;
@@ -565,7 +512,6 @@
                 enemy.vx *= 0.92;
                 enemy.x += enemy.vx * delta;
                 enemy.x = Math.min(canvas.width - enemy.width - 20, Math.max(40, enemy.x));
-                // facing direction
                 if (player.x + player.width/2 > enemy.x + enemy.width/2) enemy.facingRight = true;
                 else enemy.facingRight = false;
             } else {
@@ -574,7 +520,7 @@
                 enemy.x = Math.min(canvas.width - enemy.width - 20, Math.max(40, enemy.x));
             }
 
-            // enemy gravity
+            // Enemy gravity
             enemy.vy += 1200 * delta;
             enemy.y += enemy.vy * delta;
             if (enemy.y >= GROUND_Y - PLAYER_HEIGHT) {
@@ -584,47 +530,39 @@
             } else enemy.grounded = false;
         }
 
-        // update timers, states, AI decision
         function updateCombatTimers(delta) {
             if (!gameRunning) return;
-            // player timers
+            // Player
             if (player.attackTimer > 0) { player.attackTimer -= delta; if (player.attackTimer <= 0 && player.state !== "hit") player.state = "idle"; }
             if (player.hitTimer > 0) { player.hitTimer -= delta; if (player.hitTimer <= 0 && player.state === "hit") player.state = "idle"; }
             if (player.attackCooldown > 0) player.attackCooldown -= delta;
             if (player.invincibleTimer > 0) player.invincibleTimer -= delta;
 
-            // enemy timers
+            // Enemy
             if (enemy.attackTimer > 0) { enemy.attackTimer -= delta; if (enemy.attackTimer <= 0 && enemy.state !== "hit") enemy.state = "idle"; }
             if (enemy.hitTimer > 0) { enemy.hitTimer -= delta; if (enemy.hitTimer <= 0 && enemy.state === "hit") enemy.state = "idle"; }
             if (enemy.attackCooldown > 0) enemy.attackCooldown -= delta;
             if (enemy.invincibleTimer > 0) enemy.invincibleTimer -= delta;
 
-            // AI logic periodic
+            // AI attack
             if (gameRunning && enemy.attackTimer <= 0 && enemy.hitTimer <= 0 && enemy.attackCooldown <= 0) {
-                const distToPlayer = Math.abs((player.x + player.width/2) - (enemy.x + enemy.width/2));
-                if (distToPlayer < 110 && Math.random() < 0.018) {
-                    aiTryAttack();
-                }
+                const dist = Math.abs((player.x + player.width/2) - (enemy.x + enemy.width/2));
+                if (dist < 110 && Math.random() < 0.018) aiTryAttack();
             }
 
-            // Player attack requests
-            if (gameRunning && player.attackTimer <= 0 && player.hitTimer <= 0 && player.attackCooldown <= 0) {
-                if (input.punchRequest) { startPlayerAttack('punch'); input.punchRequest = false; }
-                else if (input.kickRequest) { startPlayerAttack('kick'); input.kickRequest = false; }
-            } else {
-                input.punchRequest = false;
-                input.kickRequest = false;
-            }
-            updateBlock();
-            if (player.state !== "block" && player.state !== "hit" && player.attackTimer <= 0 && player.hitTimer <= 0 && player.grounded) {
-                if (player.state === "jump" && player.grounded) player.state = "idle";
-                else if (player.state !== "idle") player.state = "idle";
-            }
+            // Player block
+            if (player.state === "hit" || player.attackTimer > 0) player.blockActive = false;
+            else player.blockActive = blockActive;
+            if (player.blockActive && player.state !== "hit" && player.attackTimer <= 0) player.state = "block";
+            else if (player.state === "block" && !player.blockActive && player.attackTimer === 0 && player.hitTimer === 0) player.state = "idle";
+
+            // State cleanup
+            if (player.state !== "block" && player.state !== "hit" && player.attackTimer <= 0 && player.hitTimer <= 0 && player.grounded && player.state !== "jump") player.state = "idle";
             if (enemy.state !== "hit" && enemy.attackTimer <= 0 && enemy.hitTimer <= 0 && enemy.grounded && enemy.state !== "idle") enemy.state = "idle";
         }
 
-        // ---------- ANIME DRAWING (stylized characters) ----------
-        function drawAnimeFighter(x, y, isPlayer, state, facingRight, blockFlag, attackTimerVal, healthPercent) {
+        // ---------- DRAWING (anime style) ----------
+        function drawAnimeFighter(x, y, isPlayer, state, facingRight, blockFlag, healthPercent) {
             const w = PLAYER_WIDTH, h = PLAYER_HEIGHT;
             ctx.save();
             if (!facingRight) {
@@ -632,24 +570,19 @@
                 ctx.scale(-1, 1);
                 ctx.translate(-x - w/2, -y - h/2);
             }
-            // body base
-            ctx.shadowBlur = 0;
             ctx.fillStyle = isPlayer ? "#ffc7a2" : "#b77b55";
             ctx.beginPath();
             ctx.ellipse(x + w/2, y + h*0.35, w*0.38, h*0.35, 0, 0, Math.PI*2);
             ctx.fill();
             ctx.fillStyle = isPlayer ? "#f0a56e" : "#9a5a3a";
             ctx.fillRect(x + w*0.2, y + h*0.55, w*0.6, h*0.35);
-            // pants
             ctx.fillStyle = "#2c2c54";
             ctx.fillRect(x + w*0.2, y + h*0.75, w*0.6, h*0.2);
-            // anime hair
             ctx.fillStyle = isPlayer ? "#3b2b1f" : "#2f1e0f";
             ctx.beginPath();
             ctx.moveTo(x + w*0.2, y + h*0.2);
             ctx.quadraticCurveTo(x + w/2, y - h*0.1, x + w*0.8, y + h*0.2);
             ctx.fill();
-            // eyes
             ctx.fillStyle = "#1f1a17";
             ctx.beginPath();
             ctx.arc(x + w*0.35, y + h*0.38, 6, 0, Math.PI*2);
@@ -660,7 +593,6 @@
             ctx.arc(x + w*0.32, y + h*0.36, 2.2, 0, Math.PI*2);
             ctx.arc(x + w*0.62, y + h*0.36, 2.2, 0, Math.PI*2);
             ctx.fill();
-            // expression (attack)
             if (state === "punch" || state === "kick") {
                 ctx.fillStyle = "#d64531";
                 ctx.beginPath();
@@ -668,7 +600,6 @@
                 ctx.lineTo(x + w*0.7, y + h*0.65);
                 ctx.lineTo(x + w*0.5, y + h*0.62);
                 ctx.fill();
-                // dynamic line
                 ctx.beginPath();
                 ctx.moveTo(x + w*0.85, y + h*0.5);
                 ctx.lineTo(x + w + 12, y + h*0.45);
@@ -679,27 +610,21 @@
             if (state === "hit") {
                 ctx.fillStyle = "#ff4444";
                 ctx.font = "bold 22px monospace";
-                ctx.shadowBlur = 4;
                 ctx.fillText("!!", x + w*0.4, y - 8);
             }
             if (blockFlag && state === "block") {
                 ctx.fillStyle = "#77aaff66";
-                ctx.beginPath();
-                ctx.rect(x + w*0.2, y + h*0.3, w*0.6, h*0.3);
-                ctx.fill();
+                ctx.fillRect(x + w*0.2, y + h*0.3, w*0.6, h*0.3);
             }
             ctx.restore();
         }
 
         function drawGame() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            // stage effects
             ctx.fillStyle = "#a0c4e288";
             for(let i=0;i<12;i++) ctx.fillRect(40 + i*70, GROUND_Y+5, 25, 8);
-            // draw characters
-            drawAnimeFighter(player.x, player.y, true, player.state, player.facingRight, player.blockActive, player.attackTimer, player.health/100);
-            drawAnimeFighter(enemy.x, enemy.y, false, enemy.state, enemy.facingRight, enemy.blockActive, enemy.attackTimer, enemy.health/100);
-            // particle effects & win text
+            drawAnimeFighter(player.x, player.y, true, player.state, player.facingRight, player.blockActive, player.health/100);
+            drawAnimeFighter(enemy.x, enemy.y, false, enemy.state, enemy.facingRight, enemy.blockActive, enemy.health/100);
             if (!gameRunning && winner) {
                 ctx.font = "bold 34 'Segoe UI', system-ui";
                 ctx.fillStyle = "#FFD966";
@@ -709,13 +634,9 @@
                 ctx.fillStyle = "white";
                 ctx.fillText("tap RESET to battle again", canvas.width/2-120, 125);
             }
-            // anime aura
-            ctx.font = "bold 12px monospace";
-            ctx.fillStyle = "#fffbd0";
-            ctx.shadowBlur = 0;
         }
 
-        // ---------- GAME LOOP (delta time) ----------
+        // ---------- GAME LOOP ----------
         let lastFrameTime = 0;
         function gameLoop(nowMs) {
             requestAnimationFrame(gameLoop);
@@ -724,6 +645,9 @@
             if (dt <= 0) { lastFrameTime = nowMs; return; }
             deltaTime = dt;
             lastFrameTime = nowMs;
+
+            updateJoystickInput();
+
             if (gameRunning) {
                 updateMovement(deltaTime);
                 updateCombatTimers(deltaTime);
@@ -733,9 +657,13 @@
             drawGame();
         }
 
+        // Action buttons
+        document.getElementById('btnPunch').addEventListener('click', (e) => { e.preventDefault(); startPlayerAttack('punch'); });
+        document.getElementById('btnKick').addEventListener('click', (e) => { e.preventDefault(); startPlayerAttack('kick'); });
+        document.getElementById('btnReset').addEventListener('click', (e) => { e.preventDefault(); resetGame(); });
+
         resetGame();
         requestAnimationFrame(gameLoop);
-        // initial canvas dimensions set
         canvas.addEventListener('contextmenu', (e) => e.preventDefault());
     })();
 </script>
