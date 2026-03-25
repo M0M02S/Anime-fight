@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Anime Duel · Turn-Based Fighter</title>
+  <title>Anime Duell · Rundenkampf</title>
   <style>
     * {
       box-sizing: border-box;
-      user-select: none; /* cleaner on mobile */
+      user-select: none;
       -webkit-tap-highlight-color: transparent;
     }
 
@@ -17,12 +17,11 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      font-family: 'Segoe UI', 'Poppins', 'Inter', system-ui, -apple-system, 'Helvetica Neue', sans-serif;
+      font-family: 'Segoe UI', 'Poppins', system-ui, -apple-system, sans-serif;
       margin: 0;
       padding: 20px;
     }
 
-    /* main game card */
     .game-card {
       max-width: 750px;
       width: 100%;
@@ -32,10 +31,8 @@
       box-shadow: 0 25px 45px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.1);
       padding: 20px 18px 30px;
       border: 1px solid rgba(255, 210, 90, 0.3);
-      transition: all 0.2s ease;
     }
 
-    /* canvas area - anime fighters */
     .arena {
       background: radial-gradient(circle at 20% 30%, #1f2a3e, #0b0f17);
       border-radius: 48px;
@@ -51,11 +48,9 @@
       height: auto;
       background: #1a1f2c;
       border-radius: 36px;
-      cursor: pointer;
       box-shadow: 0 4px 12px rgba(0,0,0,0.4);
     }
 
-    /* stats row (health & energy) */
     .stats-row {
       display: flex;
       flex-wrap: wrap;
@@ -73,10 +68,10 @@
       box-shadow: 0 6px 12px rgba(0,0,0,0.3);
     }
 
-    .stat-panel.player {
+    .stat-panel.spieler {
       border-left-color: #3b82f6;
     }
-    .stat-panel.enemy {
+    .stat-panel.gegner {
       border-left-color: #ef4444;
     }
 
@@ -93,7 +88,6 @@
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
-      text-shadow: 0 0 4px rgba(0,0,0,0.3);
     }
     .stat-number {
       color: #facc15;
@@ -101,7 +95,6 @@
       font-size: 1rem;
     }
 
-    /* health bar */
     .bar-bg {
       background: #2a1e1e;
       border-radius: 30px;
@@ -133,7 +126,6 @@
       justify-content: space-between;
     }
 
-    /* combat log */
     .combat-log {
       background: #03070faa;
       backdrop-filter: blur(8px);
@@ -149,7 +141,6 @@
       overflow-y: auto;
       font-family: monospace;
       letter-spacing: 0.5px;
-      box-shadow: inset 0 0 8px #00000033;
     }
 
     .log-text {
@@ -163,7 +154,6 @@
       to { opacity: 1; transform: translateY(0);}
     }
 
-    /* button grid - perfect for touch */
     .button-panel {
       display: flex;
       flex-wrap: wrap;
@@ -188,8 +178,6 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      backdrop-filter: blur(2px);
-      letter-spacing: 1px;
       flex: 1 0 auto;
       touch-action: manipulation;
     }
@@ -232,8 +220,7 @@
       }
     }
 
-    /* disable buttons when game over */
-    .disabled-btn, button:disabled {
+    button:disabled {
       opacity: 0.5;
       transform: translateY(0px);
       filter: grayscale(0.1);
@@ -254,53 +241,50 @@
     <canvas id="fightCanvas" width="600" height="250" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas>
   </div>
 
-  <!-- stats -->
   <div class="stats-row">
-    <div class="stat-panel player">
+    <div class="stat-panel spieler">
       <div class="stat-header">
-        <span class="stat-name">⚡ KAI · 疾風</span>
+        <span class="stat-name">⚡ KAI · Sturmfaust</span>
         <span class="stat-number" id="playerHpText">100</span>
       </div>
       <div class="bar-bg"><div class="health-fill" id="playerHealthFill" style="width:100%"></div></div>
       <div class="energy-label">
-        <span>🌀 気力</span>
+        <span>🌀 Energie</span>
         <span id="playerEnergyText">50</span><span>/100</span>
       </div>
       <div class="bar-bg"><div class="energy-fill" id="playerEnergyFill" style="width:50%"></div></div>
     </div>
 
-    <div class="stat-panel enemy">
+    <div class="stat-panel gegner">
       <div class="stat-header">
-        <span class="stat-name">🔥 RYUJIN · 凶刃</span>
+        <span class="stat-name">🔥 RYUJIN · Dämonenklaue</span>
         <span class="stat-number" id="enemyHpText">100</span>
       </div>
       <div class="bar-bg"><div class="health-fill" id="enemyHealthFill" style="width:100%"></div></div>
       <div class="energy-label">
-        <span>🌀 殺気</span>
+        <span>🌀 Zorn</span>
         <span id="enemyEnergyText">40</span><span>/100</span>
       </div>
       <div class="bar-bg"><div class="energy-fill" id="enemyEnergyFill" style="width:40%"></div></div>
     </div>
   </div>
 
-  <!-- combat log -->
   <div class="combat-log" id="combatLog">
-    <span class="log-text">⚔️ タップ「攻撃」でバトル開始！</span>
+    <span class="log-text">⚔️ Tippe auf eine Aktion, um den Kampf zu beginnen!</span>
   </div>
 
-  <!-- action buttons -->
   <div class="button-panel">
-    <button class="fight-btn" id="attackBtn">⚡ 攻撃</button>
-    <button class="fight-btn special" id="specialBtn">✨ 奥義 (25)</button>
-    <button class="fight-btn heal" id="healBtn">🌸 回復 (20)</button>
-    <button class="fight-btn restart" id="restartBtn">🔄 再戦</button>
+    <button class="fight-btn" id="attackBtn">⚡ Angriff</button>
+    <button class="fight-btn special" id="specialBtn">✨ Spezial (25)</button>
+    <button class="fight-btn heal" id="healBtn">🌸 Heilen (20)</button>
+    <button class="fight-btn restart" id="restartBtn">🔄 Neustart</button>
   </div>
-  <footer>★ ターン制バトル | 気力を使って奥義・回復！敵も奥義を放つ ★</footer>
+  <footer>★ Rundenbasiert | Angriff kostenlos | Spezial & Heilen verbrauchen Energie ★</footer>
 </div>
 
 <script>
   (function() {
-    // ---------- GAME STATE ----------
+    // Spieler & Gegner
     let player = {
       maxHp: 100,
       hp: 100,
@@ -315,11 +299,11 @@
     };
 
     let gameActive = true;
-    let actionLock = false;     // prevent spam while enemy turn or animations
+    let actionLock = false;     // verhindert Mehrfachaktionen während des Gegnerzugs
     let canvas = document.getElementById('fightCanvas');
     let ctx = canvas.getContext('2d');
 
-    // DOM elements
+    // DOM-Elemente
     const playerHpText = document.getElementById('playerHpText');
     const enemyHpText = document.getElementById('enemyHpText');
     const playerEnergyText = document.getElementById('playerEnergyText');
@@ -335,7 +319,7 @@
     const healBtn = document.getElementById('healBtn');
     const restartBtn = document.getElementById('restartBtn');
 
-    // Helper: add log message
+    // Nachricht ins Kampflog schreiben
     function addLogMessage(msg, isError = false) {
       const logEntry = document.createElement('span');
       logEntry.className = 'log-text';
@@ -343,15 +327,13 @@
       logEntry.innerHTML = isError ? `⚠️ ${msg}` : `✦ ${msg}`;
       combatLogDiv.appendChild(logEntry);
       logEntry.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      // keep last 12 logs roughly
       while(combatLogDiv.children.length > 14) {
         combatLogDiv.removeChild(combatLogDiv.firstChild);
       }
     }
 
-    // update all UI (bars, numbers)
+    // UI aktualisieren (Balken, Zahlen)
     function updateUI() {
-      // health
       const playerHpPercent = (player.hp / player.maxHp) * 100;
       const enemyHpPercent = (enemy.hp / enemy.maxHp) * 100;
       playerHealthFill.style.width = `${Math.max(0, playerHpPercent)}%`;
@@ -359,7 +341,6 @@
       playerHpText.innerText = Math.max(0, player.hp);
       enemyHpText.innerText = Math.max(0, enemy.hp);
 
-      // energy
       const playerEnPercent = (player.energy / player.maxEnergy) * 100;
       const enemyEnPercent = (enemy.energy / enemy.maxEnergy) * 100;
       playerEnergyFill.style.width = `${Math.max(0, playerEnPercent)}%`;
@@ -368,7 +349,6 @@
       enemyEnergyText.innerText = enemy.energy;
     }
 
-    // clamp values
     function clampStats() {
       player.hp = Math.min(player.maxHp, Math.max(0, player.hp));
       player.energy = Math.min(player.maxEnergy, Math.max(0, player.energy));
@@ -376,19 +356,19 @@
       enemy.energy = Math.min(enemy.maxEnergy, Math.max(0, enemy.energy));
     }
 
-    // check game over (disable buttons)
+    // Spielende prüfen
     function checkGameOver() {
       if (!gameActive) return true;
       let over = false;
       if (player.hp <= 0) {
         gameActive = false;
         over = true;
-        addLogMessage("💀 KAI 力尽きた... 敗北... 再戦ボタンでリベンジ！");
+        addLogMessage("💀 KAI ist besiegt... Niederlage. Mit Neustart kannst du es erneut versuchen!");
         disableGameButtons(true);
       } else if (enemy.hp <= 0) {
         gameActive = false;
         over = true;
-        addLogMessage("🏆 見事な勝利！ RYUJIN を打ち倒した！ アニメ栄光あれ！");
+        addLogMessage("🏆 Triumph! RYUJIN wurde gestürzt. Ein wahrer Anime-Sieg!");
         disableGameButtons(true);
       }
       if (over) {
@@ -419,67 +399,60 @@
       }
     }
 
-    // regenerate after full round (both characters)
+    // Nach jeder vollen Runde: Energie regenerieren
     function regenerateAfterRound() {
       let oldPlayerEn = player.energy;
       let oldEnemyEn = enemy.energy;
       player.energy = Math.min(player.maxEnergy, player.energy + 10);
       enemy.energy = Math.min(enemy.maxEnergy, enemy.energy + 8);
-      if (oldPlayerEn !== player.energy) addLogMessage(`🌀 気力回復 +10 (KAI) → ${player.energy}`);
-      if (oldEnemyEn !== enemy.energy) addLogMessage(`🌑 殺気回復 +8 (RYUJIN) → ${enemy.energy}`);
+      if (oldPlayerEn !== player.energy) addLogMessage(`🌀 Energie +10 (KAI) → ${player.energy}`);
+      if (oldEnemyEn !== enemy.energy) addLogMessage(`🌑 Zorn +8 (RYUJIN) → ${enemy.energy}`);
       clampStats();
       updateUI();
       drawCanvas();
     }
 
-    // Enemy AI turn (performs attack or special)
+    // Gegner-Zug (KI)
     async function enemyTurn() {
       if (!gameActive) return;
       if (enemy.hp <= 0) return;
 
-      addLogMessage(`⚔️ RYUJIN の攻撃フェーズ！`);
+      addLogMessage(`⚔️ RYUJIN greift an!`);
       let damage = 0;
       let energyCost = 0;
       let isSpecial = false;
 
-      // AI logic: if energy >= 25 and random chance or high threat -> special
+      // Entscheidung: Spezial, wenn genug Energie und Zufall
       let willSpecial = false;
-      if (enemy.energy >= 25) {
-        // 45% chance for special, also if enemy low hp but still fight
-        if (Math.random() < 0.45) willSpecial = true;
-      }
+      if (enemy.energy >= 25 && Math.random() < 0.45) willSpecial = true;
+
       if (willSpecial && enemy.energy >= 25) {
-        // SPECIAL MOVE
-        damage = Math.floor(Math.random() * 13) + 16; // 16~28
+        damage = Math.floor(Math.random() * 13) + 16; // 16–28
         energyCost = 25;
         isSpecial = true;
-        addLogMessage(`💢 RYUJIN 「秘奥義· 紅蓮斬！」 ${damage} ダメージ！`);
+        addLogMessage(`💢 RYUJIN „Dämonen-Klingensturm!“ ${damage} Schaden!`);
       } else {
-        // normal attack
-        damage = Math.floor(Math.random() * 10) + 8; // 8~17
-        energyCost = 0;
-        addLogMessage(`🗡️ RYUJIN の通常攻撃！ ${damage} ダメージを受けた！`);
+        damage = Math.floor(Math.random() * 10) + 8; // 8–17
+        addLogMessage(`🗡️ RYUJIN führt einen normalen Hieb aus! ${damage} Schaden.`);
       }
 
-      // apply damage to player
       player.hp = Math.max(0, player.hp - damage);
       if (energyCost > 0) {
         enemy.energy = Math.max(0, enemy.energy - energyCost);
-        addLogMessage(`🌀 RYUJIN 気力 -${energyCost}`);
+        addLogMessage(`🌀 RYUJIN verliert ${energyCost} Energie.`);
       }
       clampStats();
       updateUI();
-      drawCanvas(true); // flash effect on hit
+      drawCanvas(true); // kurzer Aufblitz-Effekt
 
       if (player.hp <= 0) {
-        addLogMessage(`💔 KAI のHPが0になった... 無念...`);
+        addLogMessage(`💔 KAI ist am Boden ... keine Kraft mehr.`);
         checkGameOver();
         return;
       }
-      // after enemy turn, regeneration happens in finishRound
     }
 
-    // finish round (regenerate both, unlock)
+    // Runde abschließen: Energie-Regeneration & Entsperren
     async function finishRound() {
       if (!gameActive) return;
       regenerateAfterRound();
@@ -488,62 +461,52 @@
       drawCanvas();
       enableActionButtons();
       actionLock = false;
-      // final check after regen maybe player dies? but regen only heals energy, not hp. So safe.
       checkGameOver();
-      if (!gameActive) {
-        actionLock = true;
-      }
+      if (!gameActive) actionLock = true;
     }
 
-    // main player action wrapper (prevents double actions)
-    async function playerAction(callback) {
+    // Spieleraktion mit Sperre
+    async function playerAction(actionFn) {
       if (actionLock || !gameActive) {
-        addLogMessage("待機中... 相手のターンが終わるまでお待ちください", true);
+        addLogMessage("Warte, der Gegner ist am Zug ...", true);
         return false;
       }
       if (checkGameOver()) return false;
       actionLock = true;
       disableGameButtons(true);
-      
-      // execute player move
-      let moveSuccess = await callback();
-      if (!moveSuccess) {
-        // if move failed (energy insufficient etc), unlock and reenable
+
+      let success = await actionFn();
+      if (!success) {
         actionLock = false;
         enableActionButtons();
         return false;
       }
-      
+
       clampStats();
       updateUI();
       drawCanvas();
-      
-      // after player move, check if enemy dead
-      let over = checkGameOver();
-      if (over) {
+
+      if (checkGameOver()) {
         actionLock = false;
         return true;
       }
-      
-      // now enemy turn
+
       await enemyTurn();
-      let overAfterEnemy = checkGameOver();
-      if (overAfterEnemy) {
+      if (checkGameOver()) {
         actionLock = false;
         disableGameButtons(true);
         return true;
       }
-      
-      // finish round: regeneration & unlock
+
       await finishRound();
       return true;
     }
 
-    // ---------- PLAYER MOVES ----------
+    // ----- Spieler-Aktionen (Deutsch) -----
     function playerAttack() {
       return new Promise((resolve) => {
-        let damage = Math.floor(Math.random() * 11) + 10; // 10~20
-        addLogMessage(`⚡ KAI「疾風迅雷！」 ${damage} ダメージを与えた！`);
+        let damage = Math.floor(Math.random() * 11) + 10; // 10–20
+        addLogMessage(`⚡ KAI „Sturmfaust!“ ${damage} Schaden am Gegner!`);
         enemy.hp = Math.max(0, enemy.hp - damage);
         clampStats();
         updateUI();
@@ -555,12 +518,12 @@
     function playerSpecial() {
       return new Promise((resolve) => {
         if (player.energy < 25) {
-          addLogMessage(`気力不足！ 奥義には気力25必要です (現在${player.energy})`, true);
+          addLogMessage(`Nicht genug Energie! Spezial kostet 25 (aktuell ${player.energy})`, true);
           resolve(false);
           return;
         }
-        let damage = Math.floor(Math.random() * 16) + 18; // 18~33
-        addLogMessage(`✨✨ 奥義・七星雷光斬！ ✨✨ ${damage} 大ダメージ！`);
+        let damage = Math.floor(Math.random() * 16) + 18; // 18–33
+        addLogMessage(`✨✨ HIMMELSSTOSS – KAI entfesselt seine geheime Technik! ✨✨ ${damage} Schaden!`);
         enemy.hp = Math.max(0, enemy.hp - damage);
         player.energy = Math.max(0, player.energy - 25);
         clampStats();
@@ -573,16 +536,16 @@
     function playerHeal() {
       return new Promise((resolve) => {
         if (player.energy < 20) {
-          addLogMessage(`気力不足！ 回復には気力20必要です (現在${player.energy})`, true);
+          addLogMessage(`Nicht genug Energie! Heilen kostet 20 (aktuell ${player.energy})`, true);
           resolve(false);
           return;
         }
-        let healAmount = Math.floor(Math.random() * 14) + 12; // 12~25
+        let healAmount = Math.floor(Math.random() * 14) + 12; // 12–25
         let newHp = Math.min(player.maxHp, player.hp + healAmount);
         let actualHeal = newHp - player.hp;
         player.hp = newHp;
         player.energy = Math.max(0, player.energy - 20);
-        addLogMessage(`🌸 癒しの呼吸！ ${actualHeal} HP 回復！ (気力-20)`);
+        addLogMessage(`🌸 Meditations-Atem! +${actualHeal} HP wiederhergestellt. (Energie -20)`);
         clampStats();
         updateUI();
         drawCanvas();
@@ -590,15 +553,7 @@
       });
     }
 
-    // attach actions
-    function bindEvents() {
-      attackBtn.onclick = () => playerAction(playerAttack);
-      specialBtn.onclick = () => playerAction(playerSpecial);
-      healBtn.onclick = () => playerAction(playerHeal);
-      restartBtn.onclick = () => restartGame();
-    }
-
-    // restart
+    // Spiel neustarten
     function restartGame() {
       gameActive = true;
       actionLock = false;
@@ -617,40 +572,28 @@
       clampStats();
       updateUI();
       drawCanvas();
-      // clear logs and add fresh
-      combatLogDiv.innerHTML = '<span class="log-text">⚔️ 再戦！ 正々堂々と闘え！</span>';
-      addLogMessage("気力とHPが全快！ 新たな闘いが始まる");
+      combatLogDiv.innerHTML = '<span class="log-text">⚔️ Neustart! Ein neuer Kampf beginnt.</span>';
+      addLogMessage("Volle Gesundheit und Energie! Zeig, was du kannst.");
       enableActionButtons();
       attackBtn.disabled = false;
       specialBtn.disabled = false;
       healBtn.disabled = false;
-      checkGameOver(); // will set false bc both alive
+      checkGameOver(); // setzt gameActive korrekt, falls seltsamer Zustand (sollte nicht vorkommen)
     }
 
-    // ---------- CANVAS ANIME STYLE ILLUSTRATION ----------
+    // ----- Canvas: Anime-Charaktere (deutsche Namen im Bild) -----
     function drawCanvas(flashEffect = false) {
       if (!ctx) return;
       ctx.clearRect(0, 0, 600, 250);
-      
-      // background dojo vibe
       ctx.fillStyle = "#141a2c";
       ctx.fillRect(0, 0, 600, 250);
-      // floor gradient
+      // Boden
       ctx.fillStyle = "#2a1e2e";
       ctx.fillRect(0, 190, 600, 60);
       ctx.fillStyle = "#3a2a3c";
-      for(let i=0;i<12;i++) {
-        ctx.fillRect(20+i*50, 205, 30, 8);
-      }
-      
-      // --- Player (left) - KAI ---
-      // hair blue
-      ctx.save();
-      // shadow & expression
-      let pHpPercent = player.hp / player.maxHp;
-      let tint = pHpPercent < 0.3 ? "#ff8a7a" : "#b8c7ff";
-      ctx.shadowBlur = 0;
-      // face
+      for(let i=0;i<12;i++) ctx.fillRect(20+i*50, 205, 30, 8);
+
+      // Spieler (links)
       ctx.beginPath();
       ctx.arc(140, 140, 42, 0, Math.PI*2);
       ctx.fillStyle = "#fddbb0";
@@ -658,7 +601,7 @@
       ctx.strokeStyle = "#b97f4b";
       ctx.lineWidth = 1.5;
       ctx.stroke();
-      // eyes (anime spark)
+      // Augen
       ctx.fillStyle = "#202020";
       ctx.beginPath();
       ctx.arc(120, 130, 7, 0, Math.PI*2);
@@ -674,7 +617,7 @@
       ctx.arc(118, 129, 1.2, 0, Math.PI*2);
       ctx.arc(158, 129, 1.2, 0, Math.PI*2);
       ctx.fill();
-      // hair spike
+      // Haare
       ctx.fillStyle = "#2c5f8a";
       ctx.beginPath();
       ctx.moveTo(110, 95);
@@ -683,40 +626,42 @@
       ctx.lineTo(140, 100);
       ctx.lineTo(125, 108);
       ctx.fill();
-      // headband
       ctx.fillStyle = "#d43f1d";
       ctx.fillRect(110, 108, 60, 6);
-      // mouth determined by hp
-      if(pHpPercent > 0.5) ctx.beginPath(); ctx.arc(140, 155, 12, 0.05, Math.PI - 0.05); ctx.stroke();
-      else { ctx.beginPath(); ctx.arc(140, 158, 8, 0, Math.PI); ctx.stroke();}
-      
-      // --- Enemy (right) - Ryujin ---
+      // Mund je nach HP
+      if(player.hp/player.maxHp > 0.5) {
+        ctx.beginPath();
+        ctx.arc(140, 155, 12, 0.05, Math.PI - 0.05);
+        ctx.stroke();
+      } else {
+        ctx.beginPath();
+        ctx.arc(140, 158, 8, 0, Math.PI);
+        ctx.stroke();
+      }
+
+      // Gegner (rechts)
       ctx.beginPath();
       ctx.arc(460, 140, 44, 0, Math.PI*2);
       ctx.fillStyle = "#e0ac77";
       ctx.fill();
       ctx.fillStyle = "#4a2a2a";
-      // angry eyes
       ctx.fillRect(438, 127, 12, 8);
       ctx.fillRect(470, 127, 12, 8);
       ctx.fillStyle = "#f08080";
       ctx.fillRect(440, 135, 8, 4);
       ctx.fillRect(472, 135, 8, 4);
-      // scar
       ctx.beginPath();
       ctx.moveTo(452, 148);
       ctx.lineTo(468, 152);
       ctx.lineWidth = 2;
       ctx.strokeStyle = "#8b3a3a";
       ctx.stroke();
-      // horn
       ctx.fillStyle = "#6b2e2e";
       ctx.beginPath();
       ctx.moveTo(445, 98);
       ctx.lineTo(460, 75);
       ctx.lineTo(475, 98);
       ctx.fill();
-      // demonic aura
       if(enemy.hp > 0) {
         ctx.beginPath();
         ctx.arc(460, 140, 48, 0, Math.PI*2);
@@ -724,25 +669,28 @@
         ctx.lineWidth = 1.8;
         ctx.stroke();
       }
-      // flash hit effect
+
       if(flashEffect) {
         ctx.fillStyle = "rgba(255,200,100,0.35)";
         ctx.fillRect(0, 0, 600, 250);
       }
-      
-      // draw names
+
       ctx.font = "bold 16px 'Segoe UI'";
       ctx.fillStyle = "#f5eace";
-      ctx.shadowBlur = 0;
       ctx.fillText("KAI", 110, 55);
       ctx.fillStyle = "#ffbba4";
       ctx.fillText("RYUJIN", 420, 55);
-      
-      ctx.restore();
     }
 
-    // initial draw + UI
-    function initGame() {
+    // Event-Listener
+    function bindEvents() {
+      attackBtn.onclick = () => playerAction(playerAttack);
+      specialBtn.onclick = () => playerAction(playerSpecial);
+      healBtn.onclick = () => playerAction(playerHeal);
+      restartBtn.onclick = () => restartGame();
+    }
+
+    function init() {
       bindEvents();
       updateUI();
       drawCanvas();
@@ -750,8 +698,8 @@
       actionLock = false;
       enableActionButtons();
     }
-    
-    initGame();
+
+    init();
   })();
 </script>
 </body>
