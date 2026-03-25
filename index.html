@@ -1,704 +1,644 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Anime Fight · Fullbody + Joystick-Panel</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Anime Fight Game</title>
   <style>
     * {
       box-sizing: border-box;
-      user-select: none;
       -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      user-select: none;
+      margin: 0;
+      padding: 0;
     }
 
     body {
-      background: linear-gradient(145deg, #0a0b1a 0%, #03050c 100%);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-family: 'Segoe UI', 'Poppins', system-ui, -apple-system, sans-serif;
-      margin: 0;
-      padding: 20px;
-    }
-
-    .game-container {
-      max-width: 1200px;
-      width: 100%;
-      background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(6px);
-      border-radius: 70px;
-      padding: 20px 25px 30px;
-      box-shadow: 0 30px 45px rgba(0,0,0,0.7), inset 0 1px 1px rgba(255,255,255,0.1);
-      border: 1px solid rgba(255,200,80,0.5);
-    }
-
-    /* Arena mit Canvas für ganze Charaktere */
-    .arena {
-      background: radial-gradient(circle at 30% 40%, #1f2a36, #070c14);
-      border-radius: 60px;
-      padding: 15px;
-      margin-bottom: 25px;
-      box-shadow: inset 0 0 20px rgba(0,0,0,0.6), 0 12px 28px black;
-    }
-
-    canvas {
-      display: block;
-      width: 100%;
-      height: auto;
-      background: #0f1420;
-      border-radius: 48px;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.5);
-      cursor: pointer;
-    }
-
-    /* Stats */
-    .stats-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 25px;
-      margin: 20px 0 18px;
-    }
-
-    .stat-panel {
-      flex: 1;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(6px);
-      border-radius: 48px;
-      padding: 16px 22px;
-      border-left: 6px solid;
-      box-shadow: 0 6px 14px black;
-    }
-
-    .stat-panel.player { border-left-color: #3b82f6; }
-    .stat-panel.enemy { border-left-color: #ef4444; }
-
-    .stat-header {
-      display: flex;
-      justify-content: space-between;
-      font-weight: bold;
-      font-size: 1.4rem;
-      margin-bottom: 12px;
-    }
-    .stat-name {
-      background: linear-gradient(135deg, #ffefc0, #ffcf70);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-    .stat-number {
-      color: #facc15;
-      font-weight: 800;
-      font-size: 1.4rem;
-    }
-    .bar-bg {
-      background: #2a1e1e;
-      border-radius: 40px;
-      height: 18px;
+      background: linear-gradient(to bottom, #87ceeb, #dff6ff 60%, #b7e4a8);
+      font-family: Arial, sans-serif;
       overflow: hidden;
-      margin: 8px 0 10px;
-      box-shadow: inset 0 1px 4px #000000aa;
+      height: 100vh;
     }
-    .health-fill {
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, #f97316, #ef4444);
-      border-radius: 40px;
-      transition: width 0.25s;
+
+    #game {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
     }
-    .energy-fill {
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, #3b82f6, #06b6d4);
-      border-radius: 40px;
-      transition: width 0.2s;
-    }
-    .energy-label {
-      margin-top: 6px;
-      font-size: 0.9rem;
-      color: #bbd9ff;
+
+    .hud {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      z-index: 20;
       display: flex;
       justify-content: space-between;
+      gap: 12px;
     }
 
-    /* Kampflog */
-    .combat-log {
-      background: #03070fdd;
-      backdrop-filter: blur(12px);
-      border-radius: 48px;
-      padding: 14px 24px;
-      margin: 20px 0 25px;
-      font-size: 1rem;
-      font-weight: 500;
-      color: #faeec2;
-      border: 1px solid #facc1566;
-      min-height: 85px;
-      max-height: 110px;
-      overflow-y: auto;
-      font-family: monospace;
-    }
-    .log-text {
-      display: block;
-      animation: fadeSlide 0.2s ease;
-      word-break: break-word;
-    }
-    @keyframes fadeSlide {
-      from { opacity: 0; transform: translateY(5px);}
-      to { opacity: 1; transform: translateY(0);}
-    }
-
-    /* JOYSTICK-PANEL – wie ein echter Arcade-Stick */
-    .joystick-panel {
-      background: #1e1b2a;
-      border-radius: 70px;
-      padding: 20px 20px;
-      margin-top: 12px;
-      box-shadow: inset 0 0 0 2px rgba(255,215,100,0.3), 0 12px 28px black;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 25px;
-      align-items: center;
-    }
-
-    /* einzelne "Joystick-Buttons" – groß, rund, mit Griff-Design */
-    .joy-btn {
-      width: 130px;
-      height: 130px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 35% 35%, #2b2f3f, #141823);
-      border: 3px solid #ffcd7e;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.2);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+    .bar-box {
+      width: 48%;
+      background: rgba(0,0,0,0.35);
+      border: 2px solid white;
+      border-radius: 14px;
+      padding: 8px;
+      color: white;
       font-weight: bold;
-      font-size: 1.3rem;
-      color: #ffefcf;
-      cursor: pointer;
-      transition: 0.05s linear;
-      touch-action: manipulation;
-      text-align: center;
+      text-shadow: 1px 1px 2px black;
     }
-    .joy-btn:active {
-      transform: scale(0.94);
-      box-shadow: 0 4px 10px black;
-    }
-    .joy-icon {
-      font-size: 2.4rem;
-      display: block;
+
+    .bar-label {
       margin-bottom: 6px;
-    }
-    .joy-cost {
-      font-size: 0.7rem;
-      background: #000000aa;
-      padding: 2px 8px;
-      border-radius: 30px;
-      margin-top: 5px;
-    }
-    .joy-btn.special {
-      background: radial-gradient(circle at 35% 35%, #5a2e8a, #2a1a3e);
-      border-color: #e5aaff;
-    }
-    .joy-btn.heal {
-      background: radial-gradient(circle at 35% 35%, #2c8866, #154e38);
-      border-color: #9bffcf;
-    }
-    .joy-btn.restart {
-      background: radial-gradient(circle at 35% 35%, #a34a5a, #54222e);
-      border-color: #ffbcbc;
-      width: 120px;
-      height: 120px;
+      font-size: 14px;
     }
 
-    /* Joystick-Knopf für "Angriff" mit einem kleinen Stick-Symbol */
-    .joy-stick-decoration {
-      position: relative;
+    .bar {
+      width: 100%;
+      height: 20px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 10px;
+      overflow: hidden;
     }
-    .joy-stick-decoration::after {
-      content: "🕹️";
-      font-size: 1.4rem;
+
+    .fill {
+      height: 100%;
+      width: 100%;
+      transition: width 0.2s linear;
+    }
+
+    #playerHealth { background: linear-gradient(to right, #00ff7f, #00c853); }
+    #enemyHealth { background: linear-gradient(to right, #ff5252, #d50000); }
+
+    .arena {
       position: absolute;
-      bottom: -10px;
-      right: -10px;
-      opacity: 0.7;
+      inset: 0;
     }
 
-    @media (max-width: 800px) {
-      .joy-btn {
-        width: 100px;
-        height: 100px;
-        font-size: 1rem;
-      }
-      .joy-icon {
-        font-size: 2rem;
-      }
-      .stat-header {
-        font-size: 1.1rem;
-      }
-      .stat-number {
-        font-size: 1.1rem;
-      }
-      .combat-log {
-        font-size: 0.85rem;
-      }
-    }
-    @media (max-width: 550px) {
-      .joy-btn {
-        width: 80px;
-        height: 80px;
-      }
-      .joy-icon {
-        font-size: 1.6rem;
-      }
-      .joystick-panel {
-        gap: 15px;
-      }
+    .ground {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 18%;
+      background: linear-gradient(to top, #6d4c41, #8d6e63);
+      border-top: 4px solid #4e342e;
     }
 
-    button:disabled, .joy-btn.disabled {
-      opacity: 0.5;
+    .fighter {
+      position: absolute;
+      width: 72px;
+      height: 120px;
+      bottom: 18%;
+      border-radius: 16px;
+      transition: transform 0.08s;
+    }
+
+    .fighter::before {
+      content: "";
+      position: absolute;
+      top: -22px;
+      left: 18px;
+      width: 36px;
+      height: 36px;
+      background: #ffd7b5;
+      border-radius: 50%;
+      border: 2px solid rgba(0,0,0,0.2);
+    }
+
+    .fighter::after {
+      content: "";
+      position: absolute;
+      top: -30px;
+      left: 10px;
+      width: 52px;
+      height: 20px;
+      border-radius: 50% 50% 20% 20%;
+    }
+
+    #player {
+      left: 12%;
+      background: linear-gradient(to bottom, #1976d2, #0d47a1);
+      box-shadow: 0 0 20px rgba(0, 150, 255, 0.6);
+    }
+
+    #player::after {
+      background: #ffeb3b;
+    }
+
+    #enemy {
+      left: 72%;
+      background: linear-gradient(to bottom, #c62828, #7f0000);
+      box-shadow: 0 0 20px rgba(255, 50, 50, 0.6);
+    }
+
+    #enemy::after {
+      background: #212121;
+    }
+
+    .face-right { transform: scaleX(1); }
+    .face-left { transform: scaleX(-1); }
+
+    .effect {
+      position: absolute;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
       pointer-events: none;
-      filter: grayscale(0.2);
+      opacity: 0.9;
+      animation: pop 0.25s ease-out forwards;
+      z-index: 15;
     }
-    footer {
+
+    @keyframes pop {
+      0% { transform: scale(0.4); opacity: 1; }
+      100% { transform: scale(2.2); opacity: 0; }
+    }
+
+    .controls {
+      position: absolute;
+      bottom: 14px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 14px;
+      z-index: 30;
+      pointer-events: none;
+    }
+
+    .left-controls,
+    .right-controls {
+      display: flex;
+      gap: 12px;
+      pointer-events: auto;
+    }
+
+    .btn {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      border: 3px solid rgba(255,255,255,0.8);
+      background: rgba(255,255,255,0.16);
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    }
+
+    .btn:active {
+      transform: scale(0.94);
+      background: rgba(255,255,255,0.28);
+    }
+
+    .wide {
+      width: 88px;
+      border-radius: 18px;
+    }
+
+    #message {
+      position: absolute;
+      top: 48%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 18px 24px;
+      background: rgba(0,0,0,0.65);
+      color: white;
+      border: 2px solid white;
+      border-radius: 16px;
+      font-size: 24px;
+      font-weight: bold;
+      z-index: 50;
+      display: none;
       text-align: center;
-      font-size: 0.7rem;
-      color: #6c7fa0;
-      margin-top: 20px;
+    }
+
+    #restartBtn {
+      margin-top: 12px;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      background: #ffca28;
+      color: #222;
+    }
+
+    .hint {
+      position: absolute;
+      top: 76px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+      background: rgba(0,0,0,0.35);
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      z-index: 20;
+      text-shadow: 1px 1px 2px black;
+    }
+
+    @media (max-width: 600px) {
+      .btn {
+        width: 64px;
+        height: 64px;
+        font-size: 14px;
+      }
+
+      .wide {
+        width: 82px;
+      }
+
+      .fighter {
+        width: 64px;
+        height: 110px;
+      }
+
+      .fighter::before {
+        left: 15px;
+      }
+
+      .fighter::after {
+        left: 7px;
+      }
     }
   </style>
 </head>
 <body>
-<div class="game-container">
-  <div class="arena">
-    <canvas id="fightCanvas" width="900" height="380" style="width:100%; height:auto; max-width:900px; margin:0 auto; display:block;"></canvas>
+  <div id="game">
+    <div class="hud">
+      <div class="bar-box">
+        <div class="bar-label">Spieler</div>
+        <div class="bar">
+          <div id="playerHealth" class="fill"></div>
+        </div>
+      </div>
+      <div class="bar-box">
+        <div class="bar-label">Gegner</div>
+        <div class="bar">
+          <div id="enemyHealth" class="fill"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hint">Touch-Steuerung: L/R = laufen, ↑ = springen, Hit = schlagen, Skill = Spezial</div>
+
+    <div class="arena">
+      <div id="player" class="fighter face-right"></div>
+      <div id="enemy" class="fighter face-left"></div>
+      <div class="ground"></div>
+    </div>
+
+    <div id="message">
+      <div id="messageText"></div>
+      <button id="restartBtn">Neu starten</button>
+    </div>
+
+    <div class="controls">
+      <div class="left-controls">
+        <button class="btn" id="leftBtn">◀</button>
+        <button class="btn" id="rightBtn">▶</button>
+        <button class="btn" id="jumpBtn">↑</button>
+      </div>
+      <div class="right-controls">
+        <button class="btn wide" id="attackBtn">Hit</button>
+        <button class="btn wide" id="specialBtn">Skill</button>
+      </div>
+    </div>
   </div>
 
-  <div class="stats-row">
-    <div class="stat-panel player">
-      <div class="stat-header">
-        <span class="stat-name">⚡ KAI · Sturmfaust</span>
-        <span class="stat-number" id="playerHpText">100</span>
-      </div>
-      <div class="bar-bg"><div class="health-fill" id="playerHealthFill" style="width:100%"></div></div>
-      <div class="energy-label">
-        <span>🌀 Energie</span>
-        <span id="playerEnergyText">50</span><span>/100</span>
-      </div>
-      <div class="bar-bg"><div class="energy-fill" id="playerEnergyFill" style="width:50%"></div></div>
-    </div>
-    <div class="stat-panel enemy">
-      <div class="stat-header">
-        <span class="stat-name">🔥 RYUJIN · Dämonenklaue</span>
-        <span class="stat-number" id="enemyHpText">100</span>
-      </div>
-      <div class="bar-bg"><div class="health-fill" id="enemyHealthFill" style="width:100%"></div></div>
-      <div class="energy-label">
-        <span>🌀 Zorn</span>
-        <span id="enemyEnergyText">40</span><span>/100</span>
-      </div>
-      <div class="bar-bg"><div class="energy-fill" id="enemyEnergyFill" style="width:40%"></div></div>
-    </div>
-  </div>
+  <script>
+    const game = document.getElementById("game");
+    const playerEl = document.getElementById("player");
+    const enemyEl = document.getElementById("enemy");
+    const playerHealthEl = document.getElementById("playerHealth");
+    const enemyHealthEl = document.getElementById("enemyHealth");
+    const message = document.getElementById("message");
+    const messageText = document.getElementById("messageText");
+    const restartBtn = document.getElementById("restartBtn");
 
-  <div class="combat-log" id="combatLog">
-    <span class="log-text">⚔️ Drücke einen JOYSTICK-KNOPF, um anzugreifen!</span>
-  </div>
-
-  <!-- JOYSTICK-PANEL – Arcade-Stil -->
-  <div class="joystick-panel">
-    <div class="joy-btn" id="attackJoy">
-      <span class="joy-icon">⚡</span> ANGRIFF
-      <div class="joy-cost">—</div>
-    </div>
-    <div class="joy-btn special" id="specialJoy">
-      <span class="joy-icon">✨</span> SPEZIAL
-      <div class="joy-cost">25 E</div>
-    </div>
-    <div class="joy-btn heal" id="healJoy">
-      <span class="joy-icon">🌸</span> HEILEN
-      <div class="joy-cost">20 E</div>
-    </div>
-    <div class="joy-btn restart" id="restartJoy">
-      <span class="joy-icon">🔄</span> NEU
-    </div>
-  </div>
-  <footer>★ JOYSTICK-STEUERUNG | Rundenkampf: Energie für Spezial & Heilung ★</footer>
-</div>
-
-<script>
-  (function() {
-    // ------ SPIELSTATUS ------
-    let player = {
-      maxHp: 100, hp: 100,
-      maxEnergy: 100, energy: 50
+    const state = {
+      gameOver: false,
+      groundYPercent: 18,
+      gravity: 0.8,
+      player: {
+        x: window.innerWidth * 0.12,
+        y: 0,
+        width: 72,
+        height: 120,
+        vx: 0,
+        vy: 0,
+        speed: 5,
+        jumpPower: 15,
+        health: 100,
+        facing: 1,
+        attacking: false,
+        specialReady: true
+      },
+      enemy: {
+        x: window.innerWidth * 0.72,
+        y: 0,
+        width: 72,
+        height: 120,
+        vx: 0,
+        vy: 0,
+        speed: 2.2,
+        health: 100,
+        facing: -1,
+        attacking: false,
+        specialCooldown: 0
+      },
+      controls: {
+        left: false,
+        right: false
+      }
     };
-    let enemy = {
-      maxHp: 100, hp: 100,
-      maxEnergy: 100, energy: 40
-    };
-    let gameActive = true;
-    let actionLock = false;
 
-    const canvas = document.getElementById('fightCanvas');
-    const ctx = canvas.getContext('2d');
+    function resizeGame() {
+      state.player.width = window.innerWidth < 600 ? 64 : 72;
+      state.player.height = window.innerWidth < 600 ? 110 : 120;
+      state.enemy.width = state.player.width;
+      state.enemy.height = state.player.height;
+    }
 
-    // DOM-Elemente
-    const playerHpText = document.getElementById('playerHpText');
-    const enemyHpText = document.getElementById('enemyHpText');
-    const playerEnergyText = document.getElementById('playerEnergyText');
-    const enemyEnergyText = document.getElementById('enemyEnergyText');
-    const playerHealthFill = document.getElementById('playerHealthFill');
-    const enemyHealthFill = document.getElementById('enemyHealthFill');
-    const playerEnergyFill = document.getElementById('playerEnergyFill');
-    const enemyEnergyFill = document.getElementById('enemyEnergyFill');
-    const combatLogDiv = document.getElementById('combatLog');
+    window.addEventListener("resize", resizeGame);
+    resizeGame();
 
-    // Joystick-Elemente
-    const attackJoy = document.getElementById('attackJoy');
-    const specialJoy = document.getElementById('specialJoy');
-    const healJoy = document.getElementById('healJoy');
-    const restartJoy = document.getElementById('restartJoy');
-
-    function addLogMessage(msg, isError = false) {
-      const logEntry = document.createElement('span');
-      logEntry.className = 'log-text';
-      logEntry.style.color = isError ? '#ffb28b' : '#f2e8cf';
-      logEntry.innerHTML = isError ? `⚠️ ${msg}` : `✦ ${msg}`;
-      combatLogDiv.appendChild(logEntry);
-      logEntry.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      while(combatLogDiv.children.length > 14) combatLogDiv.removeChild(combatLogDiv.firstChild);
+    function groundY() {
+      return 0;
     }
 
     function updateUI() {
-      const pHp = (player.hp / player.maxHp) * 100;
-      const eHp = (enemy.hp / enemy.maxHp) * 100;
-      playerHealthFill.style.width = `${Math.max(0, pHp)}%`;
-      enemyHealthFill.style.width = `${Math.max(0, eHp)}%`;
-      playerHpText.innerText = Math.max(0, player.hp);
-      enemyHpText.innerText = Math.max(0, enemy.hp);
-      const pEn = (player.energy / player.maxEnergy) * 100;
-      const eEn = (enemy.energy / enemy.maxEnergy) * 100;
-      playerEnergyFill.style.width = `${Math.max(0, pEn)}%`;
-      enemyEnergyFill.style.width = `${Math.max(0, eEn)}%`;
-      playerEnergyText.innerText = player.energy;
-      enemyEnergyText.innerText = enemy.energy;
+      playerHealthEl.style.width = Math.max(0, state.player.health) + "%";
+      enemyHealthEl.style.width = Math.max(0, state.enemy.health) + "%";
     }
 
-    function clampStats() {
-      player.hp = Math.min(player.maxHp, Math.max(0, player.hp));
-      player.energy = Math.min(player.maxEnergy, Math.max(0, player.energy));
-      enemy.hp = Math.min(enemy.maxHp, Math.max(0, enemy.hp));
-      enemy.energy = Math.min(enemy.maxEnergy, Math.max(0, enemy.energy));
+    function render() {
+      playerEl.style.left = state.player.x + "px";
+      playerEl.style.bottom = `calc(${state.groundYPercent}% + ${state.player.y}px)`;
+      enemyEl.style.left = state.enemy.x + "px";
+      enemyEl.style.bottom = `calc(${state.groundYPercent}% + ${state.enemy.y}px)`;
+
+      playerEl.className = "fighter " + (state.player.facing === 1 ? "face-right" : "face-left");
+      enemyEl.className = "fighter " + (state.enemy.facing === 1 ? "face-right" : "face-left");
     }
 
-    function disableJoy(disabled) {
-      const joys = [attackJoy, specialJoy, healJoy];
-      joys.forEach(j => {
-        if (disabled) j.style.pointerEvents = 'none';
-        else j.style.pointerEvents = 'auto';
-      });
+    function clamp(val, min, max) {
+      return Math.max(min, Math.min(max, val));
     }
 
-    function enableJoy() {
-      if (gameActive && !checkGameOver()) {
-        attackJoy.style.pointerEvents = 'auto';
-        specialJoy.style.pointerEvents = 'auto';
-        healJoy.style.pointerEvents = 'auto';
-      } else {
-        attackJoy.style.pointerEvents = 'none';
-        specialJoy.style.pointerEvents = 'none';
-        healJoy.style.pointerEvents = 'none';
-      }
+    function distance(a, b) {
+      return Math.abs((a.x + a.width / 2) - (b.x + b.width / 2));
     }
 
-    function checkGameOver() {
-      if (!gameActive) return true;
-      let over = false;
-      if (player.hp <= 0) {
-        gameActive = false;
-        over = true;
-        addLogMessage("💀 KAI wurde besiegt... Niederlage. Drücke NEU für Revanche!");
-        disableJoy(true);
-      } else if (enemy.hp <= 0) {
-        gameActive = false;
-        over = true;
-        addLogMessage("🏆 SIEG! RYUJIN ist am Boden. Du bist der Champion!");
-        disableJoy(true);
-      }
-      if (over) {
-        attackJoy.style.pointerEvents = 'none';
-        specialJoy.style.pointerEvents = 'none';
-        healJoy.style.pointerEvents = 'none';
-        drawCanvas(true);
-        return true;
-      }
-      return false;
+    function createEffect(x, y, color) {
+      const fx = document.createElement("div");
+      fx.className = "effect";
+      fx.style.left = x + "px";
+      fx.style.top = y + "px";
+      fx.style.background = color;
+      game.appendChild(fx);
+      setTimeout(() => fx.remove(), 250);
     }
 
-    function regenerateAfterRound() {
-      let oldP = player.energy;
-      let oldE = enemy.energy;
-      player.energy = Math.min(player.maxEnergy, player.energy + 10);
-      enemy.energy = Math.min(enemy.maxEnergy, enemy.energy + 8);
-      if (oldP !== player.energy) addLogMessage(`🌀 Energie +10 (KAI) → ${player.energy}`);
-      if (oldE !== enemy.energy) addLogMessage(`🌑 Zorn +8 (RYUJIN) → ${enemy.energy}`);
-      clampStats();
+    function damageTarget(target, amount) {
+      target.health -= amount;
+      if (target.health < 0) target.health = 0;
       updateUI();
-      drawCanvas();
+      checkWinner();
     }
 
-    async function enemyTurn() {
-      if (!gameActive || enemy.hp <= 0) return;
-      addLogMessage(`⚔️ RYUJIN greift an!`);
-      let damage = 0;
-      let energyCost = 0;
-      let willSpecial = (enemy.energy >= 25 && Math.random() < 0.45);
-      if (willSpecial && enemy.energy >= 25) {
-        damage = Math.floor(Math.random() * 13) + 16;
-        energyCost = 25;
-        addLogMessage(`💢 RYUJIN „Dämonen-Klingensturm!“ ${damage} Schaden!`);
-      } else {
-        damage = Math.floor(Math.random() * 10) + 8;
-        addLogMessage(`🗡️ RYUJIN führt einen brutalen Hieb aus! ${damage} Schaden.`);
-      }
-      player.hp = Math.max(0, player.hp - damage);
-      if (energyCost > 0) {
-        enemy.energy = Math.max(0, enemy.energy - energyCost);
-        addLogMessage(`🌀 RYUJIN verliert ${energyCost} Energie.`);
-      }
-      clampStats();
-      updateUI();
-      drawCanvas(true);
-      if (player.hp <= 0) {
-        addLogMessage(`💔 KAI bricht zusammen ...`);
-        checkGameOver();
-      }
-    }
-
-    async function finishRound() {
-      if (!gameActive) return;
-      regenerateAfterRound();
-      clampStats();
-      updateUI();
-      drawCanvas();
-      enableJoy();
-      actionLock = false;
-      checkGameOver();
-      if (!gameActive) actionLock = true;
-    }
-
-    async function playerAction(actionFn) {
-      if (actionLock || !gameActive) {
-        addLogMessage("Warte, der Gegner ist am Zug ...", true);
-        return false;
-      }
-      if (checkGameOver()) return false;
-      actionLock = true;
-      disableJoy(true);
-      let success = await actionFn();
-      if (!success) {
-        actionLock = false;
-        enableJoy();
-        return false;
-      }
-      clampStats();
-      updateUI();
-      drawCanvas();
-      if (checkGameOver()) {
-        actionLock = false;
-        return true;
-      }
-      await enemyTurn();
-      if (checkGameOver()) {
-        actionLock = false;
-        disableJoy(true);
-        return true;
-      }
-      await finishRound();
-      return true;
-    }
-
-    // ----- Aktionen (deutsch) -----
     function playerAttack() {
-      return new Promise(resolve => {
-        let damage = Math.floor(Math.random() * 11) + 10; // 10–20
-        addLogMessage(`⚡ KAI „Sturmfaust!“ ${damage} Schaden!`);
-        enemy.hp = Math.max(0, enemy.hp - damage);
-        clampStats();
-        updateUI();
-        drawCanvas(true);
-        resolve(true);
-      });
+      if (state.gameOver || state.player.attacking) return;
+      state.player.attacking = true;
+
+      const inRange = distance(state.player, state.enemy) < 110;
+      playerEl.style.transform += " scale(1.05)";
+
+      if (inRange) {
+        damageTarget(state.enemy, 10);
+        createEffect(
+          state.enemy.x + state.enemy.width / 2,
+          window.innerHeight * 0.55,
+          "rgba(255,255,0,0.8)"
+        );
+      }
+
+      setTimeout(() => {
+        state.player.attacking = false;
+      }, 220);
     }
 
     function playerSpecial() {
-      return new Promise(resolve => {
-        if (player.energy < 25) {
-          addLogMessage(`Nicht genug Energie! Spezial kostet 25 (aktuell ${player.energy})`, true);
-          resolve(false);
-          return;
-        }
-        let damage = Math.floor(Math.random() * 16) + 18; // 18–33
-        addLogMessage(`✨✨ HIMMELSSTOSS – KAI entfesselt seine Geheimtechnik! ✨✨ ${damage} Schaden!`);
-        enemy.hp = Math.max(0, enemy.hp - damage);
-        player.energy = Math.max(0, player.energy - 25);
-        clampStats();
-        updateUI();
-        drawCanvas(true);
-        resolve(true);
-      });
-    }
+      if (state.gameOver || !state.player.specialReady) return;
+      state.player.specialReady = false;
 
-    function playerHeal() {
-      return new Promise(resolve => {
-        if (player.energy < 20) {
-          addLogMessage(`Nicht genug Energie! Heilen kostet 20 (aktuell ${player.energy})`, true);
-          resolve(false);
-          return;
-        }
-        let healAmount = Math.floor(Math.random() * 14) + 12;
-        let newHp = Math.min(player.maxHp, player.hp + healAmount);
-        let actualHeal = newHp - player.hp;
-        player.hp = newHp;
-        player.energy = Math.max(0, player.energy - 20);
-        addLogMessage(`🌸 Meditations-Atem! +${actualHeal} HP wiederhergestellt. (Energie -20)`);
-        clampStats();
-        updateUI();
-        drawCanvas();
-        resolve(true);
-      });
-    }
+      const beam = document.createElement("div");
+      beam.style.position = "absolute";
+      beam.style.height = "18px";
+      beam.style.width = "180px";
+      beam.style.left = (state.player.facing === 1 ? state.player.x + 40 : state.player.x - 140) + "px";
+      beam.style.bottom = `calc(${state.groundYPercent}% + ${state.player.y + 52}px)`;
+      beam.style.background = "linear-gradient(to right, #00e5ff, #2979ff, #7c4dff)";
+      beam.style.boxShadow = "0 0 20px #00e5ff";
+      beam.style.borderRadius = "12px";
+      beam.style.zIndex = "14";
+      game.appendChild(beam);
 
-    function restartGame() {
-      gameActive = true;
-      actionLock = false;
-      player = { maxHp: 100, hp: 100, maxEnergy: 100, energy: 50 };
-      enemy = { maxHp: 100, hp: 100, maxEnergy: 100, energy: 40 };
-      clampStats();
-      updateUI();
-      drawCanvas();
-      combatLogDiv.innerHTML = '<span class="log-text">⚔️ NEUSTART! Joysticks sind bereit. Wähle deine Attacke!</span>';
-      addLogMessage("Volle Gesundheit & Energie. Kämpfe!");
-      attackJoy.style.pointerEvents = 'auto';
-      specialJoy.style.pointerEvents = 'auto';
-      healJoy.style.pointerEvents = 'auto';
-      checkGameOver();
-    }
+      const hit =
+        (state.player.facing === 1 &&
+          state.enemy.x < state.player.x + 220 &&
+          state.enemy.x > state.player.x) ||
+        (state.player.facing === -1 &&
+          state.enemy.x > state.player.x - 220 &&
+          state.enemy.x < state.player.x);
 
-    // ========== CANVAS: GANZE CHARAKTERE (Full Body) ==========
-    function drawCanvas(flashEffect = false) {
-      if (!ctx) return;
-      ctx.clearRect(0, 0, 900, 380);
-      // Hintergrund Dojo
-      ctx.fillStyle = "#11161f";
-      ctx.fillRect(0, 0, 900, 380);
-      ctx.fillStyle = "#2a2332";
-      ctx.fillRect(0, 280, 900, 100);
-      for (let i=0; i<12; i++) ctx.fillRect(40+i*70, 310, 50, 12);
-
-      // ------ Spieler (KAI) Fullbody ------
-      ctx.save();
-      // Körper
-      ctx.fillStyle = "#f7cf9f";
-      ctx.beginPath();
-      ctx.ellipse(190, 240, 28, 38, 0, 0, Math.PI*2);
-      ctx.fill();
-      ctx.fillStyle = "#d4a56e";
-      ctx.fillRect(175, 260, 30, 28);
-      // Kopf
-      ctx.beginPath();
-      ctx.arc(190, 185, 26, 0, Math.PI*2);
-      ctx.fill();
-      ctx.fillStyle = "#2c5f8a";
-      ctx.beginPath();
-      ctx.moveTo(173, 153);
-      ctx.quadraticCurveTo(190, 130, 207, 153);
-      ctx.fill();
-      ctx.fillStyle = "#1f2a36";
-      ctx.fillRect(176, 175, 8, 6);
-      ctx.fillRect(196, 175, 8, 6);
-      ctx.fillStyle = "white";
-      ctx.fillRect(177, 173, 3, 3);
-      ctx.fillRect(197, 173, 3, 3);
-      ctx.fillStyle = "#b54a2a";
-      ctx.fillRect(183, 200, 14, 4);
-      // Gi (Kampfanzug)
-      ctx.fillStyle = "#2c3e66";
-      ctx.fillRect(170, 235, 40, 28);
-      ctx.fillStyle = "#e0b070";
-      ctx.fillRect(179, 250, 22, 12);
-      // Arme + Faust
-      ctx.fillStyle = "#f7cf9f";
-      ctx.fillRect(150, 225, 22, 16);
-      ctx.fillRect(208, 225, 22, 16);
-      
-      // ------ Gegner (RYUJIN) Fullbody ------
-      ctx.fillStyle = "#e0ac77";
-      ctx.beginPath();
-      ctx.ellipse(710, 240, 30, 42, 0, 0, Math.PI*2);
-      ctx.fill();
-      ctx.fillStyle = "#b56f3a";
-      ctx.fillRect(695, 262, 30, 30);
-      ctx.beginPath();
-      ctx.arc(710, 184, 28, 0, Math.PI*2);
-      ctx.fill();
-      // Dämonenhörner
-      ctx.fillStyle = "#6b2e2e";
-      ctx.beginPath();
-      ctx.moveTo(692, 152);
-      ctx.lineTo(710, 125);
-      ctx.lineTo(728, 152);
-      ctx.fill();
-      ctx.fillStyle = "#4a2a2a";
-      ctx.fillRect(694, 173, 10, 7);
-      ctx.fillRect(716, 173, 10, 7);
-      ctx.fillStyle = "#f08080";
-      ctx.fillRect(698, 181, 6, 4);
-      ctx.fillRect(720, 181, 6, 4);
-      ctx.fillStyle = "#2a2a2a";
-      ctx.fillRect(702, 198, 16, 5);
-      // Rüstung
-      ctx.fillStyle = "#5a3a2a";
-      ctx.fillRect(695, 233, 30, 30);
-      ctx.fillStyle = "#c98a5a";
-      ctx.fillRect(702, 252, 16, 12);
-      // Klaue
-      ctx.fillStyle = "#8b5a3a";
-      ctx.fillRect(670, 225, 22, 16);
-      ctx.fillRect(728, 225, 22, 16);
-      
-      // Namen
-      ctx.font = "bold 20px 'Segoe UI'";
-      ctx.fillStyle = "#ffefb0";
-      ctx.fillText("KAI", 150, 110);
-      ctx.fillStyle = "#ffb77c";
-      ctx.fillText("RYUJIN", 670, 100);
-      
-      if(flashEffect) {
-        ctx.fillStyle = "rgba(255,210,100,0.4)";
-        ctx.fillRect(0, 0, 900, 380);
+      if (hit) {
+        damageTarget(state.enemy, 22);
+        createEffect(
+          state.enemy.x + state.enemy.width / 2,
+          window.innerHeight * 0.5,
+          "rgba(0,229,255,0.9)"
+        );
       }
-      ctx.restore();
+
+      setTimeout(() => beam.remove(), 180);
+      setTimeout(() => {
+        state.player.specialReady = true;
+      }, 2500);
     }
 
-    // Event-Bindung
-    attackJoy.addEventListener('click', () => playerAction(playerAttack));
-    specialJoy.addEventListener('click', () => playerAction(playerSpecial));
-    healJoy.addEventListener('click', () => playerAction(playerHeal));
-    restartJoy.addEventListener('click', () => restartGame());
+    function enemyAttack() {
+      if (state.enemy.attacking || state.gameOver) return;
+      state.enemy.attacking = true;
 
-    function init() {
+      if (distance(state.enemy, state.player) < 100) {
+        damageTarget(state.player, 8);
+        createEffect(
+          state.player.x + state.player.width / 2,
+          window.innerHeight * 0.55,
+          "rgba(255,80,80,0.85)"
+        );
+      }
+
+      setTimeout(() => {
+        state.enemy.attacking = false;
+      }, 350);
+    }
+
+    function enemyAI() {
+      if (state.gameOver) return;
+
+      const dx = state.player.x - state.enemy.x;
+      state.enemy.facing = dx > 0 ? 1 : -1;
+
+      if (Math.abs(dx) > 90) {
+        state.enemy.x += Math.sign(dx) * state.enemy.speed;
+      } else {
+        if (Math.random() < 0.025) enemyAttack();
+      }
+
+      if (state.enemy.specialCooldown > 0) {
+        state.enemy.specialCooldown--;
+      } else if (Math.abs(dx) < 220 && Math.random() < 0.006) {
+        state.enemy.specialCooldown = 220;
+        damageTarget(state.player, 14);
+        createEffect(
+          state.player.x + state.player.width / 2,
+          window.innerHeight * 0.45,
+          "rgba(255,0,120,0.9)"
+        );
+      }
+    }
+
+    function updatePlayer() {
+      if (state.controls.left) {
+        state.player.vx = -state.player.speed;
+        state.player.facing = -1;
+      } else if (state.controls.right) {
+        state.player.vx = state.player.speed;
+        state.player.facing = 1;
+      } else {
+        state.player.vx = 0;
+      }
+
+      state.player.x += state.player.vx;
+      state.player.vy -= state.gravity;
+      state.player.y += state.player.vy;
+
+      if (state.player.y <= groundY()) {
+        state.player.y = groundY();
+        state.player.vy = 0;
+      }
+
+      state.player.x = clamp(state.player.x, 0, window.innerWidth - state.player.width);
+      state.enemy.x = clamp(state.enemy.x, 0, window.innerWidth - state.enemy.width);
+    }
+
+    function checkWinner() {
+      if (state.gameOver) return;
+
+      if (state.player.health <= 0) {
+        state.gameOver = true;
+        message.style.display = "block";
+        messageText.textContent = "Du hast verloren!";
+      } else if (state.enemy.health <= 0) {
+        state.gameOver = true;
+        message.style.display = "block";
+        messageText.textContent = "Du hast gewonnen!";
+      }
+    }
+
+    function jump() {
+      if (state.gameOver) return;
+      if (state.player.y === 0) {
+        state.player.vy = state.player.jumpPower;
+      }
+    }
+
+    function loop() {
+      updatePlayer();
+      enemyAI();
+      render();
+      requestAnimationFrame(loop);
+    }
+
+    function pressStart(button, fnStart, fnEnd) {
+      const start = (e) => {
+        e.preventDefault();
+        fnStart();
+      };
+      const end = (e) => {
+        e.preventDefault();
+        if (fnEnd) fnEnd();
+      };
+
+      button.addEventListener("touchstart", start, { passive: false });
+      button.addEventListener("touchend", end, { passive: false });
+      button.addEventListener("touchcancel", end, { passive: false });
+
+      button.addEventListener("mousedown", start);
+      button.addEventListener("mouseup", end);
+      button.addEventListener("mouseleave", end);
+    }
+
+    pressStart(document.getElementById("leftBtn"),
+      () => state.controls.left = true,
+      () => state.controls.left = false
+    );
+
+    pressStart(document.getElementById("rightBtn"),
+      () => state.controls.right = true,
+      () => state.controls.right = false
+    );
+
+    pressStart(document.getElementById("jumpBtn"), jump);
+    pressStart(document.getElementById("attackBtn"), playerAttack);
+    pressStart(document.getElementById("specialBtn"), playerSpecial);
+
+    restartBtn.addEventListener("click", () => {
+      state.gameOver = false;
+      state.player.x = window.innerWidth * 0.12;
+      state.player.y = 0;
+      state.player.vy = 0;
+      state.player.health = 100;
+      state.player.specialReady = true;
+
+      state.enemy.x = window.innerWidth * 0.72;
+      state.enemy.health = 100;
+      state.enemy.specialCooldown = 0;
+
+      state.controls.left = false;
+      state.controls.right = false;
+
       updateUI();
-      drawCanvas();
-      gameActive = true;
-      actionLock = false;
-      enableJoy();
-    }
-    init();
-  })();
-</script>
+      message.style.display = "none";
+    });
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowLeft") {
+        state.controls.left = true;
+        state.player.facing = -1;
+      }
+      if (e.key === "ArrowRight") {
+        state.controls.right = true;
+        state.player.facing = 1;
+      }
+      if (e.key === "ArrowUp") jump();
+      if (e.key === "a" || e.key === "A") playerAttack();
+      if (e.key === "s" || e.key === "S") playerSpecial();
+    });
+
+    window.addEventListener("keyup", (e) => {
+      if (e.key === "ArrowLeft") state.controls.left = false;
+      if (e.key === "ArrowRight") state.controls.right = false;
+    });
+
+    updateUI();
+    render();
+    loop();
+  </script>
 </body>
 </html>
