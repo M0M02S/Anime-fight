@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Anime Fight Arena - Real Joystick</title>
+    <title>Anime Fight Arena - Fluid Joystick Combat</title>
     <style>
         * {
             user-select: none;
@@ -84,7 +84,6 @@
             border-radius: 68px;
             backdrop-filter: blur(8px);
         }
-        /* Canvas joystick */
         .joystick-area {
             width: 130px;
             height: 130px;
@@ -175,7 +174,7 @@
             </div>
         </div>
         <div class="fight-tip">
-            🕹️ DRAG JOYSTICK → MOVE | ⬆️ FLICK UP = JUMP | ⬇️ HOLD DOWN = BLOCK
+            🕹️ DRAG JOYSTICK → MOVE (speed = distance) | ⬆️ FLICK UP = JUMP | ⬇️ HOLD DOWN = BLOCK
         </div>
     </div>
 </div>
@@ -244,8 +243,8 @@
         const joyCtx = joyCanvas.getContext('2d');
         let joyActive = false;
         let joyPos = { x: 0, y: 0 }; // normalized -1..1
-        let joyRadius = 50; // half of canvas size
-        let joyCenterX = 65, joyCenterY = 65; // center of 130px canvas
+        let joyRadius = 50;
+        let joyCenterX = 65, joyCenterY = 65;
         
         function drawJoystick() {
             joyCtx.clearRect(0, 0, 130, 130);
@@ -256,14 +255,12 @@
             joyCtx.strokeStyle = "#ffda88";
             joyCtx.lineWidth = 2;
             joyCtx.stroke();
-            // thumb position based on joyPos
             let thumbX = joyCenterX + joyPos.x * (joyRadius - 15);
             let thumbY = joyCenterY + joyPos.y * (joyRadius - 15);
             joyCtx.beginPath();
             joyCtx.arc(thumbX, thumbY, 20, 0, Math.PI*2);
             joyCtx.fillStyle = "#fad47c";
             joyCtx.fill();
-            joyCtx.shadowBlur = 0;
         }
         
         function handleJoyStart(e) {
@@ -344,7 +341,7 @@
             if (dist <= rangeFront + 20 && facingOk) {
                 const blocking = defender.blockActive && defender.state !== "hit";
                 applyDamage(defender, damage, blocking);
-                attacker.attackCooldown = 0.55;
+                attacker.attackCooldown = 0.45;
                 return true;
             }
             return false;
@@ -359,22 +356,22 @@
             player.state = type;
             player.attackTimer = 0.28;
             performAttack(player, enemy, damage, range);
-            player.attackCooldown = 0.55;
+            player.attackCooldown = 0.45;
         }
         
         function aiAttack() {
             if (!gameRunning) return;
             if (enemy.attackCooldown > 0) return;
             if (enemy.state === "hit") return;
-            const distToPlayer = Math.abs((enemy.x + enemy.width/2) - (player.x + player.width/2));
-            if (distToPlayer < 90) {
+            const dist = Math.abs((enemy.x + enemy.width/2) - (player.x + player.width/2));
+            if (dist < 95) {
                 let type = Math.random() < 0.6 ? 'punch' : 'kick';
                 let damage = type === 'punch' ? 8 : 13;
                 let range = 58;
                 enemy.state = type;
                 enemy.attackTimer = 0.28;
                 performAttack(enemy, player, damage, range);
-                enemy.attackCooldown = 0.65;
+                enemy.attackCooldown = 0.55;
             }
         }
         
@@ -383,48 +380,54 @@
         let jumpRequest = false;
         let blockRequest = false;
         let lastUp = false;
+        let moveSpeedFactor = 1.0;
         
         function updateJoystickActions() {
-            const dead = 0.2;
+            const dead = 0.15;
             const x = Math.abs(joyPos.x) > dead ? joyPos.x : 0;
-            moveLeft = x < -0.2;
-            moveRight = x > 0.2;
-            const up = joyPos.y < -0.6;
-            const down = joyPos.y > 0.6;
-            // Jump on rising edge of up
+            moveLeft = x < -0.1;
+            moveRight = x > 0.1;
+            // Speed factor based on how far you push (0.5 to 1.0 range)
+            let mag = Math.min(1, Math.abs(x) / 0.8);
+            moveSpeedFactor = 0.6 + mag * 0.6; // 0.6 to 1.2 speed multiplier
+            
+            const up = joyPos.y < -0.55;
+            const down = joyPos.y > 0.55;
             if (up && !lastUp) jumpRequest = true;
             else jumpRequest = false;
             lastUp = up;
             blockRequest = down;
         }
         
-        // ----- PHYSICS -----
+        // ----- PHYSICS (high speed) -----
         let lastTime = 0;
         let delta = 1/60;
         
         function updateMovement(dt) {
             if (!gameRunning) return;
-            let canMove = (player.attackTimer <= 0 && player.hitTimer <= 0);
+            // Player movement (always allowed except during hit stun)
+            let canMove = (player.hitTimer <= 0);
             if (canMove) {
                 let acc = 0;
                 if (moveLeft) acc = -1;
                 if (moveRight) acc = 1;
-                player.vx += acc * 14 * dt;
+                let speed = 480 * moveSpeedFactor; // much faster
+                player.vx += acc * speed * dt;
                 player.vx *= 0.92;
-                if (Math.abs(player.vx) < 0.2) player.vx = 0;
-                player.vx = Math.min(320, Math.max(-320, player.vx));
+                if (Math.abs(player.vx) < 0.5) player.vx = 0;
+                player.vx = Math.min(550, Math.max(-550, player.vx));
                 player.x += player.vx * dt;
             } else {
                 player.vx *= 0.96;
                 player.x += player.vx * dt;
             }
             // Jump
-            if (jumpRequest && player.grounded && canMove && player.attackTimer === 0 && player.hitTimer === 0) {
-                player.vy = -370;
+            if (jumpRequest && player.grounded && canMove && player.hitTimer === 0) {
+                player.vy = -420;
                 player.grounded = false;
                 player.state = "jump";
             }
-            player.vy += 1200 * dt;
+            player.vy += 1400 * dt;
             player.y += player.vy * dt;
             if (player.y >= GROUND_Y - H) {
                 player.y = GROUND_Y - H;
@@ -433,13 +436,14 @@
                 if (player.state === "jump" && player.attackTimer === 0 && player.hitTimer === 0) player.state = "idle";
             } else player.grounded = false;
             player.x = Math.min(gameCanvas.width - player.width - 25, Math.max(30, player.x));
-            // Enemy AI movement (always tries to approach)
-            let aiMove = (enemy.attackTimer <= 0 && enemy.hitTimer <= 0);
-            if (aiMove && gameRunning) {
+            
+            // Enemy AI: always try to approach and attack
+            let aiCanMove = (enemy.hitTimer <= 0);
+            if (aiCanMove && gameRunning) {
                 let diff = player.x - enemy.x;
                 let dir = 0;
-                if (Math.abs(diff) > 20) dir = diff > 0 ? 1 : -1;
-                enemy.vx += dir * 9 * dt;
+                if (Math.abs(diff) > 25) dir = diff > 0 ? 1 : -1;
+                enemy.vx += dir * 360 * dt;
                 enemy.vx *= 0.92;
                 enemy.x += enemy.vx * dt;
                 enemy.x = Math.min(gameCanvas.width - enemy.width - 20, Math.max(40, enemy.x));
@@ -450,7 +454,7 @@
                 enemy.x += enemy.vx * dt;
                 enemy.x = Math.min(gameCanvas.width - enemy.width - 20, Math.max(40, enemy.x));
             }
-            enemy.vy += 1200 * dt;
+            enemy.vy += 1400 * dt;
             enemy.y += enemy.vy * dt;
             if (enemy.y >= GROUND_Y - H) {
                 enemy.y = GROUND_Y - H;
@@ -472,10 +476,10 @@
             if (enemy.attackCooldown > 0) enemy.attackCooldown -= dt;
             if (enemy.invincibleTimer > 0) enemy.invincibleTimer -= dt;
             
-            // AI attack decision
+            // AI attack more frequently
             if (gameRunning && enemy.attackTimer <= 0 && enemy.hitTimer <= 0 && enemy.attackCooldown <= 0) {
                 const dist = Math.abs((player.x + player.width/2) - (enemy.x + enemy.width/2));
-                if (dist < 100 && Math.random() < 0.022) aiAttack();
+                if (dist < 100 && Math.random() < 0.028) aiAttack();
             }
             // Block handling
             if (player.state === "hit" || player.attackTimer > 0) player.blockActive = false;
@@ -483,11 +487,12 @@
             if (player.blockActive && player.state !== "hit" && player.attackTimer <= 0) player.state = "block";
             else if (player.state === "block" && !player.blockActive && player.attackTimer === 0 && player.hitTimer === 0) player.state = "idle";
             
+            // Idle state correction
             if (player.state !== "block" && player.state !== "hit" && player.attackTimer <= 0 && player.hitTimer <= 0 && player.grounded && player.state !== "jump") player.state = "idle";
             if (enemy.state !== "hit" && enemy.attackTimer <= 0 && enemy.hitTimer <= 0 && enemy.grounded) enemy.state = "idle";
         }
         
-        // ----- DRAWING -----
+        // ----- DRAWING (anime style) -----
         function drawFighter(x, y, isPlayer, state, facingRight, blockFlag) {
             const w = W, h = H;
             ctx.save();
