@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Anime Duel · Turn-Based Fighter</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none; /* cleaner on mobile */
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: linear-gradient(145deg, #0a0f1e 0%, #0c1222 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Segoe UI', 'Poppins', 'Inter', system-ui, -apple-system, 'Helvetica Neue', sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+
+    /* main game card */
+    .game-card {
+      max-width: 750px;
+      width: 100%;
+      background: rgba(10, 20, 30, 0.7);
+      backdrop-filter: blur(2px);
+      border-radius: 64px 64px 48px 48px;
+      box-shadow: 0 25px 45px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+      padding: 20px 18px 30px;
+      border: 1px solid rgba(255, 210, 90, 0.3);
+      transition: all 0.2s ease;
+    }
+
+    /* canvas area - anime fighters */
+    .arena {
+      background: radial-gradient(circle at 20% 30%, #1f2a3e, #0b0f17);
+      border-radius: 48px;
+      padding: 12px;
+      margin-bottom: 20px;
+      box-shadow: inset 0 0 18px rgba(0,0,0,0.6), 0 8px 18px rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,180,80,0.4);
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: #1a1f2c;
+      border-radius: 36px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+
+    /* stats row (health & energy) */
+    .stats-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin: 20px 0 12px;
+    }
+
+    .stat-panel {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(4px);
+      border-radius: 32px;
+      padding: 12px 16px;
+      border-left: 5px solid;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+    }
+
+    .stat-panel.player {
+      border-left-color: #3b82f6;
+    }
+    .stat-panel.enemy {
+      border-left-color: #ef4444;
+    }
+
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      font-weight: bold;
+      font-size: 1.1rem;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+    .stat-name {
+      background: linear-gradient(135deg, #f0f3ff, #ffe6b0);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 4px rgba(0,0,0,0.3);
+    }
+    .stat-number {
+      color: #facc15;
+      font-weight: 800;
+      font-size: 1rem;
+    }
+
+    /* health bar */
+    .bar-bg {
+      background: #2a1e1e;
+      border-radius: 30px;
+      height: 14px;
+      overflow: hidden;
+      margin: 6px 0 8px;
+      box-shadow: inset 0 1px 3px #00000055;
+    }
+    .health-fill {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, #f97316, #ef4444);
+      border-radius: 30px;
+      transition: width 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    }
+    .energy-fill {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, #3b82f6, #06b6d4);
+      border-radius: 30px;
+      transition: width 0.2s ease;
+    }
+
+    .energy-label {
+      margin-top: 8px;
+      font-size: 0.75rem;
+      color: #a5c9ff;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* combat log */
+    .combat-log {
+      background: #03070faa;
+      backdrop-filter: blur(8px);
+      border-radius: 40px;
+      padding: 12px 18px;
+      margin: 18px 0;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #f0e6d0;
+      border: 1px solid #facc1544;
+      min-height: 70px;
+      max-height: 90px;
+      overflow-y: auto;
+      font-family: monospace;
+      letter-spacing: 0.5px;
+      box-shadow: inset 0 0 8px #00000033;
+    }
+
+    .log-text {
+      display: block;
+      animation: fadeSlide 0.2s ease;
+      word-break: break-word;
+    }
+
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(5px);}
+      to { opacity: 1; transform: translateY(0);}
+    }
+
+    /* button grid - perfect for touch */
+    .button-panel {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 14px;
+      margin-top: 12px;
+    }
+
+    .fight-btn {
+      background: radial-gradient(ellipse at top, #2a2f3f, #11161f);
+      border: none;
+      padding: 14px 20px;
+      min-width: 100px;
+      border-radius: 80px;
+      font-weight: bold;
+      font-size: 1.2rem;
+      color: #ffefcf;
+      box-shadow: 0 5px 0 #0b0e14;
+      transition: 0.07s linear;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      backdrop-filter: blur(2px);
+      letter-spacing: 1px;
+      flex: 1 0 auto;
+      touch-action: manipulation;
+    }
+
+    .fight-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 #0b0e14;
+    }
+
+    .fight-btn.special {
+      background: radial-gradient(ellipse at top, #4a2b6e, #281a44);
+      box-shadow: 0 5px 0 #1f1035;
+      color: #e9c0ff;
+    }
+    .fight-btn.heal {
+      background: radial-gradient(ellipse at top, #2d6a4f, #1b4d3a);
+      box-shadow: 0 5px 0 #0f3526;
+      color: #b7efc5;
+    }
+    .fight-btn.restart {
+      background: radial-gradient(ellipse at top, #7f2e3e, #4c1c27);
+      box-shadow: 0 5px 0 #2c1119;
+      color: #ffb7c5;
+    }
+
+    @media (max-width: 550px) {
+      .game-card {
+        padding: 16px;
+      }
+      .fight-btn {
+        padding: 12px 12px;
+        font-size: 1rem;
+        min-width: 70px;
+      }
+      .stat-header {
+        font-size: 0.9rem;
+      }
+      .combat-log {
+        font-size: 0.75rem;
+      }
+    }
+
+    /* disable buttons when game over */
+    .disabled-btn, button:disabled {
+      opacity: 0.5;
+      transform: translateY(0px);
+      filter: grayscale(0.1);
+      cursor: not-allowed;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 0.65rem;
+      color: #4f668a;
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+<div class="game-card">
+  <div class="arena">
+    <canvas id="fightCanvas" width="600" height="250" style="width:100%; height:auto; max-width:600px; margin:0 auto; display:block;"></canvas>
+  </div>
+
+  <!-- stats -->
+  <div class="stats-row">
+    <div class="stat-panel player">
+      <div class="stat-header">
+        <span class="stat-name">⚡ KAI · 疾風</span>
+        <span class="stat-number" id="playerHpText">100</span>
+      </div>
+      <div class="bar-bg"><div class="health-fill" id="playerHealthFill" style="width:100%"></div></div>
+      <div class="energy-label">
+        <span>🌀 気力</span>
+        <span id="playerEnergyText">50</span><span>/100</span>
+      </div>
+      <div class="bar-bg"><div class="energy-fill" id="playerEnergyFill" style="width:50%"></div></div>
+    </div>
+
+    <div class="stat-panel enemy">
+      <div class="stat-header">
+        <span class="stat-name">🔥 RYUJIN · 凶刃</span>
+        <span class="stat-number" id="enemyHpText">100</span>
+      </div>
+      <div class="bar-bg"><div class="health-fill" id="enemyHealthFill" style="width:100%"></div></div>
+      <div class="energy-label">
+        <span>🌀 殺気</span>
+        <span id="enemyEnergyText">40</span><span>/100</span>
+      </div>
+      <div class="bar-bg"><div class="energy-fill" id="enemyEnergyFill" style="width:40%"></div></div>
+    </div>
+  </div>
+
+  <!-- combat log -->
+  <div class="combat-log" id="combatLog">
+    <span class="log-text">⚔️ タップ「攻撃」でバトル開始！</span>
+  </div>
+
+  <!-- action buttons -->
+  <div class="button-panel">
+    <button class="fight-btn" id="attackBtn">⚡ 攻撃</button>
+    <button class="fight-btn special" id="specialBtn">✨ 奥義 (25)</button>
+    <button class="fight-btn heal" id="healBtn">🌸 回復 (20)</button>
+    <button class="fight-btn restart" id="restartBtn">🔄 再戦</button>
+  </div>
+  <footer>★ ターン制バトル | 気力を使って奥義・回復！敵も奥義を放つ ★</footer>
+</div>
+
+<script>
+  (function() {
+    // ---------- GAME STATE ----------
+    let player = {
+      maxHp: 100,
+      hp: 100,
+      maxEnergy: 100,
+      energy: 50
+    };
+    let enemy = {
+      maxHp: 100,
+      hp: 100,
+      maxEnergy: 100,
+      energy: 40
+    };
+
+    let gameActive = true;
+    let actionLock = false;     // prevent spam while enemy turn or animations
+    let canvas = document.getElementById('fightCanvas');
+    let ctx = canvas.getContext('2d');
+
+    // DOM elements
+    const playerHpText = document.getElementById('playerHpText');
+    const enemyHpText = document.getElementById('enemyHpText');
+    const playerEnergyText = document.getElementById('playerEnergyText');
+    const enemyEnergyText = document.getElementById('enemyEnergyText');
+    const playerHealthFill = document.getElementById('playerHealthFill');
+    const enemyHealthFill = document.getElementById('enemyHealthFill');
+    const playerEnergyFill = document.getElementById('playerEnergyFill');
+    const enemyEnergyFill = document.getElementById('enemyEnergyFill');
+    const combatLogDiv = document.getElementById('combatLog');
+
+    const attackBtn = document.getElementById('attackBtn');
+    const specialBtn = document.getElementById('specialBtn');
+    const healBtn = document.getElementById('healBtn');
+    const restartBtn = document.getElementById('restartBtn');
+
+    // Helper: add log message
+    function addLogMessage(msg, isError = false) {
+      const logEntry = document.createElement('span');
+      logEntry.className = 'log-text';
+      logEntry.style.color = isError ? '#ffaa99' : '#e2e8f0';
+      logEntry.innerHTML = isError ? `⚠️ ${msg}` : `✦ ${msg}`;
+      combatLogDiv.appendChild(logEntry);
+      logEntry.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      // keep last 12 logs roughly
+      while(combatLogDiv.children.length > 14) {
+        combatLogDiv.removeChild(combatLogDiv.firstChild);
+      }
+    }
+
+    // update all UI (bars, numbers)
+    function updateUI() {
+      // health
+      const playerHpPercent = (player.hp / player.maxHp) * 100;
+      const enemyHpPercent = (enemy.hp / enemy.maxHp) * 100;
+      playerHealthFill.style.width = `${Math.max(0, playerHpPercent)}%`;
+      enemyHealthFill.style.width = `${Math.max(0, enemyHpPercent)}%`;
+      playerHpText.innerText = Math.max(0, player.hp);
+      enemyHpText.innerText = Math.max(0, enemy.hp);
+
+      // energy
+      const playerEnPercent = (player.energy / player.maxEnergy) * 100;
+      const enemyEnPercent = (enemy.energy / enemy.maxEnergy) * 100;
+      playerEnergyFill.style.width = `${Math.max(0, playerEnPercent)}%`;
+      enemyEnergyFill.style.width = `${Math.max(0, enemyEnPercent)}%`;
+      playerEnergyText.innerText = player.energy;
+      enemyEnergyText.innerText = enemy.energy;
+    }
+
+    // clamp values
+    function clampStats() {
+      player.hp = Math.min(player.maxHp, Math.max(0, player.hp));
+      player.energy = Math.min(player.maxEnergy, Math.max(0, player.energy));
+      enemy.hp = Math.min(enemy.maxHp, Math.max(0, enemy.hp));
+      enemy.energy = Math.min(enemy.maxEnergy, Math.max(0, enemy.energy));
+    }
+
+    // check game over (disable buttons)
+    function checkGameOver() {
+      if (!gameActive) return true;
+      let over = false;
+      if (player.hp <= 0) {
+        gameActive = false;
+        over = true;
+        addLogMessage("💀 KAI 力尽きた... 敗北... 再戦ボタンでリベンジ！");
+        disableGameButtons(true);
+      } else if (enemy.hp <= 0) {
+        gameActive = false;
+        over = true;
+        addLogMessage("🏆 見事な勝利！ RYUJIN を打ち倒した！ アニメ栄光あれ！");
+        disableGameButtons(true);
+      }
+      if (over) {
+        attackBtn.disabled = true;
+        specialBtn.disabled = true;
+        healBtn.disabled = true;
+        drawCanvas(true);
+        return true;
+      }
+      return false;
+    }
+
+    function disableGameButtons(disabled) {
+      attackBtn.disabled = disabled;
+      specialBtn.disabled = disabled;
+      healBtn.disabled = disabled;
+    }
+
+    function enableActionButtons() {
+      if (gameActive && !checkGameOver()) {
+        attackBtn.disabled = false;
+        specialBtn.disabled = false;
+        healBtn.disabled = false;
+      } else {
+        attackBtn.disabled = true;
+        specialBtn.disabled = true;
+        healBtn.disabled = true;
+      }
+    }
+
+    // regenerate after full round (both characters)
+    function regenerateAfterRound() {
+      let oldPlayerEn = player.energy;
+      let oldEnemyEn = enemy.energy;
+      player.energy = Math.min(player.maxEnergy, player.energy + 10);
+      enemy.energy = Math.min(enemy.maxEnergy, enemy.energy + 8);
+      if (oldPlayerEn !== player.energy) addLogMessage(`🌀 気力回復 +10 (KAI) → ${player.energy}`);
+      if (oldEnemyEn !== enemy.energy) addLogMessage(`🌑 殺気回復 +8 (RYUJIN) → ${enemy.energy}`);
+      clampStats();
+      updateUI();
+      drawCanvas();
+    }
+
+    // Enemy AI turn (performs attack or special)
+    async function enemyTurn() {
+      if (!gameActive) return;
+      if (enemy.hp <= 0) return;
+
+      addLogMessage(`⚔️ RYUJIN の攻撃フェーズ！`);
+      let damage = 0;
+      let energyCost = 0;
+      let isSpecial = false;
+
+      // AI logic: if energy >= 25 and random chance or high threat -> special
+      let willSpecial = false;
+      if (enemy.energy >= 25) {
+        // 45% chance for special, also if enemy low hp but still fight
+        if (Math.random() < 0.45) willSpecial = true;
+      }
+      if (willSpecial && enemy.energy >= 25) {
+        // SPECIAL MOVE
+        damage = Math.floor(Math.random() * 13) + 16; // 16~28
+        energyCost = 25;
+        isSpecial = true;
+        addLogMessage(`💢 RYUJIN 「秘奥義· 紅蓮斬！」 ${damage} ダメージ！`);
+      } else {
+        // normal attack
+        damage = Math.floor(Math.random() * 10) + 8; // 8~17
+        energyCost = 0;
+        addLogMessage(`🗡️ RYUJIN の通常攻撃！ ${damage} ダメージを受けた！`);
+      }
+
+      // apply damage to player
+      player.hp = Math.max(0, player.hp - damage);
+      if (energyCost > 0) {
+        enemy.energy = Math.max(0, enemy.energy - energyCost);
+        addLogMessage(`🌀 RYUJIN 気力 -${energyCost}`);
+      }
+      clampStats();
+      updateUI();
+      drawCanvas(true); // flash effect on hit
+
+      if (player.hp <= 0) {
+        addLogMessage(`💔 KAI のHPが0になった... 無念...`);
+        checkGameOver();
+        return;
+      }
+      // after enemy turn, regeneration happens in finishRound
+    }
+
+    // finish round (regenerate both, unlock)
+    async function finishRound() {
+      if (!gameActive) return;
+      regenerateAfterRound();
+      clampStats();
+      updateUI();
+      drawCanvas();
+      enableActionButtons();
+      actionLock = false;
+      // final check after regen maybe player dies? but regen only heals energy, not hp. So safe.
+      checkGameOver();
+      if (!gameActive) {
+        actionLock = true;
+      }
+    }
+
+    // main player action wrapper (prevents double actions)
+    async function playerAction(callback) {
+      if (actionLock || !gameActive) {
+        addLogMessage("待機中... 相手のターンが終わるまでお待ちください", true);
+        return false;
+      }
+      if (checkGameOver()) return false;
+      actionLock = true;
+      disableGameButtons(true);
+      
+      // execute player move
+      let moveSuccess = await callback();
+      if (!moveSuccess) {
+        // if move failed (energy insufficient etc), unlock and reenable
+        actionLock = false;
+        enableActionButtons();
+        return false;
+      }
+      
+      clampStats();
+      updateUI();
+      drawCanvas();
+      
+      // after player move, check if enemy dead
+      let over = checkGameOver();
+      if (over) {
+        actionLock = false;
+        return true;
+      }
+      
+      // now enemy turn
+      await enemyTurn();
+      let overAfterEnemy = checkGameOver();
+      if (overAfterEnemy) {
+        actionLock = false;
+        disableGameButtons(true);
+        return true;
+      }
+      
+      // finish round: regeneration & unlock
+      await finishRound();
+      return true;
+    }
+
+    // ---------- PLAYER MOVES ----------
+    function playerAttack() {
+      return new Promise((resolve) => {
+        let damage = Math.floor(Math.random() * 11) + 10; // 10~20
+        addLogMessage(`⚡ KAI「疾風迅雷！」 ${damage} ダメージを与えた！`);
+        enemy.hp = Math.max(0, enemy.hp - damage);
+        clampStats();
+        updateUI();
+        drawCanvas(true);
+        resolve(true);
+      });
+    }
+
+    function playerSpecial() {
+      return new Promise((resolve) => {
+        if (player.energy < 25) {
+          addLogMessage(`気力不足！ 奥義には気力25必要です (現在${player.energy})`, true);
+          resolve(false);
+          return;
+        }
+        let damage = Math.floor(Math.random() * 16) + 18; // 18~33
+        addLogMessage(`✨✨ 奥義・七星雷光斬！ ✨✨ ${damage} 大ダメージ！`);
+        enemy.hp = Math.max(0, enemy.hp - damage);
+        player.energy = Math.max(0, player.energy - 25);
+        clampStats();
+        updateUI();
+        drawCanvas(true);
+        resolve(true);
+      });
+    }
+
+    function playerHeal() {
+      return new Promise((resolve) => {
+        if (player.energy < 20) {
+          addLogMessage(`気力不足！ 回復には気力20必要です (現在${player.energy})`, true);
+          resolve(false);
+          return;
+        }
+        let healAmount = Math.floor(Math.random() * 14) + 12; // 12~25
+        let newHp = Math.min(player.maxHp, player.hp + healAmount);
+        let actualHeal = newHp - player.hp;
+        player.hp = newHp;
+        player.energy = Math.max(0, player.energy - 20);
+        addLogMessage(`🌸 癒しの呼吸！ ${actualHeal} HP 回復！ (気力-20)`);
+        clampStats();
+        updateUI();
+        drawCanvas();
+        resolve(true);
+      });
+    }
+
+    // attach actions
+    function bindEvents() {
+      attackBtn.onclick = () => playerAction(playerAttack);
+      specialBtn.onclick = () => playerAction(playerSpecial);
+      healBtn.onclick = () => playerAction(playerHeal);
+      restartBtn.onclick = () => restartGame();
+    }
+
+    // restart
+    function restartGame() {
+      gameActive = true;
+      actionLock = false;
+      player = {
+        maxHp: 100,
+        hp: 100,
+        maxEnergy: 100,
+        energy: 50,
+      };
+      enemy = {
+        maxHp: 100,
+        hp: 100,
+        maxEnergy: 100,
+        energy: 40,
+      };
+      clampStats();
+      updateUI();
+      drawCanvas();
+      // clear logs and add fresh
+      combatLogDiv.innerHTML = '<span class="log-text">⚔️ 再戦！ 正々堂々と闘え！</span>';
+      addLogMessage("気力とHPが全快！ 新たな闘いが始まる");
+      enableActionButtons();
+      attackBtn.disabled = false;
+      specialBtn.disabled = false;
+      healBtn.disabled = false;
+      checkGameOver(); // will set false bc both alive
+    }
+
+    // ---------- CANVAS ANIME STYLE ILLUSTRATION ----------
+    function drawCanvas(flashEffect = false) {
+      if (!ctx) return;
+      ctx.clearRect(0, 0, 600, 250);
+      
+      // background dojo vibe
+      ctx.fillStyle = "#141a2c";
+      ctx.fillRect(0, 0, 600, 250);
+      // floor gradient
+      ctx.fillStyle = "#2a1e2e";
+      ctx.fillRect(0, 190, 600, 60);
+      ctx.fillStyle = "#3a2a3c";
+      for(let i=0;i<12;i++) {
+        ctx.fillRect(20+i*50, 205, 30, 8);
+      }
+      
+      // --- Player (left) - KAI ---
+      // hair blue
+      ctx.save();
+      // shadow & expression
+      let pHpPercent = player.hp / player.maxHp;
+      let tint = pHpPercent < 0.3 ? "#ff8a7a" : "#b8c7ff";
+      ctx.shadowBlur = 0;
+      // face
+      ctx.beginPath();
+      ctx.arc(140, 140, 42, 0, Math.PI*2);
+      ctx.fillStyle = "#fddbb0";
+      ctx.fill();
+      ctx.strokeStyle = "#b97f4b";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      // eyes (anime spark)
+      ctx.fillStyle = "#202020";
+      ctx.beginPath();
+      ctx.arc(120, 130, 7, 0, Math.PI*2);
+      ctx.arc(160, 130, 7, 0, Math.PI*2);
+      ctx.fill();
+      ctx.fillStyle = "white";
+      ctx.beginPath();
+      ctx.arc(117, 127, 2.5, 0, Math.PI*2);
+      ctx.arc(157, 127, 2.5, 0, Math.PI*2);
+      ctx.fill();
+      ctx.fillStyle = "#000";
+      ctx.beginPath();
+      ctx.arc(118, 129, 1.2, 0, Math.PI*2);
+      ctx.arc(158, 129, 1.2, 0, Math.PI*2);
+      ctx.fill();
+      // hair spike
+      ctx.fillStyle = "#2c5f8a";
+      ctx.beginPath();
+      ctx.moveTo(110, 95);
+      ctx.quadraticCurveTo(140, 70, 170, 95);
+      ctx.lineTo(155, 108);
+      ctx.lineTo(140, 100);
+      ctx.lineTo(125, 108);
+      ctx.fill();
+      // headband
+      ctx.fillStyle = "#d43f1d";
+      ctx.fillRect(110, 108, 60, 6);
+      // mouth determined by hp
+      if(pHpPercent > 0.5) ctx.beginPath(); ctx.arc(140, 155, 12, 0.05, Math.PI - 0.05); ctx.stroke();
+      else { ctx.beginPath(); ctx.arc(140, 158, 8, 0, Math.PI); ctx.stroke();}
+      
+      // --- Enemy (right) - Ryujin ---
+      ctx.beginPath();
+      ctx.arc(460, 140, 44, 0, Math.PI*2);
+      ctx.fillStyle = "#e0ac77";
+      ctx.fill();
+      ctx.fillStyle = "#4a2a2a";
+      // angry eyes
+      ctx.fillRect(438, 127, 12, 8);
+      ctx.fillRect(470, 127, 12, 8);
+      ctx.fillStyle = "#f08080";
+      ctx.fillRect(440, 135, 8, 4);
+      ctx.fillRect(472, 135, 8, 4);
+      // scar
+      ctx.beginPath();
+      ctx.moveTo(452, 148);
+      ctx.lineTo(468, 152);
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = "#8b3a3a";
+      ctx.stroke();
+      // horn
+      ctx.fillStyle = "#6b2e2e";
+      ctx.beginPath();
+      ctx.moveTo(445, 98);
+      ctx.lineTo(460, 75);
+      ctx.lineTo(475, 98);
+      ctx.fill();
+      // demonic aura
+      if(enemy.hp > 0) {
+        ctx.beginPath();
+        ctx.arc(460, 140, 48, 0, Math.PI*2);
+        ctx.strokeStyle = "#ff6644";
+        ctx.lineWidth = 1.8;
+        ctx.stroke();
+      }
+      // flash hit effect
+      if(flashEffect) {
+        ctx.fillStyle = "rgba(255,200,100,0.35)";
+        ctx.fillRect(0, 0, 600, 250);
+      }
+      
+      // draw names
+      ctx.font = "bold 16px 'Segoe UI'";
+      ctx.fillStyle = "#f5eace";
+      ctx.shadowBlur = 0;
+      ctx.fillText("KAI", 110, 55);
+      ctx.fillStyle = "#ffbba4";
+      ctx.fillText("RYUJIN", 420, 55);
+      
+      ctx.restore();
+    }
+
+    // initial draw + UI
+    function initGame() {
+      bindEvents();
+      updateUI();
+      drawCanvas();
+      gameActive = true;
+      actionLock = false;
+      enableActionButtons();
+    }
+    
+    initGame();
+  })();
+</script>
+</body>
+</html>
