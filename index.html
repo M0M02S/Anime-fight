@@ -1,599 +1,548 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Anime Fight Arena - Fluid Joystick Combat</title>
-    <style>
-        * {
-            user-select: none;
-            touch-action: manipulation;
-            box-sizing: border-box;
-        }
-        body {
-            background: linear-gradient(145deg, #0a0f1e 0%, #0b1525 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Segoe UI', 'Poppins', system-ui, sans-serif;
-            margin: 0;
-            padding: 16px;
-        }
-        .game-container {
-            background: #000000aa;
-            border-radius: 64px;
-            padding: 20px 20px 24px;
-            box-shadow: 0 25px 40px rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(2px);
-        }
-        .canvas-wrapper {
-            display: flex;
-            justify-content: center;
-        }
-        canvas {
-            display: block;
-            margin: 0 auto;
-            border-radius: 32px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
-            width: 100%;
-            height: auto;
-            background: radial-gradient(circle at 20% 40%, #2b3b4e, #141c28);
-        }
-        .health-bars {
-            display: flex;
-            justify-content: space-between;
-            gap: 24px;
-            margin: 16px 20px 20px 20px;
-        }
-        .health-bar-container {
-            flex: 1;
-            background: #2c1a1a;
-            border-radius: 60px;
-            padding: 4px;
-            box-shadow: inset 0 2px 5px #00000055, 0 2px 3px rgba(255,255,255,0.2);
-        }
-        .health-fill {
-            height: 24px;
-            border-radius: 60px;
-            width: 100%;
-            transition: width 0.1s ease;
-            background: linear-gradient(90deg, #e34d4d, #f08080);
-        }
-        .enemy-health .health-fill {
-            background: linear-gradient(90deg, #c0392b, #e67e22);
-        }
-        .health-label {
-            font-weight: bold;
-            color: white;
-            text-shadow: 0 2px 2px black;
-            margin-bottom: 6px;
-            font-size: 1.1rem;
-            display: flex;
-            justify-content: space-between;
-        }
-        .controls-panel {
-            margin-top: 20px;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            align-items: center;
-            gap: 20px;
-            padding: 12px 20px;
-            background: rgba(0, 0, 0, 0.55);
-            border-radius: 68px;
-            backdrop-filter: blur(8px);
-        }
-        .joystick-area {
-            width: 130px;
-            height: 130px;
-            background: rgba(20, 15, 40, 0.9);
-            border-radius: 50%;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.6), inset 0 0 0 2px rgba(255,215,130,0.5);
-            position: relative;
-            touch-action: none;
-        }
-        #joystickCanvas {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            display: block;
-        }
-        .action-buttons {
-            display: flex;
-            gap: 24px;
-        }
-        .action-btn {
-            background: radial-gradient(circle at 30% 30%, #e64b2e, #9b2c1d);
-            border: 2px solid #ffc285;
-            width: 85px;
-            height: 85px;
-            border-radius: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.9rem;
-            font-weight: bold;
-            color: #fff3cf;
-            text-shadow: 0 2px 3px black;
-            box-shadow: 0 8px 0 #541e12;
-            transition: all 0.05s linear;
-            cursor: pointer;
-        }
-        .action-btn:active {
-            transform: translateY(4px);
-            box-shadow: 0 2px 0 #541e12;
-        }
-        .reset-btn {
-            background: #2c3e66;
-            box-shadow: 0 8px 0 #141c32;
-        }
-        .fight-tip {
-            color: #ffd966;
-            text-align: center;
-            font-size: 0.8rem;
-            margin-top: 12px;
-            background: #00000077;
-            border-radius: 60px;
-            padding: 6px 12px;
-            width: fit-content;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        @media (max-width: 780px) {
-            .joystick-area { width: 110px; height: 110px; }
-            .action-btn { width: 75px; height: 75px; font-size: 1.5rem; }
-            .health-fill { height: 18px; }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=yes">
+  <title>SPACE DRIFT • Mobile Space Simulator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      touch-action: manipulation;
+    }
+    body {
+      background: #0a0f1e;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+    }
+    #game-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      max-width: 500px;
+      max-height: 900px;
+      box-shadow: 0 0 40px rgba(0, 180, 255, 0.3);
+      border-radius: 0;
+      overflow: hidden;
+      background: radial-gradient(ellipse at center, #1a1f35 0%, #03050a 100%);
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      touch-action: none; /* prevent scroll/pinch on canvas */
+    }
+    .ui-panel {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      pointer-events: none;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .controls {
+      pointer-events: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .virtual-stick {
+      width: 110px;
+      height: 110px;
+      background: rgba(20, 30, 50, 0.65);
+      backdrop-filter: blur(12px);
+      border-radius: 50%;
+      border: 2px solid rgba(80, 180, 255, 0.5);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.7), inset 0 0 20px rgba(0,160,255,0.3);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+    .stick-thumb {
+      width: 55px;
+      height: 55px;
+      background: radial-gradient(circle at 30% 30%, #b3e0ff, #1e6fa0);
+      border-radius: 50%;
+      box-shadow: 0 4px 12px rgba(0,200,255,0.8);
+      transition: background 0.1s;
+      border: 2px solid white;
+    }
+    .throttle-slider {
+      pointer-events: auto;
+      width: 60px;
+      height: 130px;
+      background: rgba(20, 30, 50, 0.65);
+      backdrop-filter: blur(12px);
+      border-radius: 30px;
+      border: 2px solid rgba(255, 180, 80, 0.6);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 10px 0;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.7);
+    }
+    .throttle-fill {
+      width: 18px;
+      background: linear-gradient(0deg, #ff7b00, #ffb347);
+      border-radius: 14px;
+      box-shadow: 0 0 20px #ff9900;
+      transition: height 0.05s linear;
+    }
+    .hud {
+      pointer-events: auto;
+      background: rgba(0, 5, 15, 0.7);
+      backdrop-filter: blur(10px);
+      border-radius: 24px;
+      padding: 10px 18px;
+      color: white;
+      text-align: right;
+      border: 1px solid rgba(255,255,255,0.25);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+      font-weight: bold;
+      letter-spacing: 0.5px;
+    }
+    .speed-value {
+      font-size: 28px;
+      color: #ffcc80;
+      line-height: 1.2;
+    }
+    .hud-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      color: #aaccff;
+    }
+    button {
+      pointer-events: auto;
+      background: rgba(255,255,255,0.9);
+      border: none;
+      border-radius: 20px;
+      padding: 10px 16px;
+      font-weight: bold;
+      color: #0a1424;
+      background: #e0f0ff;
+      box-shadow: 0 4px 10px rgba(0,160,255,0.5);
+      font-size: 14px;
+      margin-top: 5px;
+    }
+    @media (max-width: 450px) {
+      .virtual-stick {
+        width: 90px;
+        height: 90px;
+      }
+      .stick-thumb {
+        width: 45px;
+        height: 45px;
+      }
+      .throttle-slider {
+        width: 45px;
+        height: 100px;
+      }
+    }
+  </style>
 </head>
 <body>
-<div>
-    <div class="game-container">
-        <div class="canvas-wrapper">
-            <canvas id="gameCanvas" width="900" height="500" style="width:100%; height:auto; max-width:900px; aspect-ratio:900/500"></canvas>
-        </div>
-        <div class="health-bars">
-            <div class="health-bar-container">
-                <div class="health-label"><span>🔥 HERO</span> <span id="playerHpText">100</span></div>
-                <div class="health-fill" id="playerHealthFill" style="width: 100%"></div>
-            </div>
-            <div class="health-bar-container enemy-health">
-                <div class="health-label"><span>💀 AKUMA</span> <span id="enemyHpText">100</span></div>
-                <div class="health-fill" id="enemyHealthFill" style="width: 100%"></div>
-            </div>
-        </div>
-        <div class="controls-panel">
-            <div class="joystick-area" id="joystickArea">
-                <canvas id="joystickCanvas" width="130" height="130"></canvas>
-            </div>
-            <div class="action-buttons">
-                <div class="action-btn" id="btnPunch">✧ PUNCH</div>
-                <div class="action-btn" id="btnKick">⚡ KICK</div>
-                <div class="action-btn reset-btn" id="btnReset">🔄</div>
-            </div>
-        </div>
-        <div class="fight-tip">
-            🕹️ DRAG JOYSTICK → MOVE (speed = distance) | ⬆️ FLICK UP = JUMP | ⬇️ HOLD DOWN = BLOCK
-        </div>
+<div id="game-container">
+  <canvas id="gameCanvas" width="500" height="900"></canvas>
+  <div class="ui-panel">
+    <div class="controls">
+      <div class="virtual-stick" id="joystickZone">
+        <div class="stick-thumb" id="stickThumb"></div>
+      </div>
+      <button id="resetBtn">⟳ RESET</button>
     </div>
+    <div class="throttle-slider" id="throttleZone">
+      <div class="throttle-fill" id="throttleFill" style="height: 40%;"></div>
+    </div>
+    <div class="hud">
+      <div class="hud-label">SPEED</div>
+      <div class="speed-value" id="speedDisplay">0.0</div>
+      <div style="font-size:12px; color:#ccc;">m/s</div>
+    </div>
+  </div>
 </div>
 
 <script>
-    (function(){
-        // ----- CANVAS -----
-        const gameCanvas = document.getElementById('gameCanvas');
-        const ctx = gameCanvas.getContext('2d');
-        
-        // ----- GAME DIMENSIONS -----
-        const GROUND_Y = 420;
-        const W = 48, H = 78;
-        
-        let gameRunning = true;
-        let winner = null;
-        
-        // ----- PLAYER -----
-        let player = {
-            x: 130, y: GROUND_Y - H, vx: 0, vy: 0,
-            width: W, height: H, facingRight: true,
-            health: 100, maxHealth: 100, grounded: true,
-            state: "idle", attackTimer: 0, hitTimer: 0, blockActive: false,
-            invincibleTimer: 0, attackCooldown: 0
-        };
-        
-        // ----- ENEMY -----
-        let enemy = {
-            x: gameCanvas.width - 150, y: GROUND_Y - H, vx: 0, vy: 0,
-            width: W, height: H, facingRight: false,
-            health: 100, maxHealth: 100, grounded: true,
-            state: "idle", attackTimer: 0, hitTimer: 0, blockActive: false,
-            invincibleTimer: 0, attackCooldown: 0
-        };
-        
-        function updateHealthBars() {
-            const playerPercent = (player.health / player.maxHealth) * 100;
-            const enemyPercent = (enemy.health / enemy.maxHealth) * 100;
-            document.getElementById('playerHealthFill').style.width = `${Math.max(0, playerPercent)}%`;
-            document.getElementById('enemyHealthFill').style.width = `${Math.max(0, enemyPercent)}%`;
-            document.getElementById('playerHpText').innerText = Math.floor(player.health);
-            document.getElementById('enemyHpText').innerText = Math.floor(enemy.health);
-        }
-        
-        function resetGame() {
-            gameRunning = true;
-            winner = null;
-            player = {
-                ...player,
-                x: 130, y: GROUND_Y - H, vx: 0, vy: 0, facingRight: true,
-                health: 100, maxHealth: 100, grounded: true, state: "idle",
-                attackTimer: 0, hitTimer: 0, blockActive: false, invincibleTimer: 0, attackCooldown: 0
-            };
-            enemy = {
-                ...enemy,
-                x: gameCanvas.width - 150, y: GROUND_Y - H, vx: 0, vy: 0, facingRight: false,
-                health: 100, maxHealth: 100, grounded: true, state: "idle",
-                attackTimer: 0, hitTimer: 0, blockActive: false, invincibleTimer: 0, attackCooldown: 0
-            };
-            updateHealthBars();
-        }
-        
-        // ----- JOYSTICK (canvas based) -----
-        const joystickArea = document.getElementById('joystickArea');
-        const joyCanvas = document.getElementById('joystickCanvas');
-        const joyCtx = joyCanvas.getContext('2d');
-        let joyActive = false;
-        let joyPos = { x: 0, y: 0 }; // normalized -1..1
-        let joyRadius = 50;
-        let joyCenterX = 65, joyCenterY = 65;
-        
-        function drawJoystick() {
-            joyCtx.clearRect(0, 0, 130, 130);
-            joyCtx.beginPath();
-            joyCtx.arc(joyCenterX, joyCenterY, joyRadius, 0, Math.PI*2);
-            joyCtx.fillStyle = "#2a2540";
-            joyCtx.fill();
-            joyCtx.strokeStyle = "#ffda88";
-            joyCtx.lineWidth = 2;
-            joyCtx.stroke();
-            let thumbX = joyCenterX + joyPos.x * (joyRadius - 15);
-            let thumbY = joyCenterY + joyPos.y * (joyRadius - 15);
-            joyCtx.beginPath();
-            joyCtx.arc(thumbX, thumbY, 20, 0, Math.PI*2);
-            joyCtx.fillStyle = "#fad47c";
-            joyCtx.fill();
-        }
-        
-        function handleJoyStart(e) {
-            e.preventDefault();
-            joyActive = true;
-            handleJoyMove(e);
-        }
-        
-        function handleJoyMove(e) {
-            if (!joyActive) return;
-            e.preventDefault();
-            let clientX, clientY;
-            if (e.touches) {
-                clientX = e.touches[0].clientX;
-                clientY = e.touches[0].clientY;
-            } else {
-                clientX = e.clientX;
-                clientY = e.clientY;
-            }
-            const rect = joystickArea.getBoundingClientRect();
-            const areaCenterX = rect.left + rect.width/2;
-            const areaCenterY = rect.top + rect.height/2;
-            let dx = clientX - areaCenterX;
-            let dy = clientY - areaCenterY;
-            const maxDist = rect.width/2;
-            let dist = Math.hypot(dx, dy);
-            if (dist > maxDist) {
-                dx = dx / dist * maxDist;
-                dy = dy / dist * maxDist;
-                dist = maxDist;
-            }
-            joyPos.x = dx / maxDist;
-            joyPos.y = dy / maxDist;
-            drawJoystick();
-        }
-        
-        function handleJoyEnd(e) {
-            joyActive = false;
-            joyPos = { x: 0, y: 0 };
-            drawJoystick();
-        }
-        
-        joystickArea.addEventListener('touchstart', handleJoyStart);
-        joystickArea.addEventListener('touchmove', handleJoyMove);
-        joystickArea.addEventListener('touchend', handleJoyEnd);
-        joystickArea.addEventListener('mousedown', handleJoyStart);
-        window.addEventListener('mousemove', (e) => { if (joyActive) handleJoyMove(e); });
-        window.addEventListener('mouseup', handleJoyEnd);
-        drawJoystick();
-        
-        // ----- GAME MECHANICS -----
-        function applyDamage(target, amount, isBlocking) {
-            if (target.invincibleTimer > 0) return false;
-            let final = amount;
-            if (isBlocking && target.blockActive) final = Math.floor(amount * 0.4);
-            target.health = Math.max(0, target.health - final);
-            target.invincibleTimer = 0.45;
-            target.hitTimer = 0.25;
-            target.state = "hit";
-            if (target === player) player.vx += (player.facingRight ? -3 : 3);
-            else enemy.vx += (enemy.facingRight ? -2 : 2);
-            updateHealthBars();
-            if (target.health <= 0) {
-                gameRunning = false;
-                winner = (target === player) ? "enemy" : "player";
-            }
-            return true;
-        }
-        
-        function performAttack(attacker, defender, damage, rangeFront) {
-            if (!gameRunning) return false;
-            if (attacker.attackCooldown > 0) return false;
-            if (attacker.state === "hit") return false;
-            const ac = attacker.x + attacker.width/2;
-            const dc = defender.x + defender.width/2;
-            const dist = Math.abs(ac - dc);
-            const facingOk = (attacker.facingRight && dc > ac) || (!attacker.facingRight && dc < ac);
-            if (dist <= rangeFront + 20 && facingOk) {
-                const blocking = defender.blockActive && defender.state !== "hit";
-                applyDamage(defender, damage, blocking);
-                attacker.attackCooldown = 0.45;
-                return true;
-            }
-            return false;
-        }
-        
-        function startPlayerAttack(type) {
-            if (!gameRunning) return;
-            if (player.attackCooldown > 0) return;
-            if (player.state === "hit") return;
-            let damage = type === 'punch' ? 9 : 14;
-            let range = type === 'punch' ? 52 : 60;
-            player.state = type;
-            player.attackTimer = 0.28;
-            performAttack(player, enemy, damage, range);
-            player.attackCooldown = 0.45;
-        }
-        
-        function aiAttack() {
-            if (!gameRunning) return;
-            if (enemy.attackCooldown > 0) return;
-            if (enemy.state === "hit") return;
-            const dist = Math.abs((enemy.x + enemy.width/2) - (player.x + player.width/2));
-            if (dist < 95) {
-                let type = Math.random() < 0.6 ? 'punch' : 'kick';
-                let damage = type === 'punch' ? 8 : 13;
-                let range = 58;
-                enemy.state = type;
-                enemy.attackTimer = 0.28;
-                performAttack(enemy, player, damage, range);
-                enemy.attackCooldown = 0.55;
-            }
-        }
-        
-        // ----- INPUT FROM JOYSTICK -----
-        let moveLeft = false, moveRight = false;
-        let jumpRequest = false;
-        let blockRequest = false;
-        let lastUp = false;
-        let moveSpeedFactor = 1.0;
-        
-        function updateJoystickActions() {
-            const dead = 0.15;
-            const x = Math.abs(joyPos.x) > dead ? joyPos.x : 0;
-            moveLeft = x < -0.1;
-            moveRight = x > 0.1;
-            // Speed factor based on how far you push (0.5 to 1.0 range)
-            let mag = Math.min(1, Math.abs(x) / 0.8);
-            moveSpeedFactor = 0.6 + mag * 0.6; // 0.6 to 1.2 speed multiplier
-            
-            const up = joyPos.y < -0.55;
-            const down = joyPos.y > 0.55;
-            if (up && !lastUp) jumpRequest = true;
-            else jumpRequest = false;
-            lastUp = up;
-            blockRequest = down;
-        }
-        
-        // ----- PHYSICS (high speed) -----
-        let lastTime = 0;
-        let delta = 1/60;
-        
-        function updateMovement(dt) {
-            if (!gameRunning) return;
-            // Player movement (always allowed except during hit stun)
-            let canMove = (player.hitTimer <= 0);
-            if (canMove) {
-                let acc = 0;
-                if (moveLeft) acc = -1;
-                if (moveRight) acc = 1;
-                let speed = 480 * moveSpeedFactor; // much faster
-                player.vx += acc * speed * dt;
-                player.vx *= 0.92;
-                if (Math.abs(player.vx) < 0.5) player.vx = 0;
-                player.vx = Math.min(550, Math.max(-550, player.vx));
-                player.x += player.vx * dt;
-            } else {
-                player.vx *= 0.96;
-                player.x += player.vx * dt;
-            }
-            // Jump
-            if (jumpRequest && player.grounded && canMove && player.hitTimer === 0) {
-                player.vy = -420;
-                player.grounded = false;
-                player.state = "jump";
-            }
-            player.vy += 1400 * dt;
-            player.y += player.vy * dt;
-            if (player.y >= GROUND_Y - H) {
-                player.y = GROUND_Y - H;
-                player.vy = 0;
-                player.grounded = true;
-                if (player.state === "jump" && player.attackTimer === 0 && player.hitTimer === 0) player.state = "idle";
-            } else player.grounded = false;
-            player.x = Math.min(gameCanvas.width - player.width - 25, Math.max(30, player.x));
-            
-            // Enemy AI: always try to approach and attack
-            let aiCanMove = (enemy.hitTimer <= 0);
-            if (aiCanMove && gameRunning) {
-                let diff = player.x - enemy.x;
-                let dir = 0;
-                if (Math.abs(diff) > 25) dir = diff > 0 ? 1 : -1;
-                enemy.vx += dir * 360 * dt;
-                enemy.vx *= 0.92;
-                enemy.x += enemy.vx * dt;
-                enemy.x = Math.min(gameCanvas.width - enemy.width - 20, Math.max(40, enemy.x));
-                if (player.x + player.width/2 > enemy.x + enemy.width/2) enemy.facingRight = true;
-                else enemy.facingRight = false;
-            } else {
-                enemy.vx *= 0.96;
-                enemy.x += enemy.vx * dt;
-                enemy.x = Math.min(gameCanvas.width - enemy.width - 20, Math.max(40, enemy.x));
-            }
-            enemy.vy += 1400 * dt;
-            enemy.y += enemy.vy * dt;
-            if (enemy.y >= GROUND_Y - H) {
-                enemy.y = GROUND_Y - H;
-                enemy.vy = 0;
-                enemy.grounded = true;
-            } else enemy.grounded = false;
-        }
-        
-        function updateTimers(dt) {
-            if (!gameRunning) return;
-            // player timers
-            if (player.attackTimer > 0) { player.attackTimer -= dt; if (player.attackTimer <= 0 && player.state !== "hit") player.state = "idle"; }
-            if (player.hitTimer > 0) { player.hitTimer -= dt; if (player.hitTimer <= 0 && player.state === "hit") player.state = "idle"; }
-            if (player.attackCooldown > 0) player.attackCooldown -= dt;
-            if (player.invincibleTimer > 0) player.invincibleTimer -= dt;
-            // enemy timers
-            if (enemy.attackTimer > 0) { enemy.attackTimer -= dt; if (enemy.attackTimer <= 0 && enemy.state !== "hit") enemy.state = "idle"; }
-            if (enemy.hitTimer > 0) { enemy.hitTimer -= dt; if (enemy.hitTimer <= 0 && enemy.state === "hit") enemy.state = "idle"; }
-            if (enemy.attackCooldown > 0) enemy.attackCooldown -= dt;
-            if (enemy.invincibleTimer > 0) enemy.invincibleTimer -= dt;
-            
-            // AI attack more frequently
-            if (gameRunning && enemy.attackTimer <= 0 && enemy.hitTimer <= 0 && enemy.attackCooldown <= 0) {
-                const dist = Math.abs((player.x + player.width/2) - (enemy.x + enemy.width/2));
-                if (dist < 100 && Math.random() < 0.028) aiAttack();
-            }
-            // Block handling
-            if (player.state === "hit" || player.attackTimer > 0) player.blockActive = false;
-            else player.blockActive = blockRequest;
-            if (player.blockActive && player.state !== "hit" && player.attackTimer <= 0) player.state = "block";
-            else if (player.state === "block" && !player.blockActive && player.attackTimer === 0 && player.hitTimer === 0) player.state = "idle";
-            
-            // Idle state correction
-            if (player.state !== "block" && player.state !== "hit" && player.attackTimer <= 0 && player.hitTimer <= 0 && player.grounded && player.state !== "jump") player.state = "idle";
-            if (enemy.state !== "hit" && enemy.attackTimer <= 0 && enemy.hitTimer <= 0 && enemy.grounded) enemy.state = "idle";
-        }
-        
-        // ----- DRAWING (anime style) -----
-        function drawFighter(x, y, isPlayer, state, facingRight, blockFlag) {
-            const w = W, h = H;
-            ctx.save();
-            if (!facingRight) {
-                ctx.translate(x + w/2, y + h/2);
-                ctx.scale(-1, 1);
-                ctx.translate(-x - w/2, -y - h/2);
-            }
-            ctx.fillStyle = isPlayer ? "#ffc7a2" : "#b77b55";
-            ctx.beginPath();
-            ctx.ellipse(x + w/2, y + h*0.35, w*0.38, h*0.35, 0, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = isPlayer ? "#f0a56e" : "#9a5a3a";
-            ctx.fillRect(x + w*0.2, y + h*0.55, w*0.6, h*0.35);
-            ctx.fillStyle = "#2c2c54";
-            ctx.fillRect(x + w*0.2, y + h*0.75, w*0.6, h*0.2);
-            ctx.fillStyle = isPlayer ? "#3b2b1f" : "#2f1e0f";
-            ctx.beginPath();
-            ctx.moveTo(x + w*0.2, y + h*0.2);
-            ctx.quadraticCurveTo(x + w/2, y - h*0.1, x + w*0.8, y + h*0.2);
-            ctx.fill();
-            ctx.fillStyle = "#1f1a17";
-            ctx.beginPath();
-            ctx.arc(x + w*0.35, y + h*0.38, 6, 0, Math.PI*2);
-            ctx.arc(x + w*0.65, y + h*0.38, 6, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = "white";
-            ctx.beginPath();
-            ctx.arc(x + w*0.32, y + h*0.36, 2.2, 0, Math.PI*2);
-            ctx.arc(x + w*0.62, y + h*0.36, 2.2, 0, Math.PI*2);
-            ctx.fill();
-            if (state === "punch" || state === "kick") {
-                ctx.fillStyle = "#d64531";
-                ctx.beginPath();
-                ctx.moveTo(x + w*0.5, y + h*0.55);
-                ctx.lineTo(x + w*0.7, y + h*0.65);
-                ctx.lineTo(x + w*0.5, y + h*0.62);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.moveTo(x + w*0.85, y + h*0.5);
-                ctx.lineTo(x + w + 12, y + h*0.45);
-                ctx.lineWidth = 3;
-                ctx.strokeStyle = "#ffaa55";
-                ctx.stroke();
-            }
-            if (state === "hit") {
-                ctx.fillStyle = "#ff4444";
-                ctx.font = "bold 22px monospace";
-                ctx.fillText("!!", x + w*0.4, y - 8);
-            }
-            if (blockFlag && state === "block") {
-                ctx.fillStyle = "#77aaff66";
-                ctx.fillRect(x + w*0.2, y + h*0.3, w*0.6, h*0.3);
-            }
-            ctx.restore();
-        }
-        
-        function draw() {
-            ctx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
-            ctx.fillStyle = "#a0c4e288";
-            for(let i=0;i<12;i++) ctx.fillRect(40 + i*70, GROUND_Y+5, 25, 8);
-            drawFighter(player.x, player.y, true, player.state, player.facingRight, player.blockActive);
-            drawFighter(enemy.x, enemy.y, false, enemy.state, enemy.facingRight, enemy.blockActive);
-            if (!gameRunning && winner) {
-                ctx.font = "bold 34 'Segoe UI'";
-                ctx.fillStyle = "#FFD966";
-                ctx.shadowBlur = 6;
-                ctx.fillText(winner === "player" ? "⭐ VICTORY! ⭐" : "💀 YOU LOSE 💀", gameCanvas.width/2-140, 70);
-                ctx.font = "18px monospace";
-                ctx.fillStyle = "white";
-                ctx.fillText("tap RESET to battle again", gameCanvas.width/2-120, 125);
-            }
-        }
-        
-        // ----- GAME LOOP -----
-        function gameLoop(now) {
-            requestAnimationFrame(gameLoop);
-            if (!lastTime) { lastTime = now; return; }
-            let dt = Math.min(0.033, (now - lastTime) / 1000);
-            if (dt <= 0) { lastTime = now; return; }
-            delta = dt;
-            lastTime = now;
-            updateJoystickActions();
-            if (gameRunning) {
-                updateMovement(delta);
-                updateTimers(delta);
-                if (player.health <= 0) { gameRunning = false; winner = "enemy"; updateHealthBars(); }
-                if (enemy.health <= 0) { gameRunning = false; winner = "player"; updateHealthBars(); }
-            }
-            draw();
-        }
-        
-        // ----- BUTTONS -----
-        document.getElementById('btnPunch').addEventListener('click', (e) => { e.preventDefault(); startPlayerAttack('punch'); });
-        document.getElementById('btnKick').addEventListener('click', (e) => { e.preventDefault(); startPlayerAttack('kick'); });
-        document.getElementById('btnReset').addEventListener('click', (e) => { e.preventDefault(); resetGame(); });
-        
-        resetGame();
-        requestAnimationFrame(gameLoop);
-        gameCanvas.addEventListener('contextmenu', (e) => e.preventDefault());
-    })();
+  (function() {
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // UI elements
+    const joystickZone = document.getElementById('joystickZone');
+    const stickThumb = document.getElementById('stickThumb');
+    const throttleZone = document.getElementById('throttleZone');
+    const throttleFill = document.getElementById('throttleFill');
+    const speedDisplay = document.getElementById('speedDisplay');
+
+    // ----- SIMULATION STATE -----
+    let ship = {
+      x: 250,
+      y: 450,
+      vx: 0,
+      vy: 0,
+      angle: 0,          // radians, 0 = pointing right
+      thrust: 0,        // 0 to 1
+      rotationSpeed: 0  // -1 to 1 from joystick
+    };
+
+    // Joystick values (normalized -1..1)
+    let joystickX = 0;
+    let joystickY = 0;
+    let joystickActive = false;
+
+    // Throttle 0..1
+    let throttleLevel = 0.4; // default ~40%
+
+    // Joystick dimensions
+    let joystickRect = joystickZone.getBoundingClientRect();
+    let joystickCenterX = 0, joystickCenterY = 0;
+    let maxStickDistance = 38; // pixels from center
+
+    // Throttle dimensions
+    let throttleRect = throttleZone.getBoundingClientRect();
+    let throttleTopY = 0, throttleBottomY = 0;
+
+    // ----- PHYSICS CONSTANTS -----
+    const MAX_THRUST = 280;       // pixels per second^2
+    const DRAG = 0.98;           // space has tiny drag for smoothness
+    const ROTATION_SPEED = 3.2;  // radians per second at full stick
+
+    // Stars background
+    let stars = [];
+    const NUM_STARS = 180;
+
+    // ----- INITIALIZE STARS -----
+    function generateStars() {
+      stars = [];
+      for (let i = 0; i < NUM_STARS; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: Math.random() * 2.2 + 0.6,
+          brightness: Math.random() * 0.7 + 0.3,
+          twinkle: Math.random() * Math.PI * 2
+        });
+      }
+    }
+    generateStars();
+
+    // ----- RESIZE / UPDATE DIMENSIONS -----
+    function updateUISizes() {
+      joystickRect = joystickZone.getBoundingClientRect();
+      joystickCenterX = joystickRect.left + joystickRect.width / 2;
+      joystickCenterY = joystickRect.top + joystickRect.height / 2;
+      maxStickDistance = (joystickRect.width / 2) * 0.75;
+
+      throttleRect = throttleZone.getBoundingClientRect();
+      throttleTopY = throttleRect.top + 15;
+      throttleBottomY = throttleRect.bottom - 15;
+    }
+    window.addEventListener('resize', updateUISizes);
+    updateUISizes();
+
+    // ----- JOYSTICK CONTROLS (TOUCH & MOUSE) -----
+    function handleJoystickStart(e) {
+      e.preventDefault();
+      joystickActive = true;
+      updateJoystickFromEvent(e);
+    }
+
+    function handleJoystickMove(e) {
+      if (!joystickActive) return;
+      e.preventDefault();
+      updateJoystickFromEvent(e);
+    }
+
+    function handleJoystickEnd(e) {
+      e.preventDefault();
+      joystickActive = false;
+      joystickX = 0;
+      joystickY = 0;
+      updateStickThumbPosition(0, 0);
+    }
+
+    function updateJoystickFromEvent(e) {
+      let clientX, clientY;
+      if (e.touches) {
+        if (e.touches.length === 0) return;
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+      } else {
+        clientX = e.clientX;
+        clientY = e.clientY;
+      }
+
+      let dx = clientX - joystickCenterX;
+      let dy = clientY - joystickCenterY;
+      let distance = Math.sqrt(dx * dx + dy * dy);
+      let maxDist = maxStickDistance;
+
+      if (distance > maxDist) {
+        dx = (dx / distance) * maxDist;
+        dy = (dy / distance) * maxDist;
+        distance = maxDist;
+      }
+
+      // Normalize to -1..1
+      joystickX = dx / maxDist;
+      joystickY = dy / maxDist;
+
+      updateStickThumbPosition(dx, dy);
+    }
+
+    function updateStickThumbPosition(pixelDx, pixelDy) {
+      stickThumb.style.transform = `translate(${pixelDx}px, ${pixelDy}px)`;
+    }
+
+    // ----- THROTTLE CONTROLS -----
+    function handleThrottleStart(e) {
+      e.preventDefault();
+      updateThrottleFromEvent(e);
+    }
+
+    function handleThrottleMove(e) {
+      e.preventDefault();
+      updateThrottleFromEvent(e);
+    }
+
+    function updateThrottleFromEvent(e) {
+      let clientY;
+      if (e.touches) {
+        if (e.touches.length === 0) return;
+        clientY = e.touches[0].clientY;
+      } else {
+        clientY = e.clientY;
+      }
+
+      // Calculate fraction: top = 1.0, bottom = 0.0
+      let range = throttleBottomY - throttleTopY;
+      if (range <= 0) return;
+      let raw = (clientY - throttleTopY) / range;
+      throttleLevel = Math.min(1, Math.max(0, 1 - raw)); // invert: higher touch = higher throttle
+      updateThrottleUI();
+    }
+
+    function updateThrottleUI() {
+      let percent = throttleLevel * 100;
+      throttleFill.style.height = `${percent}%`;
+    }
+
+    // Attach event listeners for joystick
+    joystickZone.addEventListener('touchstart', handleJoystickStart, {passive: false});
+    joystickZone.addEventListener('touchmove', handleJoystickMove, {passive: false});
+    joystickZone.addEventListener('touchend', handleJoystickEnd);
+    joystickZone.addEventListener('touchcancel', handleJoystickEnd);
+    joystickZone.addEventListener('mousedown', handleJoystickStart);
+    window.addEventListener('mousemove', (e) => {
+      if (joystickActive) handleJoystickMove(e);
+    });
+    window.addEventListener('mouseup', (e) => {
+      if (joystickActive) handleJoystickEnd(e);
+    });
+
+    // Attach throttle listeners
+    throttleZone.addEventListener('touchstart', handleThrottleStart, {passive: false});
+    throttleZone.addEventListener('touchmove', handleThrottleMove, {passive: false});
+    throttleZone.addEventListener('mousedown', handleThrottleStart);
+    window.addEventListener('mousemove', (e) => {
+      // Only update throttle if mouse is down on throttle zone (simple approach)
+      if (e.buttons === 1 && e.target === throttleZone || throttleZone.contains(e.target)) {
+        updateThrottleFromEvent(e);
+      }
+    });
+
+    // Reset button
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      ship.x = canvas.width/2;
+      ship.y = canvas.height/2;
+      ship.vx = 0;
+      ship.vy = 0;
+      ship.angle = 0;
+      ship.thrust = 0;
+      joystickX = 0;
+      joystickY = 0;
+      throttleLevel = 0.4;
+      updateThrottleUI();
+      updateStickThumbPosition(0,0);
+    });
+
+    // ----- UPDATE LOOP -----
+    function update(deltaTime) {
+      // deltaTime in seconds, cap to avoid huge jumps
+      let dt = Math.min(deltaTime, 0.05);
+
+      // 1. Rotation from joystick horizontal axis
+      ship.rotationSpeed = joystickX * ROTATION_SPEED;
+      ship.angle += ship.rotationSpeed * dt;
+
+      // 2. Thrust from throttle
+      ship.thrust = throttleLevel;
+      let thrustPower = ship.thrust * MAX_THRUST;
+
+      // Apply thrust in direction of ship angle
+      let thrustX = Math.cos(ship.angle) * thrustPower;
+      let thrustY = Math.sin(ship.angle) * thrustPower;
+
+      ship.vx += thrustX * dt;
+      ship.vy += thrustY * dt;
+
+      // 3. Apply drag (space dampening)
+      ship.vx *= DRAG;
+      ship.vy *= DRAG;
+
+      // 4. Update position
+      ship.x += ship.vx * dt;
+      ship.y += ship.vy * dt;
+
+      // 5. Wrap around edges (space torus)
+      if (ship.x < -30) ship.x = canvas.width + 20;
+      if (ship.x > canvas.width + 30) ship.x = -20;
+      if (ship.y < -30) ship.y = canvas.height + 20;
+      if (ship.y > canvas.height + 30) ship.y = -20;
+
+      // Update speed display
+      let speed = Math.sqrt(ship.vx * ship.vx + ship.vy * ship.vy);
+      speedDisplay.textContent = speed.toFixed(1);
+    }
+
+    // ----- RENDERING -----
+    function drawStars() {
+      for (let s of stars) {
+        // subtle twinkle
+        let twinkle = Math.sin(Date.now() * 0.002 + s.twinkle) * 0.2 + 0.8;
+        let alpha = s.brightness * twinkle;
+        ctx.fillStyle = `rgba(255, 240, 200, ${alpha})`;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.radius, 0, Math.PI*2);
+        ctx.fill();
+      }
+    }
+
+    function drawShip() {
+      ctx.save();
+      ctx.translate(ship.x, ship.y);
+      ctx.rotate(ship.angle);
+
+      // Ship design: sleek arrow
+      ctx.shadowColor = '#00ccff';
+      ctx.shadowBlur = 14;
+
+      // Main hull
+      ctx.fillStyle = '#e0f0ff';
+      ctx.beginPath();
+      ctx.moveTo(18, 0);
+      ctx.lineTo(-14, -9);
+      ctx.lineTo(-6, 0);
+      ctx.lineTo(-14, 9);
+      ctx.closePath();
+      ctx.fill();
+
+      // Engine glow when thrusting
+      if (ship.thrust > 0.05) {
+        let glowIntensity = ship.thrust;
+        ctx.shadowColor = '#ff8800';
+        ctx.shadowBlur = 18 * glowIntensity;
+        ctx.fillStyle = '#ffaa33';
+        ctx.beginPath();
+        ctx.moveTo(-10, 0);
+        ctx.lineTo(-22, -6);
+        ctx.lineTo(-22, 6);
+        ctx.closePath();
+        ctx.fill();
+
+        // extra flame
+        ctx.fillStyle = '#ff6600';
+        ctx.shadowBlur = 25;
+        ctx.beginPath();
+        ctx.moveTo(-16, 0);
+        ctx.lineTo(-26, -3.5);
+        ctx.lineTo(-26, 3.5);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      // Cockpit
+      ctx.fillStyle = '#7fd6ff';
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      ctx.arc(8, 0, 4.5, 0, Math.PI*2);
+      ctx.fill();
+      ctx.fillStyle = 'white';
+      ctx.arc(10, -1, 2, 0, Math.PI*2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    function drawHUDDecorations() {
+      ctx.fillStyle = '#aaccff';
+      ctx.font = 'bold 12px "Segoe UI"';
+      ctx.fillText('◈ SPACE DRIFT', 20, 40);
+    }
+
+    function render() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawStars();
+
+      // Draw faint grid for spatial reference
+      ctx.strokeStyle = 'rgba(70, 130, 200, 0.15)';
+      ctx.lineWidth = 0.6;
+      for (let i = 0; i < canvas.width; i += 50) {
+        ctx.beginPath();
+        ctx.moveTo(i, 0);
+        ctx.lineTo(i, canvas.height);
+        ctx.stroke();
+      }
+      for (let j = 0; j < canvas.height; j += 50) {
+        ctx.beginPath();
+        ctx.moveTo(0, j);
+        ctx.lineTo(canvas.width, j);
+        ctx.stroke();
+      }
+
+      drawShip();
+      drawHUDDecorations();
+    }
+
+    // ----- GAME LOOP -----
+    let lastTime = performance.now();
+
+    function gameLoop(now) {
+      let delta = (now - lastTime) / 1000; // seconds
+      if (delta > 0.1) delta = 0.1; // clamp large gaps
+      lastTime = now;
+
+      update(delta);
+      render();
+      requestAnimationFrame(gameLoop);
+    }
+
+    // Start everything
+    updateThrottleUI();
+    updateStickThumbPosition(0, 0);
+    requestAnimationFrame(gameLoop);
+
+    // Recalculate sizes on orientation change or resize
+    window.addEventListener('orientationchange', () => {
+      setTimeout(updateUISizes, 80);
+    });
+
+  })();
 </script>
 </body>
 </html>
