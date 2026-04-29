@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Raketenbauer & Flugsimulator</title>
+    <title>🚀 Raketenbauer – Vom Boden ins All</title>
     <style>
         * {
             margin: 0;
@@ -20,7 +20,7 @@
             align-items: center;
             height: 100vh;
             overflow: hidden;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
         }
         #container {
             position: relative;
@@ -30,472 +30,905 @@
             max-height: 900px;
             background: #03050a;
             overflow: hidden;
+            box-shadow: 0 0 50px rgba(0, 150, 255, 0.3);
         }
         canvas {
             display: block;
             width: 100%;
             height: 100%;
+            touch-action: none;
         }
-        .ui-overlay {
+        .overlay-ui {
             position: absolute;
-            bottom: 0;
+            pointer-events: none;
+            top: 0;
             left: 0;
             right: 0;
-            padding: 15px;
+            bottom: 0;
+        }
+        .flight-hud {
+            position: absolute;
+            top: 42%;
+            left: 50%;
+            transform: translate(-50%, 0);
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            align-items: center;
+            gap: 10px;
             pointer-events: none;
+            width: 90%;
+            max-width: 400px;
         }
-        .panel {
+        .hud-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
             pointer-events: auto;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
+            background: rgba(10, 18, 35, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 10px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            width: 100%;
             justify-content: center;
-            align-items: center;
-            background: rgba(10, 15, 30, 0.8);
-            backdrop-filter: blur(8px);
-            border-radius: 20px;
-            padding: 12px 15px;
-            border: 1px solid rgba(255,255,255,0.2);
+            flex-wrap: wrap;
         }
-        button {
-            background: #1e2a4a;
-            color: white;
+        .hud-row button {
+            pointer-events: auto;
+            background: #1e3050;
+            color: #fff;
             border: none;
-            border-radius: 36px;
-            padding: 14px 18px;
-            font-size: 16px;
+            border-radius: 30px;
+            padding: 14px 20px;
+            font-size: 18px;
             font-weight: bold;
-            min-width: 70px;
-            box-shadow: 0 4px 10px rgba(0,180,255,0.4);
-            transition: background 0.15s;
-            touch-action: manipulation;
+            min-width: 60px;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(0, 160, 255, 0.35);
+            transition: all 0.1s;
         }
-        button:active {
-            background: #3a5a9a;
+        .hud-row button:active {
+            background: #3a6aaa;
+            transform: scale(0.95);
         }
-        .thrust-btn {
-            background: #d94f1a;
+        .thrust-btn-big {
+            background: #e0551a !important;
+            font-size: 24px !important;
+            letter-spacing: 3px;
+            padding: 16px 40px !important;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0%,
+            100% {
+                box-shadow: 0 0 15px #ff6600;
+            }
+            50% {
+                box-shadow: 0 0 30px #ffaa00, 0 0 50px #ff6600;
+            }
+        }
+        .slider-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
             flex: 1;
-            font-size: 22px;
-            letter-spacing: 2px;
+            min-width: 100px;
         }
-        .control-row {
-            display: flex;
-            width: 100%;
-            gap: 10px;
-            align-items: center;
-        }
-        .slider-container {
-            flex: 2;
-            display: flex;
-            align-items: center;
-            background: rgba(255,255,255,0.1);
-            border-radius: 20px;
-            padding: 5px 10px;
-            height: 50px;
-        }
-        input[type=range] {
-            width: 100%;
-            height: 10px;
+        .slider-wrap input[type=range] {
+            flex: 1;
+            height: 8px;
             -webkit-appearance: none;
-            background: linear-gradient(to right, #ffaa00, #ff5500);
-            border-radius: 5px;
+            background: linear-gradient(90deg, #ffaa00, #ff4400);
+            border-radius: 4px;
+            accent-color: #ff6600;
         }
-        .fuel-bar {
+        .fuel-indicator {
             width: 100%;
-            height: 12px;
+            height: 8px;
             background: #222;
-            border-radius: 6px;
-            margin: 5px 0;
+            border-radius: 4px;
+            overflow: hidden;
         }
-        .fuel-fill {
+        .fuel-indicator div {
             height: 100%;
-            width: 100%;
-            background: #f0b400;
-            border-radius: 6px;
-            transition: width 0.1s;
+            background: #f5c542;
+            border-radius: 4px;
+            transition: width 0.2s;
         }
-        .info-text {
-            color: white;
-            font-size: 14px;
+        .info-badge {
+            color: #fff;
             font-weight: bold;
-            text-shadow: 0 0 10px black;
+            font-size: 13px;
+            text-shadow: 0 0 8px #000;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 4px 10px;
+            border-radius: 10px;
         }
     </style>
 </head>
 <body>
-<div id="container">
-    <canvas id="gameCanvas" width="500" height="900"></canvas>
-    <div class="ui-overlay" id="uiOverlay">
-        <!-- Build-Modus -->
-        <div id="buildPanel" class="panel">
-            <button id="addTank">➕ Tank</button>
-            <button id="addEngine">🚀 Triebwerk</button>
-            <button id="removePart">🗑️ Entfernen</button>
-            <button id="launchBtn" style="background:#2a7a2a;">START</button>
-        </div>
-        <!-- Flug-Modus -->
-        <div id="flightPanel" class="panel" style="display: none;">
-            <div class="info-text" id="speedDisplay">0.0 m/s</div>
-            <div class="fuel-bar"><div class="fuel-fill" id="fuelFill"></div></div>
-            <div class="control-row">
-                <button id="leftBtn">◀</button>
-                <div class="slider-container">
-                    <input type="range" id="throttleSlider" min="0" max="100" value="70">
-                </div>
-                <button id="rightBtn">▶</button>
-            </div>
-            <button id="thrustBtn" class="thrust-btn">SCHUB</button>
-            <button id="backToBuild" style="background:#555;">🔧 Bauen</button>
-        </div>
+    <div id="container">
+        <canvas id="gameCanvas" width="500" height="900"></canvas>
+        <div class="overlay-ui" id="overlayUi"></div>
     </div>
-</div>
 
-<script>
-    (function() {
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
+    <script>
+        (function() {
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            const overlay = document.getElementById('overlayUi');
 
-        // UI Elemente
-        const buildPanel = document.getElementById('buildPanel');
-        const flightPanel = document.getElementById('flightPanel');
-        const speedDisplay = document.getElementById('speedDisplay');
-        const fuelFill = document.getElementById('fuelFill');
-        const throttleSlider = document.getElementById('throttleSlider');
+            // ───────────────────── STATE ─────────────────────
+            let mode = 'build'; // 'build' | 'flight'
+            let parts = []; // von oben (Kapsel) nach unten (Triebwerk)
+            // Standard-Kapsel
+            parts.push({ type: 'pod', mass: 2.0, fuel: 0, name: 'Kapsel' });
 
-        // ---- SPIELZUSTAND ----
-        let mode = 'build'; // 'build' oder 'flight'
+            // Welt-Physik
+            const WORLD_GROUND_Y = 780; // Boden im Welt-KS
+            let rocket = {
+                worldX: 250,
+                worldY: 745, // sitzt auf dem Boden
+                vx: 0,
+                vy: 0,
+                angle: 0, // 0 = Nase oben
+                angularVel: 0,
+                totalMass: 2.0,
+                inertia: 0.5,
+                comFromTop: 14,
+            };
 
-        // Raketen-Teile (von oben nach unten)
-        let parts = [];
-        // Standard: Kommandokapsel ganz oben
-        const pod = { type: 'pod', mass: 2.0, fuel: 0, thrust: 0, name: 'Kapsel' };
-        parts.push(pod);
+            const GRAVITY = 18; // px/s²
+            const THRUST_FORCE = 320;
+            const FUEL_MAX_PER_TANK = 5.0;
+            const FUEL_BURN_RATE = 70; // pro Sekunde bei Vollschub
 
-        // Physik-Variablen
-        let rocket = {
-            x: 250, y: 450,        // Position des Schwerpunkts
-            vx: 0, vy: 0,
-            angle: 0,              // 0 = Nase zeigt nach oben
-            angularVel: 0,
-        };
+            // Steuerung
+            let leftHeld = false;
+            let rightHeld = false;
+            let thrustHeld = false;
+            let throttle = 0.75;
 
-        const GRAVITY = 15;        // Pixel/s² nach unten
-        const THRUST_FORCE = 280;  // Schubkraft des Triebwerks (Pixel/s² * Masse?)
-        const FUEL_CONSUMPTION = 60; // Treibstoffverbrauch pro Sekunde bei vollem Schub
+            // Builder-Drag
+            let dragPart = null; // { type, x, y, offsetX, offsetY }
+            const PART_DEFS = {
+                tank: { type: 'tank', mass: 1.2, fuel: FUEL_MAX_PER_TANK, name: 'Tank', color: '#e0a030',
+                    height: 40, width: 30 },
+                engine: { type: 'engine', mass: 2.5, fuel: 0, name: 'Triebwerk', color: '#ff6630', height: 28,
+                    width: 34 },
+            };
+            // Tray-Positionen (Canvas-Koordinaten)
+            let trayCards = []; // { type, x, y, w, h }
 
-        // Steuerungszustände
-        let leftPressed = false;
-        let rightPressed = false;
-        let thrustPressed = false;
-        let throttle = 0.7;        // 0..1
-
-        // Sterne
-        let stars = [];
-        for (let i = 0; i < 150; i++) {
-            stars.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
-                r: Math.random() * 2 + 0.5,
-                b: Math.random() * 0.6 + 0.4
-            });
-        }
-
-        // ---- RAKETENBAU ----
-        function updateRocketMassProperties() {
-            if (parts.length === 0) return;
-            // Gesamtmasse
-            let totalMass = 0;
-            parts.forEach(p => totalMass += p.mass + (p.fuel || 0));
-
-            // Schwerpunkt relativ zur Oberseite der Kapsel (Teil 0)
-            let momentSum = 0;
-            let currentY = 0; // y-Koordinate der Oberkante des aktuellen Teils
-            for (let part of parts) {
-                let partMass = part.mass + (part.fuel || 0);
-                let partHeight = getPartHeight(part);
-                let partCenterY = currentY + partHeight / 2;
-                momentSum += partMass * partCenterY;
-                currentY += partHeight;
-            }
-            let comFromTop = momentSum / totalMass;
-            // Speichere für Zeichnung: position jeder Teil relativ zum Schwerpunkt
-            let yOffset = -comFromTop; // Schwerpunkt liegt bei y=0 im lokalen System
-            currentY = 0;
-            for (let part of parts) {
-                let partHeight = getPartHeight(part);
-                part._localY = yOffset + currentY;
-                part._height = partHeight;
-                currentY += partHeight;
-            }
-            rocket.totalMass = totalMass;
-            rocket.comFromTop = comFromTop;
-
-            // Trägheitsmoment (Punktmassen im Abstand zum Schwerpunkt)
-            let inertia = 0;
-            currentY = 0;
-            for (let part of parts) {
-                let partMass = part.mass + (part.fuel || 0);
-                let partCenterY = currentY + getPartHeight(part)/2;
-                let distToCom = partCenterY - comFromTop;
-                inertia += partMass * distToCom * distToCom;
-                currentY += getPartHeight(part);
-            }
-            rocket.inertia = Math.max(inertia, 0.1); // verhindert Division durch Null
-        }
-
-        function getPartHeight(part) {
-            switch(part.type) {
-                case 'pod': return 28;
-                case 'tank': return 38;
-                case 'engine': return 24;
-                default: return 20;
-            }
-        }
-
-        function addTank() {
-            // Tank zwischen Kapsel und Triebwerk (falls vorhanden) einfügen
-            let engineIndex = parts.findIndex(p => p.type === 'engine');
-            let insertIndex = engineIndex !== -1 ? engineIndex : parts.length;
-            let tank = { type: 'tank', mass: 1.0, fuel: 4.0, thrust: 0, name: 'Tank' };
-            parts.splice(insertIndex, 0, tank);
-            updateRocketMassProperties();
-        }
-
-        function addEngine() {
-            if (parts.some(p => p.type === 'engine')) {
-                alert('Es ist bereits ein Triebwerk vorhanden!');
-                return;
-            }
-            let engine = { type: 'engine', mass: 2.0, fuel: 0, thrust: THRUST_FORCE, name: 'Triebwerk' };
-            parts.push(engine);
-            updateRocketMassProperties();
-        }
-
-        function removeLastPart() {
-            if (parts.length <= 1) return; // Kapsel bleibt
-            // Entferne das letzte Teil (nicht die Kapsel)
-            if (parts[parts.length-1].type === 'pod') return;
-            parts.pop();
-            updateRocketMassProperties();
-        }
-
-        // Gesamten verfügbaren Treibstoff ermitteln
-        function getTotalFuel() {
-            return parts.reduce((sum, p) => sum + (p.fuel || 0), 0);
-        }
-
-        // Treibstoff verbrauchen (gleichmäßig über alle Tanks)
-        function consumeFuel(amount) {
-            let tanks = parts.filter(p => p.type === 'tank' && p.fuel > 0);
-            if (tanks.length === 0) return false;
-            let perTank = amount / tanks.length;
-            tanks.forEach(t => t.fuel = Math.max(0, t.fuel - perTank));
-            updateRocketMassProperties();
-            return getTotalFuel() > 0;
-        }
-
-        // ---- PHYSIK UPDATE ----
-        function updatePhysics(dt) {
-            if (mode !== 'flight') return;
-            // Steuerung auswerten
-            let rotDir = 0;
-            if (leftPressed) rotDir -= 1;
-            if (rightPressed) rotDir += 1;
-            const ROT_SPEED = 3.5; // rad/s
-            rocket.angularVel = rotDir * ROT_SPEED;
-            rocket.angle += rocket.angularVel * dt;
-
-            // Schub
-            let thrustActive = thrustPressed && getTotalFuel() > 0;
-            let currentThrust = thrustActive ? throttle * THRUST_FORCE : 0;
-
-            // Schubrichtung (Raketenachse: Nase oben = Winkel 0 -> Vektor (0, -1) )
-            let thrustDirX = Math.sin(rocket.angle);   // weil 0° = oben -> x=0, y=-1
-            let thrustDirY = -Math.cos(rocket.angle);
-
-            // Position des Triebwerks relativ zum Schwerpunkt (letztes Teil = engine)
-            let enginePart = parts[parts.length-1];
-            if (enginePart && enginePart.type === 'engine') {
-                // Hebelarm: Vektor vom Schwerpunkt zur Triebwerksdüse (Mittelpunkt des Triebwerks)
-                let engineLocalY = enginePart._localY + enginePart._height/2;
-                let leverX = 0; // alle Teile auf der Mittelachse
-                let leverY = engineLocalY; // y-Richtung im lokalen System (unten positiv)
-                // Drehmoment = Kreuzprodukt aus Hebelarm und Schubkraft
-                // Im 2D: torque = leverX * forceY - leverY * forceX
-                let forceX = thrustDirX * currentThrust;
-                let forceY = thrustDirY * currentThrust;
-                let torque = leverX * forceY - leverY * forceX;
-                rocket.angularVel += (torque / rocket.inertia) * dt;
+            // Sterne
+            let stars = [];
+            for (let i = 0; i < 200; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    r: Math.random() * 2.2 + 0.4,
+                    b: Math.random() * 0.7 + 0.3,
+                    phase: Math.random() * Math.PI * 2,
+                });
             }
 
-            // Lineare Beschleunigung
-            let ax = (thrustDirX * currentThrust) / rocket.totalMass;
-            let ay = (thrustDirY * currentThrust) / rocket.totalMass + GRAVITY; // Gravitation nach unten
-            rocket.vx += ax * dt;
-            rocket.vy += ay * dt;
-
-            // Reibung / Dämpfung (leicht)
-            rocket.vx *= 0.998;
-            rocket.vy *= 0.998;
-            rocket.angularVel *= 0.98;
-
-            // Position updaten
-            rocket.x += rocket.vx * dt;
-            rocket.y += rocket.vy * dt;
-
-            // Treibstoffverbrauch
-            if (thrustActive) {
-                let fuelUse = throttle * FUEL_CONSUMPTION * dt;
-                consumeFuel(fuelUse);
-            }
-
-            // Geschwindigkeitsanzeige
-            let speed = Math.sqrt(rocket.vx*rocket.vx + rocket.vy*rocket.vy);
-            speedDisplay.textContent = speed.toFixed(1) + ' m/s';
-            let fuelPercent = (getTotalFuel() / 4.0) * 100; // max 4 Einheiten als Referenz
-            fuelFill.style.width = Math.min(100, Math.max(0, fuelPercent)) + '%';
-        }
-
-        // ---- ZEICHNEN ----
-        function drawStars() {
-            for (let s of stars) {
-                ctx.fillStyle = `rgba(255,255,200,${s.b})`;
-                ctx.beginPath();
-                ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
-                ctx.fill();
-            }
-        }
-
-        function drawRocket() {
-            if (parts.length === 0) return;
-            ctx.save();
-            ctx.translate(rocket.x, rocket.y);
-            ctx.rotate(rocket.angle);
-
-            // Zeichne Teile von oben nach unten
-            for (let part of parts) {
-                let y = part._localY;
-                let h = part._height;
-                let w = 16; // Breite
-                ctx.fillStyle = part.type === 'pod' ? '#aaccff' :
-                               part.type === 'tank' ? '#e0b040' : '#ff8844';
-                ctx.fillRect(-w/2, y, w, h);
-                ctx.strokeStyle = '#fff';
-                ctx.lineWidth = 1.5;
-                ctx.strokeRect(-w/2, y, w, h);
-                // Treibstoffanzeige im Tank
-                if (part.type === 'tank' && part.fuel > 0) {
-                    let fuelRatio = part.fuel / 4.0;
-                    ctx.fillStyle = '#ffcc00';
-                    ctx.fillRect(-w/2, y + h*(1-fuelRatio), w, h*fuelRatio);
+            // ───────────────────── HILFSFUNKTIONEN ─────────────────────
+            function getCanvasPos(e) {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                let cx, cy;
+                if (e.touches && e.touches.length > 0) {
+                    cx = (e.touches[0].clientX - rect.left) * scaleX;
+                    cy = (e.touches[0].clientY - rect.top) * scaleY;
+                } else if (e.changedTouches && e.changedTouches.length > 0) {
+                    cx = (e.changedTouches[0].clientX - rect.left) * scaleX;
+                    cy = (e.changedTouches[0].clientY - rect.top) * scaleY;
+                } else {
+                    cx = (e.clientX - rect.left) * scaleX;
+                    cy = (e.clientY - rect.top) * scaleY;
                 }
-                // Triebwerksdüse
-                if (part.type === 'engine') {
-                    ctx.fillStyle = '#ff6600';
+                return { x: Math.max(0, Math.min(canvas.width, cx)), y: Math.max(0, Math.min(canvas.height, cy)) };
+            }
+
+            function getPartHeight(part) {
+                if (part.type === 'pod') return 30;
+                if (part.type === 'tank') return 40;
+                if (part.type === 'engine') return 28;
+                return 20;
+            }
+
+            function getPartWidth(part) {
+                if (part.type === 'pod') return 28;
+                if (part.type === 'tank') return 30;
+                if (part.type === 'engine') return 34;
+                return 20;
+            }
+
+            function updateMassProperties() {
+                if (parts.length === 0) return;
+                let totalMass = 0;
+                parts.forEach(p => totalMass += p.mass + (p.fuel || 0));
+                let momentSum = 0;
+                let curY = 0;
+                for (let p of parts) {
+                    let pm = p.mass + (p.fuel || 0);
+                    let ph = getPartHeight(p);
+                    momentSum += pm * (curY + ph / 2);
+                    curY += ph;
+                }
+                let com = momentSum / totalMass;
+                curY = 0;
+                for (let p of parts) {
+                    let ph = getPartHeight(p);
+                    p._localY = curY - com;
+                    p._height = ph;
+                    p._width = getPartWidth(p);
+                    curY += ph;
+                }
+                let inertia = 0;
+                curY = 0;
+                for (let p of parts) {
+                    let pm = p.mass + (p.fuel || 0);
+                    let pc = curY + getPartHeight(p) / 2;
+                    let d = pc - com;
+                    inertia += pm * d * d;
+                    curY += getPartHeight(p);
+                }
+                rocket.totalMass = Math.max(totalMass, 0.5);
+                rocket.inertia = Math.max(inertia, 0.05);
+                rocket.comFromTop = com;
+            }
+
+            function getTotalFuel() {
+                return parts.reduce((s, p) => s + (p.fuel || 0), 0);
+            }
+
+            function hasEngine() {
+                return parts.some(p => p.type === 'engine');
+            }
+
+            function consumeFuel(amount) {
+                let tanks = parts.filter(p => p.type === 'tank' && p.fuel > 0);
+                if (tanks.length === 0) return false;
+                let per = amount / tanks.length;
+                tanks.forEach(t => t.fuel = Math.max(0, t.fuel - per));
+                updateMassProperties();
+                return getTotalFuel() > 0.001;
+            }
+
+            // ───────────────────── RAKETENBAU ─────────────────────
+            function addPartToRocket(type) {
+                let def = PART_DEFS[type];
+                if (!def) return;
+                let newPart = { ...def, fuel: def.fuel || 0 };
+                // Einfügen: Tanks zwischen Kapsel und Triebwerk
+                if (type === 'engine') {
+                    if (hasEngine()) return; // nur ein Triebwerk
+                    parts.push(newPart);
+                } else if (type === 'tank') {
+                    let engIdx = parts.findIndex(p => p.type === 'engine');
+                    if (engIdx >= 0) parts.splice(engIdx, 0, newPart);
+                    else parts.push(newPart);
+                }
+                updateMassProperties();
+            }
+
+            function removePartAt(index) {
+                if (index < 0 || index >= parts.length) return;
+                if (parts[index].type === 'pod') return; // Kapsel bleibt
+                parts.splice(index, 1);
+                updateMassProperties();
+            }
+
+            function getRocketStackBounds() {
+                // Gibt {cx, topY, bottomY, maxW} der Rakete im Build-Modus zurück
+                if (parts.length === 0) return { cx: 250, topY: 200, bottomY: 230, maxW: 30 };
+                let cx = 250;
+                let totalH = parts.reduce((s, p) => s + getPartHeight(p), 0);
+                let baseY = 390; // Unterkante des untersten Teils
+                let topY = baseY - totalH;
+                let maxW = Math.max(...parts.map(p => getPartWidth(p)));
+                return { cx, topY, bottomY: baseY, maxW };
+            }
+
+            function findPartAt(canvasX, canvasY) {
+                let bounds = getRocketStackBounds();
+                let curY = bounds.topY;
+                for (let i = 0; i < parts.length; i++) {
+                    let h = getPartHeight(parts[i]);
+                    let w = getPartWidth(parts[i]);
+                    let left = bounds.cx - w / 2;
+                    let right = bounds.cx + w / 2;
+                    if (canvasX >= left - 8 && canvasX <= right + 8 && canvasY >= curY - 4 && canvasY <= curY + h +
+                        4) {
+                        return { index: i, y: curY, h, w, cx: bounds.cx };
+                    }
+                    curY += h;
+                }
+                return null;
+            }
+
+            function isNearRocketStack(cx, cy) {
+                let bounds = getRocketStackBounds();
+                let margin = 35;
+                return (
+                    cx >= bounds.cx - bounds.maxW / 2 - margin &&
+                    cx <= bounds.cx + bounds.maxW / 2 + margin &&
+                    cy >= bounds.topY - margin &&
+                    cy <= bounds.bottomY + margin
+                );
+            }
+
+            function buildTrayCards() {
+                trayCards = [];
+                let types = ['tank', 'engine'];
+                let cardW = 90;
+                let cardH = 70;
+                let gap = 15;
+                let totalW = types.length * cardW + (types.length - 1) * gap;
+                let startX = (canvas.width - totalW) / 2;
+                let trayY = 460;
+                types.forEach((t, i) => {
+                    trayCards.push({
+                        type: t,
+                        x: startX + i * (cardW + gap),
+                        y: trayY,
+                        w: cardW,
+                        h: cardH,
+                    });
+                });
+            }
+            buildTrayCards();
+
+            // ───────────────────── MODUS-WECHSEL ─────────────────────
+            function setMode(newMode) {
+                mode = newMode;
+                overlay.innerHTML = '';
+                if (mode === 'build') {
+                    rocket.worldX = 250;
+                    rocket.worldY = 745;
+                    rocket.vx = 0;
+                    rocket.vy = 0;
+                    rocket.angle = 0;
+                    rocket.angularVel = 0;
+                    updateMassProperties();
+                    buildTrayCards();
+                    renderBuildUI();
+                } else {
+                    if (!hasEngine()) {
+                        alert('⚠️ Baue zuerst ein Triebwerk ein!');
+                        setMode('build');
+                        return;
+                    }
+                    updateMassProperties();
+                    rocket.worldX = 250;
+                    rocket.worldY = 745;
+                    rocket.vx = 0;
+                    rocket.vy = 0;
+                    rocket.angle = 0;
+                    rocket.angularVel = 0;
+                    renderFlightUI();
+                }
+            }
+
+            function renderBuildUI() {
+                overlay.innerHTML = `
+                <div style="position:absolute;top:12px;left:0;right:0;text-align:center;pointer-events:none;">
+                  <span style="color:#fff;font-size:18px;font-weight:bold;background:rgba(0,0,0,0.6);padding:6px 18px;border-radius:20px;">🔧 RAKETENBAUER</span>
+                </div>
+                <div style="position:absolute;bottom:72px;left:50%;transform:translateX(-50%);pointer-events:auto;">
+                  <button id="btnLaunch" style="background:#2a8a3a;color:#fff;border:none;border-radius:28px;padding:16px 44px;font-size:20px;font-weight:bold;box-shadow:0 6px 20px rgba(0,200,80,0.5);cursor:pointer;letter-spacing:1px;">🚀 START</button>
+                </div>
+                <div style="position:absolute;bottom:18px;left:0;right:0;text-align:center;pointer-events:none;">
+                  <span style="color:#ccc;font-size:11px;">Teile aus der Leiste auf die Rakete ziehen • Auf Raketenteil tippen zum Entfernen</span>
+                </div>
+              `;
+                document.getElementById('btnLaunch').addEventListener('click', () => setMode('flight'));
+            }
+
+            function renderFlightUI() {
+                overlay.innerHTML = `
+                <div class="flight-hud">
+                  <div class="hud-row" style="justify-content:space-around;">
+                    <span class="info-badge" id="speedBadge">0.0 m/s</span>
+                    <span class="info-badge" id="altBadge">0 m</span>
+                    <div class="fuel-indicator" style="width:80px;"><div id="fuelFill" style="width:100%;"></div></div>
+                  </div>
+                  <div class="hud-row">
+                    <button id="btnLeft">◀</button>
+                    <div class="slider-wrap">
+                      <span style="color:#fff;font-size:12px;">Schub</span>
+                      <input type="range" id="throttleSlider" min="0" max="100" value="75">
+                    </div>
+                    <button id="btnRight">▶</button>
+                  </div>
+                  <button class="thrust-btn-big" id="btnThrust">🔥 SCHUB</button>
+                  <button id="btnBack" style="background:#555;font-size:14px;padding:10px 24px;">🔧 Zurück zum Bauen</button>
+                </div>
+              `;
+                // Event-Listener für Flight-UI
+                setTimeout(() => {
+                    const bl = document.getElementById('btnLeft');
+                    const br = document.getElementById('btnRight');
+                    const bt = document.getElementById('btnThrust');
+                    const bs = document.getElementById('throttleSlider');
+                    const bb = document.getElementById('btnBack');
+                    if (bl) {
+                        bl.addEventListener('pointerdown', e => { e.preventDefault();
+                            leftHeld = true;
+                            bl.style.background = '#4a80c0'; });
+                        bl.addEventListener('pointerup', e => { e.preventDefault();
+                            leftHeld = false;
+                            bl.style.background = ''; });
+                        bl.addEventListener('pointerleave', e => { leftHeld = false;
+                            bl.style.background = ''; });
+                    }
+                    if (br) {
+                        br.addEventListener('pointerdown', e => { e.preventDefault();
+                            rightHeld = true;
+                            br.style.background = '#4a80c0'; });
+                        br.addEventListener('pointerup', e => { e.preventDefault();
+                            rightHeld = false;
+                            br.style.background = ''; });
+                        br.addEventListener('pointerleave', e => { rightHeld = false;
+                            br.style.background = ''; });
+                    }
+                    if (bt) {
+                        bt.addEventListener('pointerdown', e => { e.preventDefault();
+                            thrustHeld = true;
+                            bt.style.background = '#ff4400'; });
+                        bt.addEventListener('pointerup', e => { e.preventDefault();
+                            thrustHeld = false;
+                            bt.style.background = ''; });
+                        bt.addEventListener('pointerleave', e => { thrustHeld = false;
+                            bt.style.background = ''; });
+                    }
+                    if (bs) bs.addEventListener('input', () => { throttle = parseInt(bs.value) / 100; });
+                    if (bb) bb.addEventListener('click', () => setMode('build'));
+                }, 50);
+            }
+
+            // ───────────────────── TOUCH / MOUSE EVENTS ─────────────────────
+            function onDown(e) {
+                e.preventDefault();
+                const pos = getCanvasPos(e);
+                if (mode === 'build') {
+                    // Prüfe Tray-Karten
+                    for (let card of trayCards) {
+                        if (pos.x >= card.x && pos.x <= card.x + card.w && pos.y >= card.y && pos.y <= card.y +
+                            card.h) {
+                            dragPart = {
+                                type: card.type,
+                                x: pos.x,
+                                y: pos.y,
+                                offsetX: pos.x - card.x,
+                                offsetY: pos.y - card.y,
+                            };
+                            return;
+                        }
+                    }
+                    // Prüfe ob auf Raketenteil getippt -> entfernen
+                    let hit = findPartAt(pos.x, pos.y);
+                    if (hit && parts[hit.index].type !== 'pod') {
+                        removePartAt(hit.index);
+                        buildTrayCards();
+                        return;
+                    }
+                }
+            }
+
+            function onMove(e) {
+                e.preventDefault();
+                if (mode === 'build' && dragPart) {
+                    const pos = getCanvasPos(e);
+                    dragPart.x = pos.x;
+                    dragPart.y = pos.y;
+                }
+            }
+
+            function onUp(e) {
+                e.preventDefault();
+                if (mode === 'build' && dragPart) {
+                    const pos = getCanvasPos(e);
+                    if (isNearRocketStack(pos.x, pos.y)) {
+                        addPartToRocket(dragPart.type);
+                    }
+                    dragPart = null;
+                    buildTrayCards();
+                }
+            }
+
+            canvas.addEventListener('touchstart', onDown, { passive: false });
+            canvas.addEventListener('touchmove', onMove, { passive: false });
+            canvas.addEventListener('touchend', onUp, { passive: false });
+            canvas.addEventListener('touchcancel', onUp, { passive: false });
+            canvas.addEventListener('mousedown', onDown);
+            canvas.addEventListener('mousemove', e => {
+                if (dragPart) onMove(e);
+            });
+            canvas.addEventListener('mouseup', onUp);
+            canvas.addEventListener('mouseleave', onUp);
+
+            // ───────────────────── PHYSIK UPDATE ─────────────────────
+            function updateFlight(dt) {
+                if (mode !== 'flight') return;
+                let dtClamped = Math.min(dt, 0.05);
+
+                // Rotation
+                let rotInput = 0;
+                if (leftHeld) rotInput -= 1;
+                if (rightHeld) rotInput += 1;
+                const rotSpeed = 3.8;
+                rocket.angularVel = rotInput * rotSpeed;
+                rocket.angle += rocket.angularVel * dtClamped;
+
+                // Schub
+                let hasFuel = getTotalFuel() > 0.001;
+                let thrustActive = thrustHeld && hasFuel && hasEngine();
+                let thrustForce = thrustActive ? throttle * THRUST_FORCE : 0;
+
+                // Schubrichtung (lokal: Nase oben = Winkel 0 => (0, -1))
+                let tx = Math.sin(rocket.angle);
+                let ty = -Math.cos(rocket.angle);
+
+                // Drehmoment durch Triebwerk
+                let engPart = parts[parts.length - 1];
+                if (engPart && engPart.type === 'engine' && thrustForce > 0) {
+                    let engineLocalY = engPart._localY + engPart._height / 2;
+                    let leverY = engineLocalY; // Hebelarm in Y-Richtung
+                    let fx = tx * thrustForce;
+                    let fy = ty * thrustForce;
+                    let torque = -leverY * fx; // cross( (0, leverY), (fx, fy) ) = 0*fy - leverY*fx
+                    rocket.angularVel += (torque / rocket.inertia) * dtClamped;
+                }
+
+                // Lineare Beschleunigung
+                let ax = (tx * thrustForce) / rocket.totalMass;
+                let ay = (ty * thrustForce) / rocket.totalMass + GRAVITY; // Gravitation nach unten
+                rocket.vx += ax * dtClamped;
+                rocket.vy += ay * dtClamped;
+
+                // Dämpfung
+                rocket.vx *= 0.997;
+                rocket.vy *= 0.997;
+                rocket.angularVel *= 0.96;
+
+                // Position
+                rocket.worldX += rocket.vx * dtClamped;
+                rocket.worldY += rocket.vy * dtClamped;
+
+                // Bodenkollision
+                if (rocket.worldY >= WORLD_GROUND_Y - 5) {
+                    rocket.worldY = WORLD_GROUND_Y - 5;
+                    if (rocket.vy > 0) rocket.vy = 0;
+                    rocket.vx *= 0.9;
+                    rocket.angularVel *= 0.5;
+                }
+
+                // Treibstoff
+                if (thrustActive) {
+                    consumeFuel(throttle * FUEL_BURN_RATE * dtClamped);
+                }
+
+                // HUD updaten
+                let speed = Math.sqrt(rocket.vx * rocket.vx + rocket.vy * rocket.vy);
+                let alt = WORLD_GROUND_Y - rocket.worldY;
+                let speedBadge = document.getElementById('speedBadge');
+                let altBadge = document.getElementById('altBadge');
+                let fuelFill = document.getElementById('fuelFill');
+                if (speedBadge) speedBadge.textContent = speed.toFixed(1) + ' m/s';
+                if (altBadge) altBadge.textContent = Math.max(0, alt).toFixed(0) + ' m';
+                if (fuelFill) {
+                    let fp = (getTotalFuel() / (FUEL_MAX_PER_TANK * Math.max(1, parts.filter(p => p.type ===
+                        'tank').length))) * 100;
+                    fuelFill.style.width = Math.min(100, Math.max(0, fp)) + '%';
+                }
+            }
+
+            // ───────────────────── RENDERING ─────────────────────
+            function drawStarsOnly() {
+                for (let s of stars) {
+                    let twinkle = Math.sin(Date.now() * 0.003 + s.phase) * 0.3 + 0.7;
+                    ctx.fillStyle = `rgba(255,250,220,${s.b * twinkle})`;
                     ctx.beginPath();
-                    ctx.moveTo(-w/2-3, y+h);
-                    ctx.lineTo(w/2+3, y+h);
-                    ctx.lineTo(0, y+h+8);
-                    ctx.closePath();
+                    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
                     ctx.fill();
                 }
             }
-            ctx.restore();
-        }
 
-        function drawUI() {
-            if (mode === 'build') {
-                ctx.fillStyle = 'white';
-                ctx.font = 'bold 16px "Segoe UI"';
+            function drawGroundAndSky(alpha) {
+                // Boden
+                let gy = WORLD_GROUND_Y;
+                let grad = ctx.createLinearGradient(0, gy - 30, 0, gy + 40);
+                grad.addColorStop(0, '#5a8a3c');
+                grad.addColorStop(0.4, '#3d5a1e');
+                grad.addColorStop(1, '#4a3020');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, gy - 10, canvas.width, canvas.height - gy + 10);
+
+                // Graslinie
+                ctx.strokeStyle = '#7cb342';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(0, gy);
+                for (let x = 0; x < canvas.width; x += 8) {
+                    ctx.lineTo(x, gy - Math.sin(x * 0.3) * 4 - Math.random() * 2);
+                }
+                ctx.stroke();
+
+                // Atmosphären-Overlay (blau am Boden, transparent in der Höhe)
+                if (alpha > 0.01) {
+                    let atmGrad = ctx.createLinearGradient(0, gy, 0, gy - 350);
+                    atmGrad.addColorStop(0, `rgba(135,200,235,${alpha})`);
+                    atmGrad.addColorStop(0.5, `rgba(80,140,200,${alpha * 0.5})`);
+                    atmGrad.addColorStop(1, 'rgba(20,30,60,0)');
+                    ctx.fillStyle = atmGrad;
+                    ctx.fillRect(0, gy - 350, canvas.width, 350);
+                }
+            }
+
+            function drawRocketAt(wx, wy, angle, alpha = 1) {
+                if (parts.length === 0) return;
+                ctx.save();
+                ctx.globalAlpha = alpha;
+                ctx.translate(wx, wy);
+                ctx.rotate(angle);
+
+                for (let p of parts) {
+                    let ly = p._localY;
+                    let h = p._height;
+                    let w = p._width;
+                    let col = p.type === 'pod' ? '#b0d0ff' :
+                        p.type === 'tank' ? '#e0a030' : '#ff6630';
+                    ctx.fillStyle = col;
+                    ctx.fillRect(-w / 2, ly, w, h);
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 1.5;
+                    ctx.strokeRect(-w / 2, ly, w, h);
+
+                    // Tank-Füllstand
+                    if (p.type === 'tank' && p.fuel > 0) {
+                        let ratio = p.fuel / FUEL_MAX_PER_TANK;
+                        ctx.fillStyle = '#ffcc33';
+                        ctx.fillRect(-w / 2, ly + h * (1 - ratio), w, h * ratio);
+                    }
+                    // Triebwerksdüse
+                    if (p.type === 'engine') {
+                        ctx.fillStyle = '#cc4400';
+                        ctx.beginPath();
+                        ctx.moveTo(-w / 2 - 3, ly + h);
+                        ctx.lineTo(w / 2 + 3, ly + h);
+                        ctx.lineTo(0, ly + h + 10);
+                        ctx.closePath();
+                        ctx.fill();
+                    }
+                    // Kapsel-Detail
+                    if (p.type === 'pod') {
+                        ctx.fillStyle = '#7bc0ff';
+                        ctx.beginPath();
+                        ctx.arc(0, ly + h / 2, w / 2 + 3, Math.PI, 0);
+                        ctx.fill();
+                    }
+                }
+                ctx.restore();
+            }
+
+            function drawFlame(wx, wy, angle, intensity) {
+                if (intensity < 0.03) return;
+                ctx.save();
+                ctx.globalAlpha = intensity;
+                ctx.translate(wx, wy);
+                ctx.rotate(angle);
+                let eng = parts[parts.length - 1];
+                if (!eng || eng.type !== 'engine') { ctx.restore(); return; }
+                let fy = eng._localY + eng._height;
+                let fw = eng._width * 0.8;
+                let grad = ctx.createLinearGradient(0, fy, 0, fy + 35 * intensity);
+                grad.addColorStop(0, '#ffcc00');
+                grad.addColorStop(0.4, '#ff6600');
+                grad.addColorStop(0.8, '#ff2200');
+                grad.addColorStop(1, 'rgba(255,50,0,0)');
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.moveTo(-fw / 2, fy);
+                ctx.lineTo(fw / 2, fy);
+                ctx.lineTo(0, fy + 35 * intensity);
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
+            }
+
+            function renderBuild() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                // Himmel
+                let skyGrad = ctx.createLinearGradient(0, 0, 0, WORLD_GROUND_Y);
+                skyGrad.addColorStop(0, '#0a0f25');
+                skyGrad.addColorStop(0.6, '#1a3050');
+                skyGrad.addColorStop(1, '#6ab0e0');
+                ctx.fillStyle = skyGrad;
+                ctx.fillRect(0, 0, canvas.width, WORLD_GROUND_Y);
+                drawStarsOnly();
+                drawGroundAndSky(0.5);
+
+                // Raketen-Silhouette auf dem Boden
+                let bounds = getRocketStackBounds();
+                let rx = bounds.cx;
+                let ry = bounds.bottomY; // Unterkante = Basis
+                // Zeichne die aktuelle Rakete auf einer virtuellen Startrampe
+                let rampY = WORLD_GROUND_Y - 25;
+                // Verschiebe Rakete so, dass ihre Unterkante auf der Rampe sitzt
+                let totalH = parts.reduce((s, p) => s + getPartHeight(p), 0);
+                let rocketBaseY = rampY;
+                let rocketTopY = rocketBaseY - totalH;
+                // Zeichne Rampe
+                ctx.fillStyle = '#555';
+                ctx.fillRect(rx - 40, rampY, 80, 14);
+                ctx.fillStyle = '#888';
+                ctx.fillRect(rx - 20, rampY - 6, 40, 6);
+
+                // Zeichne Rakete auf der Rampe
+                drawRocketAt(rx, rocketBaseY, 0, 1);
+
+                // Parts-Tray
+                let trayY = 460;
+                ctx.fillStyle = 'rgba(20,30,50,0.9)';
+                ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+                ctx.lineWidth = 2;
+                roundRect(ctx, 20, trayY - 10, canvas.width - 40, 90, 16, true, true);
+
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 13px "Segoe UI"';
                 ctx.textAlign = 'center';
-                ctx.fillText('BAUMODUS – Rakete zusammenstellen', 250, 80);
-                // Zeichne die Rakete in der Mitte
-                drawRocket();
-            } else {
-                drawRocket();
+                ctx.fillText('📦 Teile hier auf die Rakete ziehen', canvas.width / 2, trayY - 16);
+
+                for (let card of trayCards) {
+                    let def = PART_DEFS[card.type];
+                    ctx.fillStyle = def.color;
+                    roundRect(ctx, card.x, card.y, card.w, card.h, 12, true, true);
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 14px "Segoe UI"';
+                    ctx.fillText(def.name, card.x + card.w / 2, card.y + card.h / 2 + 5);
+                    // Kleines Icon
+                    ctx.font = '22px "Segoe UI"';
+                    ctx.fillText(card.type === 'tank' ? '⛽' : '🚀', card.x + card.w / 2, card.y + 22);
+                }
+
+                // Gezogenes Teil
+                if (dragPart) {
+                    let def = PART_DEFS[dragPart.type];
+                    ctx.globalAlpha = 0.8;
+                    ctx.fillStyle = def.color;
+                    let dw = 60,
+                        dh = 50;
+                    roundRect(ctx, dragPart.x - dw / 2, dragPart.y - dh / 2, dw, dh, 10, true, true);
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 12px "Segoe UI"';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(def.name, dragPart.x, dragPart.y + 4);
+                    ctx.globalAlpha = 1;
+                }
+
+                ctx.textAlign = 'start';
+                // Info-Text
+                ctx.fillStyle = '#fff';
+                ctx.font = '12px "Segoe UI"';
+                ctx.fillText('Teile: ' + parts.map(p => p.name).join(' → '), 24, WORLD_GROUND_Y + 30);
+                let fuelInfo = getTotalFuel() > 0 ? ` | Treibstoff: ${getTotalFuel().toFixed(1)}` : '';
+                ctx.fillText(`Masse: ${rocket.totalMass.toFixed(1)}${fuelInfo}`, 24, WORLD_GROUND_Y + 50);
             }
-        }
 
-        function render() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawStars();
-            drawUI();
-        }
+            function renderFlight() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // ---- EVENT HANDLER ----
-        function setMode(newMode) {
-            mode = newMode;
-            if (mode === 'build') {
-                buildPanel.style.display = 'flex';
-                flightPanel.style.display = 'none';
-                rocket.vx = rocket.vy = 0;
-                rocket.angularVel = 0;
-                rocket.x = 250; rocket.y = 450;
-                rocket.angle = 0;
-            } else {
-                buildPanel.style.display = 'none';
-                flightPanel.style.display = 'flex';
-                updateRocketMassProperties();
+                // Kamera: folge Rakete, zeige Boden wenn in der Nähe
+                let camY = rocket.worldY - 380;
+                let camX = rocket.worldX - canvas.width / 2;
+                // Clamp so Boden sichtbar
+                if (rocket.worldY > WORLD_GROUND_Y - 250) camY = WORLD_GROUND_Y - 630;
+
+                // Himmel / Weltraum
+                let altitude = WORLD_GROUND_Y - rocket.worldY;
+                let spaceFactor = Math.min(1, Math.max(0, (altitude - 80) / 300)); // 0=boden, 1=space ab 380m
+
+                // Hintergrund
+                if (spaceFactor < 0.95) {
+                    let skyGrad = ctx.createLinearGradient(0, WORLD_GROUND_Y - 350 - camY, 0, WORLD_GROUND_Y - camY);
+                    let blueAlpha = 1 - spaceFactor;
+                    skyGrad.addColorStop(0, `rgba(15,25,60,1)`);
+                    skyGrad.addColorStop(0.5, `rgba(40,80,160,${0.7 * blueAlpha})`);
+                    skyGrad.addColorStop(1, `rgba(120,190,235,${blueAlpha})`);
+                    ctx.fillStyle = skyGrad;
+                } else {
+                    ctx.fillStyle = '#050a18';
+                }
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Sterne (nur sichtbar wenn hoch genug)
+                if (spaceFactor > 0.1) {
+                    ctx.globalAlpha = spaceFactor;
+                    drawStarsOnly();
+                    ctx.globalAlpha = 1;
+                }
+
+                // Boden
+                let groundScreenY = WORLD_GROUND_Y - camY;
+                if (groundScreenY < canvas.height + 60) {
+                    ctx.save();
+                    ctx.translate(-camX, -camY);
+                    drawGroundAndSky(1 - spaceFactor);
+                    ctx.restore();
+                }
+
+                // Rakete
+                ctx.save();
+                ctx.translate(-camX, -camY);
+                drawRocketAt(rocket.worldX, rocket.worldY, rocket.angle, 1);
+                // Flamme
+                if (thrustHeld && getTotalFuel() > 0.001 && hasEngine()) {
+                    drawFlame(rocket.worldX, rocket.worldY, rocket.angle, throttle);
+                }
+                ctx.restore();
+
+                // Höhenmarker
+                if (spaceFactor > 0.8 && altitude > 200) {
+                    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+                    ctx.font = 'bold 14px "Segoe UI"';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('🌌 IM WELTRAUM', canvas.width / 2, 50);
+                }
+                ctx.textAlign = 'start';
             }
-        }
 
-        // Touch/Click Events für Buttons
-        document.getElementById('addTank').addEventListener('click', addTank);
-        document.getElementById('addEngine').addEventListener('click', addEngine);
-        document.getElementById('removePart').addEventListener('click', removeLastPart);
-        document.getElementById('launchBtn').addEventListener('click', () => setMode('flight'));
-        document.getElementById('backToBuild').addEventListener('click', () => setMode('build'));
+            function roundRect(ctx, x, y, w, h, r, fill, stroke) {
+                ctx.beginPath();
+                ctx.moveTo(x + r, y);
+                ctx.lineTo(x + w - r, y);
+                ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+                ctx.lineTo(x + w, y + h - r);
+                ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+                ctx.lineTo(x + r, y + h);
+                ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+                ctx.lineTo(x, y + r);
+                ctx.quadraticCurveTo(x, y, x + r, y);
+                ctx.closePath();
+                if (fill) ctx.fill();
+                if (stroke) ctx.stroke();
+            }
 
-        // Steuerung Flug
-        let leftBtn = document.getElementById('leftBtn');
-        let rightBtn = document.getElementById('rightBtn');
-        let thrustBtn = document.getElementById('thrustBtn');
+            // ───────────────────── GAME LOOP ─────────────────────
+            let lastTime = performance.now();
 
-        function setButtonActive(btn, active) {
-            if (active) btn.style.background = '#4a7ab5';
-            else btn.style.background = '';
-        }
+            function loop(now) {
+                let dt = (now - lastTime) / 1000;
+                if (dt > 0.1) dt = 0.1;
+                lastTime = now;
 
-        leftBtn.addEventListener('pointerdown', (e) => { e.preventDefault(); leftPressed = true; setButtonActive(leftBtn, true); });
-        leftBtn.addEventListener('pointerup', (e) => { e.preventDefault(); leftPressed = false; setButtonActive(leftBtn, false); });
-        leftBtn.addEventListener('pointerleave', (e) => { leftPressed = false; setButtonActive(leftBtn, false); });
+                if (mode === 'flight') {
+                    updateFlight(dt);
+                    renderFlight();
+                } else {
+                    updateMassProperties();
+                    renderBuild();
+                }
 
-        rightBtn.addEventListener('pointerdown', (e) => { e.preventDefault(); rightPressed = true; setButtonActive(rightBtn, true); });
-        rightBtn.addEventListener('pointerup', (e) => { e.preventDefault(); rightPressed = false; setButtonActive(rightBtn, false); });
-        rightBtn.addEventListener('pointerleave', (e) => { rightPressed = false; setButtonActive(rightBtn, false); });
+                requestAnimationFrame(loop);
+            }
 
-        thrustBtn.addEventListener('pointerdown', (e) => { e.preventDefault(); thrustPressed = true; thrustBtn.style.background = '#ff5500'; });
-        thrustBtn.addEventListener('pointerup', (e) => { e.preventDefault(); thrustPressed = false; thrustBtn.style.background = ''; });
-        thrustBtn.addEventListener('pointerleave', (e) => { thrustPressed = false; thrustBtn.style.background = ''; });
-
-        throttleSlider.addEventListener('input', () => {
-            throttle = parseInt(throttleSlider.value) / 100;
-        });
-
-        // Verhindert Zoom bei Doppeltipp auf Buttons
-        document.querySelectorAll('button').forEach(b => {
-            b.addEventListener('touchstart', (e) => e.preventDefault());
-        });
-
-        // Initialisierung
-        updateRocketMassProperties();
-        setMode('build');
-
-        // Game Loop
-        let lastTime = performance.now();
-        function loop(now) {
-            let dt = Math.min(0.05, (now - lastTime) / 1000);
-            lastTime = now;
-            updatePhysics(dt);
-            render();
+            // ───────────────────── START ─────────────────────
+            updateMassProperties();
+            buildTrayCards();
+            setMode('build');
             requestAnimationFrame(loop);
-        }
-        requestAnimationFrame(loop);
-    })();
-</script>
+
+            // Resize-Handler
+            window.addEventListener('resize', () => {
+                buildTrayCards();
+            });
+            window.addEventListener('orientationchange', () => {
+                setTimeout(buildTrayCards, 100);
+            });
+        })();
+    </script>
 </body>
 </html>
