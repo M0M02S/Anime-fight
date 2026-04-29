@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>🚀 Spaceflight Simulator – Raketenbauer</title>
+    <title>🚀 Spaceflight Simulator – Baue deine Rakete</title>
     <style>
         * {
             margin: 0;
@@ -31,9 +31,9 @@
             height: 100dvh;
             max-width: 500px;
             max-height: 900px;
-            background: #020510;
+            background: #010314;
             overflow: hidden;
-            box-shadow: 0 0 60px rgba(0, 140, 255, 0.3);
+            box-shadow: 0 0 70px rgba(0, 150, 255, 0.3);
         }
         canvas {
             position: absolute;
@@ -43,99 +43,65 @@
             height: 100%;
             z-index: 1;
         }
-        .overlay {
+        .ui-layer {
             position: absolute;
-            z-index: 10;
-            pointer-events: none;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-        }
-        /* ── BUILD UI: Left panel, top stats, launch button ── */
-        .build-layout {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
+            z-index: 10;
             pointer-events: none;
         }
-        .top-stats {
+        /* ── Top stats bar ── */
+        .stats-bar {
             pointer-events: auto;
             display: flex;
             gap: 6px;
             justify-content: center;
             flex-wrap: wrap;
-            padding: 8px 10px;
-            background: rgba(10, 15, 30, 0.9);
-            backdrop-filter: blur(8px);
+            padding: 8px 6px;
+            background: rgba(10, 16, 32, 0.92);
+            backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(255,255,255,0.2);
-            z-index: 20;
         }
-        .stat-badge {
+        .stat {
             background: rgba(20, 30, 50, 0.8);
             color: #e0e8ff;
-            padding: 6px 14px;
-            border-radius: 16px;
+            padding: 5px 12px;
+            border-radius: 14px;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 11px;
             border: 1px solid rgba(255,255,255,0.15);
             white-space: nowrap;
         }
-        .stat-badge span {
+        .stat span {
             color: #ffb840;
         }
-        .launch-btn-area {
-            pointer-events: auto;
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 30;
-        }
-        .launch-btn {
-            background: #1a8a3a;
-            color: #fff;
-            border: none;
-            border-radius: 30px;
-            padding: 16px 44px;
-            font-size: 22px;
-            font-weight: bold;
-            letter-spacing: 2px;
-            box-shadow: 0 6px 20px rgba(0, 200, 60, 0.5);
-            cursor: pointer;
-            transition: all 0.15s;
-            display: block;
-        }
-        .launch-btn:active {
-            background: #2ab84a;
-            transform: scale(0.94);
-        }
-        /* Left sidebar */
+        /* ── Left sidebar (categories) ── */
         .sidebar {
             position: absolute;
-            left: 0;
-            top: 80px;
-            bottom: 140px;
-            width: 110px;
+            left: 6px;
+            top: 90px;
+            bottom: 160px;
+            width: 100px;
             pointer-events: auto;
-            background: rgba(15, 25, 45, 0.95);
+            background: rgba(14, 22, 42, 0.95);
             backdrop-filter: blur(12px);
             border-right: 2px solid rgba(255,255,255,0.25);
             display: flex;
             flex-direction: column;
-            gap: 2px;
-            padding: 8px 4px;
+            gap: 3px;
+            padding: 6px 2px;
             overflow-y: auto;
             border-radius: 0 14px 14px 0;
-            z-index: 25;
         }
         .cat-btn {
             background: rgba(30, 45, 70, 0.9);
             color: #cdd;
             border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 14px;
-            padding: 10px 8px;
-            font-size: 12px;
+            border-radius: 12px;
+            padding: 8px 4px;
+            font-size: 10px;
             font-weight: bold;
             cursor: pointer;
             display: flex;
@@ -152,67 +118,66 @@
             box-shadow: 0 0 14px rgba(70, 150, 255, 0.5);
         }
         .cat-btn .icon {
-            font-size: 22px;
+            font-size: 20px;
         }
         .cat-btn .label {
-            font-size: 10px;
+            font-size: 9px;
             line-height: 1.2;
         }
-        /* Parts sub-panel (slides out) */
-        .parts-subpanel {
+        /* ── Part sub-panel (slides out right of sidebar) ── */
+        .parts-panel {
             position: absolute;
-            left: 114px;
-            top: 80px;
-            bottom: 140px;
-            width: 130px;
-            background: rgba(20, 30, 50, 0.95);
+            left: 112px;
+            top: 90px;
+            bottom: 160px;
+            width: 140px;
+            background: rgba(22, 32, 52, 0.95);
             backdrop-filter: blur(12px);
             border-radius: 0 16px 16px 0;
             border: 2px solid rgba(255,255,255,0.25);
-            padding: 8px;
+            padding: 10px 6px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
             overflow-y: auto;
             pointer-events: auto;
-            z-index: 26;
             transition: transform 0.2s ease;
-            transform: translateX(0);
         }
-        .parts-subpanel.hidden {
+        .parts-panel.hidden {
             transform: translateX(-120%);
             pointer-events: none;
         }
-        .part-drag-item {
+        .part-card {
             background: rgba(40, 55, 80, 0.9);
             border: 1px solid rgba(255,255,255,0.3);
             border-radius: 10px;
-            padding: 8px 4px;
+            padding: 6px 4px;
             display: flex;
             flex-direction: column;
             align-items: center;
             cursor: grab;
-            transition: background 0.1s;
             touch-action: none;
+            transition: background 0.1s;
         }
-        .part-drag-item:active {
+        .part-card:active {
             background: #3a6090;
             cursor: grabbing;
         }
-        .part-drag-item .icon {
+        .part-card .icon {
             font-size: 28px;
         }
-        .part-drag-item .name {
+        .part-card .name {
             color: #fff;
             font-size: 10px;
             font-weight: bold;
             margin-top: 2px;
+            text-align: center;
         }
-        .part-drag-item .stat {
+        .part-card .info {
             color: #aaa;
             font-size: 8px;
         }
-        /* Dragging ghost (absolutely positioned) */
+        /* ── Drag ghost (follows finger) ── */
         .drag-ghost {
             position: fixed;
             pointer-events: none;
@@ -237,6 +202,32 @@
             color: #fff;
             font-weight: bold;
         }
+        /* ── Launch button ── */
+        .launch-area {
+            pointer-events: auto;
+            position: absolute;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .launch-btn {
+            background: #1a8a3a;
+            color: #fff;
+            border: none;
+            border-radius: 30px;
+            padding: 16px 44px;
+            font-size: 22px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            box-shadow: 0 6px 20px rgba(0, 200, 60, 0.5);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .launch-btn:active {
+            background: #2ab84a;
+            transform: scale(0.94);
+        }
+        /* ── Flight HUD ── */
         .flight-hud {
             position: absolute;
             top: 42%;
@@ -245,13 +236,12 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             pointer-events: none;
             width: 90%;
             max-width: 400px;
-            z-index: 20;
         }
-        .hud-box {
+        .hud-row {
             display: flex;
             gap: 8px;
             align-items: center;
@@ -259,30 +249,32 @@
             background: rgba(10, 16, 32, 0.85);
             backdrop-filter: blur(8px);
             border-radius: 18px;
-            padding: 8px 12px;
+            padding: 6px 10px;
             border: 1px solid rgba(255,255,255,0.2);
             flex-wrap: wrap;
             justify-content: center;
         }
-        .hud-box button {
-            pointer-events: auto;
+        .hud-row button {
             background: #1e3050;
             color: #fff;
             border: none;
-            border-radius: 28px;
-            padding: 12px 18px;
+            border-radius: 24px;
+            padding: 10px 16px;
             font-size: 18px;
             font-weight: bold;
-            min-width: 50px;
+            min-width: 46px;
             cursor: pointer;
             box-shadow: 0 3px 8px rgba(0, 140, 255, 0.3);
             transition: all 0.1s;
         }
-        .hud-box button:active { background: #3a6aaa; transform: scale(0.93); }
+        .hud-row button:active {
+            background: #3a6aaa;
+            transform: scale(0.93);
+        }
         .thrust-big {
             background: #d94f1a !important;
             font-size: 24px !important;
-            padding: 16px 42px !important;
+            padding: 14px 40px !important;
             letter-spacing: 3px;
             animation: pulse 1.6s infinite;
         }
@@ -290,39 +282,61 @@
             0%,100% { box-shadow: 0 0 12px #ff6600; }
             50% { box-shadow: 0 0 30px #ffaa00, 0 0 55px #ff4400; }
         }
-        .slider-row { display: flex; align-items: center; gap: 4px; flex: 1; min-width: 80px; }
-        .slider-row input[type=range] { flex: 1; height: 6px; accent-color: #ff7700; }
-        .hud-info {
+        .slider-wrap {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex: 1;
+            min-width: 80px;
+        }
+        .slider-wrap input[type=range] {
+            flex: 1;
+            height: 6px;
+            accent-color: #ff7700;
+        }
+        .hud-badge {
             color: #fff;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 11px;
             background: rgba(0,0,0,0.55);
             padding: 4px 10px;
             border-radius: 12px;
         }
-        .fuel-mini { width: 70px; height: 7px; background: #222; border-radius: 3px; overflow: hidden; }
-        .fuel-mini div { height: 100%; background: #f5b800; border-radius: 3px; transition: width 0.15s; }
+        .fuel-mini {
+            width: 70px;
+            height: 6px;
+            background: #222;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .fuel-mini div {
+            height: 100%;
+            background: #f5b800;
+            border-radius: 3px;
+            transition: width 0.15s;
+        }
     </style>
 </head>
 <body>
 <div id="container">
     <canvas id="gameCanvas" width="500" height="900"></canvas>
-    <div class="overlay" id="overlay"></div>
-</div>
+    <div class="ui-layer" id="uiLayer"></div>
+</body>
 
 <script>
     (function() {
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const overlay = document.getElementById('overlay');
+        const uiLayer = document.getElementById('uiLayer');
 
-        // ═══ STATE ═══
-        let mode = 'build'; // 'build' | 'flight'
+        // ═══════════ STATE ═══════════
+        let mode = 'build';
         let parts = [];
+        // Default capsule
         const CAPSULE = { type: 'pod', name: 'Kapsel', mass: 2.0, fuel: 0, thrust: 0, color: '#b8d4ff', width: 28, height: 32, icon: '👩‍🚀' };
         parts.push({ ...CAPSULE });
 
-        // Part shop definitions
+        // Shop definitions (matching Spaceflight Simulator feel)
         const SHOP = {
             tanks: [
                 { type: 'tank', name: 'Kleiner Tank', mass: 0.8, fuel: 3, thrust: 0, color: '#e0a030', width: 28, height: 34, icon: '🛢️' },
@@ -333,6 +347,15 @@
                 { type: 'engine', name: 'Basis Triebwerk', mass: 2.0, fuel: 0, thrust: 250, color: '#ff6630', width: 30, height: 26, icon: '🚀' },
                 { type: 'engine', name: 'Starkes Triebwerk', mass: 3.5, fuel: 0, thrust: 450, color: '#ff4420', width: 34, height: 30, icon: '🚀' },
             ],
+            control: [
+                { type: 'control', name: 'Steuerdüsen', mass: 0.5, fuel: 0, thrust: 0, color: '#6a8aaa', width: 22, height: 16, icon: '🎛️' },
+            ],
+            heatshields: [
+                { type: 'heatshield', name: 'Hitzeschild', mass: 1.2, fuel: 0, thrust: 0, color: '#cc6644', width: 34, height: 14, icon: '🛡️' },
+            ],
+            staging: [
+                { type: 'staging', name: 'Stufenadapter', mass: 0.6, fuel: 0, thrust: 0, color: '#999', width: 28, height: 12, icon: '🔗' },
+            ],
             utility: [
                 { type: 'utility', name: 'Seitentank', mass: 0.6, fuel: 2, thrust: 0, color: '#c09040', width: 18, height: 26, icon: '📦' },
                 { type: 'utility', name: 'Stabilisator', mass: 0.3, fuel: 0, thrust: 0, color: '#8899aa', width: 20, height: 14, icon: '📏' },
@@ -340,39 +363,46 @@
         };
 
         let selectedCategory = 'tanks';
-        let showSubpanel = true;
+        let showPartsPanel = true;
 
-        // Rocket physics state
+        // Physics
         const WORLD_GROUND_Y = 780;
         let rocket = {
-            worldX: 250, worldY: 745, vx:0, vy:0, angle:0, angularVel:0,
+            worldX: 250, worldY: 745, vx: 0, vy: 0, angle: 0, angularVel: 0,
             totalMass: 2.0, inertia: 0.5, comFromTop: 16
         };
         const GRAVITY = 18;
         const FUEL_BURN_RATE = 65;
 
-        // Flight controls
+        // Flight input
         let leftHeld = false, rightHeld = false, thrustHeld = false, throttle = 0.75;
 
-        // Build drag state
-        let dragInfo = null; // { partDef, startX, startY, currentX, currentY }
-        let ghostEl = null;
+        // Drag state
+        let dragPartDef = null;
+        let dragGhost = null;
+        let dragStartPos = { x: 0, y: 0 };
 
         // Build rocket stack bounds (canvas coords)
-        let buildStackBounds = { cx: 250, baseY: 510, topY: 400, maxW: 40 };
+        let rocketStackBounds = { cx: 250, baseY: 500, topY: 400, maxW: 40 };
 
         // Stars
         let stars = [];
-        for (let i=0; i<200; i++) {
-            stars.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, r: Math.random()*2+0.3, b: Math.random()*0.7+0.3, phase: Math.random()*Math.PI*2 });
+        for (let i = 0; i < 200; i++) {
+            stars.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                r: Math.random() * 2 + 0.3,
+                b: Math.random() * 0.7 + 0.3,
+                phase: Math.random() * Math.PI * 2,
+            });
         }
 
-        // ═══ HELPERS ═══
+        // ═══════════ HELPERS ═══════════
         function getPartHeight(p) { return p.height || 30; }
         function getPartWidth(p) { return p.width || 28; }
-        function getTotalFuel() { return parts.reduce((s,p) => s + (p.fuel||0), 0); }
-        function getTotalThrust() { return parts.reduce((s,p) => s + (p.thrust||0), 0); }
-        function getTotalMass() { return parts.reduce((s,p) => s + (p.mass||0) + (p.fuel||0), 0); }
+        function getTotalFuel() { return parts.reduce((s, p) => s + (p.fuel || 0), 0); }
+        function getTotalThrust() { return parts.reduce((s, p) => s + (p.thrust || 0), 0); }
+        function getTotalMass() { return parts.reduce((s, p) => s + (p.mass || 0) + (p.fuel || 0), 0); }
         function hasEngine() { return parts.some(p => p.type === 'engine'); }
 
         function updateMassProperties() {
@@ -380,9 +410,9 @@
             let totalMass = getTotalMass();
             let momentSum = 0, curY = 0;
             for (let p of parts) {
-                let pm = (p.mass||0)+(p.fuel||0);
+                let pm = (p.mass || 0) + (p.fuel || 0);
                 let ph = getPartHeight(p);
-                momentSum += pm * (curY + ph/2);
+                momentSum += pm * (curY + ph / 2);
                 curY += ph;
             }
             let com = momentSum / Math.max(totalMass, 0.01);
@@ -396,8 +426,8 @@
             }
             let inertia = 0; curY = 0;
             for (let p of parts) {
-                let pm = (p.mass||0)+(p.fuel||0);
-                let pc = curY + getPartHeight(p)/2;
+                let pm = (p.mass || 0) + (p.fuel || 0);
+                let pc = curY + getPartHeight(p) / 2;
                 let d = pc - com;
                 inertia += pm * d * d;
                 curY += getPartHeight(p);
@@ -408,7 +438,7 @@
         }
 
         function consumeFuel(amount) {
-            let tanks = parts.filter(p => p.type==='tank' && p.fuel>0);
+            let tanks = parts.filter(p => p.type === 'tank' && p.fuel > 0);
             if (tanks.length === 0) return false;
             let per = amount / tanks.length;
             tanks.forEach(t => t.fuel = Math.max(0, t.fuel - per));
@@ -416,111 +446,132 @@
             return getTotalFuel() > 0.001;
         }
 
-        // ═══ BUILD: ADD / REMOVE ═══
+        // ═══════════ ROCKET STACK POSITIONING ═══════════
+        function updateRocketStackBounds() {
+            let padX = 250, padY = 500;
+            let totalH = parts.reduce((s, p) => s + getPartHeight(p), 0);
+            let baseY = padY;
+            let topY = baseY - totalH;
+            let maxW = Math.max(...parts.map(p => getPartWidth(p)), 20);
+            rocketStackBounds = { cx: padX, baseY, topY, maxW };
+        }
+
+        function isInsideRocketStack(canvasX, canvasY, margin = 30) {
+            let b = rocketStackBounds;
+            let w = b.maxW + margin;
+            return (canvasX >= b.cx - w / 2 && canvasX <= b.cx + w / 2 &&
+                canvasY >= b.topY - margin && canvasY <= b.baseY + margin);
+        }
+
+        // ═══════════ ADD / REMOVE PARTS ═══════════
         function addPart(partDef) {
             let newPart = { ...partDef, fuel: partDef.fuel || 0 };
             if (partDef.type === 'engine') {
                 if (hasEngine()) {
-                    let idx = parts.findIndex(p => p.type==='engine');
-                    if (idx>=0) parts.splice(idx,1);
+                    let idx = parts.findIndex(p => p.type === 'engine');
+                    if (idx >= 0) parts.splice(idx, 1);
                 }
                 parts.push(newPart);
             } else {
-                let engIdx = parts.findIndex(p => p.type==='engine');
-                if (engIdx>=0) parts.splice(engIdx, 0, newPart);
+                let engIdx = parts.findIndex(p => p.type === 'engine');
+                if (engIdx >= 0) parts.splice(engIdx, 0, newPart);
                 else parts.push(newPart);
             }
             updateMassProperties();
+            updateRocketStackBounds();
         }
 
         function removePartAt(index) {
-            if (index<0 || index>=parts.length) return;
+            if (index < 0 || index >= parts.length) return;
             if (parts[index].type === 'pod') return;
-            parts.splice(index,1);
+            parts.splice(index, 1);
             updateMassProperties();
+            updateRocketStackBounds();
         }
 
-        function updateBuildStackBounds() {
-            let padX = 250, padY = 510;
-            let totalH = parts.reduce((s,p) => s + getPartHeight(p), 0);
-            let baseY = padY;
-            let topY = baseY - totalH;
-            let maxW = Math.max(...parts.map(p => getPartWidth(p)), 20);
-            buildStackBounds = { cx: padX, baseY, topY, maxW };
-        }
-
-        // ═══ CANVAS TO SCREEN ═══
-        function screenToCanvas(clientX, clientY) {
+        // ═══════════ DRAG & DROP ═══════════
+        function getCanvasPos(clientX, clientY) {
             const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
             return {
-                x: (clientX - rect.left) * scaleX,
-                y: (clientY - rect.top) * scaleY
+                x: (clientX - rect.left) * (canvas.width / rect.width),
+                y: (clientY - rect.top) * (canvas.height / rect.height)
             };
         }
 
-        function isInsideStack(canvasX, canvasY, margin = 25) {
-            let b = buildStackBounds;
-            let w = b.maxW + margin;
-            return (canvasX >= b.cx - w/2 && canvasX <= b.cx + w/2 && canvasY >= b.topY - margin && canvasY <= b.baseY + margin);
-        }
-
-        // ═══ DRAG HANDLING ═══
         function startDrag(partDef, event) {
             event.preventDefault();
             const touch = event.touches ? event.touches[0] : event;
-            dragInfo = {
-                partDef: partDef,
-                startX: touch.clientX,
-                startY: touch.clientY,
-                currentX: touch.clientX,
-                currentY: touch.clientY,
-            };
-            if (!ghostEl) {
-                ghostEl = document.createElement('div');
-                ghostEl.className = 'drag-ghost';
-                document.body.appendChild(ghostEl);
+            dragPartDef = partDef;
+            dragStartPos = { x: touch.clientX, y: touch.clientY };
+
+            if (!dragGhost) {
+                dragGhost = document.createElement('div');
+                dragGhost.className = 'drag-ghost';
+                document.body.appendChild(dragGhost);
             }
-            ghostEl.innerHTML = `<span class="icon">${partDef.icon||'🔹'}</span><span class="name">${partDef.name}</span>`;
-            ghostEl.style.display = 'block';
-            ghostEl.style.left = dragInfo.currentX + 'px';
-            ghostEl.style.top = dragInfo.currentY + 'px';
+            dragGhost.innerHTML = `<span class="icon">${partDef.icon || '🔹'}</span><span class="name">${partDef.name}</span>`;
+            dragGhost.style.display = 'block';
+            dragGhost.style.left = touch.clientX + 'px';
+            dragGhost.style.top = touch.clientY + 'px';
+
             window.addEventListener('pointermove', onDragMove);
             window.addEventListener('pointerup', onDragEnd);
             window.addEventListener('pointercancel', onDragEnd);
         }
 
         function onDragMove(event) {
-            if (!dragInfo) return;
+            if (!dragPartDef) return;
             event.preventDefault();
             const touch = event.touches ? event.touches[0] : event;
-            dragInfo.currentX = touch.clientX;
-            dragInfo.currentY = touch.clientY;
-            if (ghostEl) {
-                ghostEl.style.left = dragInfo.currentX + 'px';
-                ghostEl.style.top = dragInfo.currentY + 'px';
-            }
+            dragGhost.style.left = touch.clientX + 'px';
+            dragGhost.style.top = touch.clientY + 'px';
         }
 
         function onDragEnd(event) {
-            if (!dragInfo) return;
+            if (!dragPartDef) return;
             event.preventDefault();
             window.removeEventListener('pointermove', onDragMove);
             window.removeEventListener('pointerup', onDragEnd);
             window.removeEventListener('pointercancel', onDragEnd);
 
             const touch = event.changedTouches ? event.changedTouches[0] : event;
-            let canvasPos = screenToCanvas(touch.clientX, touch.clientY);
-            if (isInsideStack(canvasPos.x, canvasPos.y)) {
-                addPart(dragInfo.partDef);
+            const canvasPos = getCanvasPos(touch.clientX, touch.clientY);
+            if (isInsideRocketStack(canvasPos.x, canvasPos.y)) {
+                addPart(dragPartDef);
             }
-            dragInfo = null;
-            if (ghostEl) ghostEl.style.display = 'none';
+            dragPartDef = null;
+            if (dragGhost) dragGhost.style.display = 'none';
         }
 
-        // ═══ RENDER OVERLAY (HTML UI) ═══
-        function renderOverlay() {
+        // ═══════════ TAP ON CANVAS TO REMOVE PART ═══════════
+        canvas.addEventListener('pointerdown', (e) => {
+            if (mode !== 'build') return;
+            const pos = getCanvasPos(e.clientX, e.clientY);
+            // Ignore if tap is on UI panels area (left sidebar / bottom)
+            if (pos.x < 120 && pos.y > 80 && pos.y < canvas.height - 160) return;
+            if (pos.y > canvas.height - 180) return;
+
+            // Check if tap hits a rocket part
+            updateRocketStackBounds();
+            let totalH = parts.reduce((s, p) => s + getPartHeight(p), 0);
+            let curY = rocketStackBounds.topY;
+            for (let i = 0; i < parts.length; i++) {
+                let h = getPartHeight(parts[i]);
+                let w = getPartWidth(parts[i]);
+                let left = rocketStackBounds.cx - w / 2 - 6;
+                let right = rocketStackBounds.cx + w / 2 + 6;
+                if (pos.x >= left && pos.x <= right && pos.y >= curY - 4 && pos.y <= curY + h + 4) {
+                    if (parts[i].type !== 'pod') {
+                        removePartAt(i);
+                    }
+                    break;
+                }
+                curY += h;
+            }
+        });
+
+        // ═══════════ RENDER UI (HTML) ═══════════
+        function renderUI() {
             if (mode === 'build') renderBuildUI();
             else renderFlightUI();
         }
@@ -531,50 +582,60 @@
             let twr = (getTotalThrust() / Math.max(getTotalMass() * 9.81, 0.01)).toFixed(2);
             let fuel = getTotalFuel().toFixed(1);
 
-            let catButtons = ['tanks','engines','utility'].map(cat => {
-                let names = { tanks:'⛽ Tanks', engines:'🚀 Triebw.', utility:'📦 Utility' };
-                return `<button class="cat-btn${selectedCategory===cat?' active':''}" data-cat="${cat}"><span class="icon">${names[cat].split(' ')[0]}</span><span class="label">${names[cat].split(' ')[1]}</span></button>`;
+            let categories = ['tanks', 'engines', 'control', 'heatshields', 'staging', 'utility'];
+            let catNames = {
+                tanks: '⛽ Tanks',
+                engines: '🚀 Triebw.',
+                control: '🎛️ Steuer.',
+                heatshields: '🛡️ Schilde',
+                staging: '🔗 Stufen',
+                utility: '📦 Utility'
+            };
+
+            let catBtns = categories.map(cat => {
+                return `<button class="cat-btn${selectedCategory === cat ? ' active' : ''}" data-cat="${cat}">
+                    <span class="icon">${catNames[cat].split(' ')[0]}</span>
+                    <span class="label">${catNames[cat].split(' ')[1]}</span>
+                </button>`;
             }).join('');
 
-            let partsHTML = '';
             let items = SHOP[selectedCategory] || [];
-            items.forEach((p,i) => {
-                partsHTML += `
-                <div class="part-drag-item" data-cat="${selectedCategory}" data-idx="${i}">
-                    <span class="icon">${p.icon||'🔹'}</span>
+            let partsCards = items.map((p, i) => {
+                return `<div class="part-card" data-cat="${selectedCategory}" data-idx="${i}">
+                    <span class="icon">${p.icon || '🔹'}</span>
                     <span class="name">${p.name}</span>
-                    <span class="stat">${p.thrust?'Schub '+p.thrust:p.fuel?'Treibst. '+p.fuel:''}</span>
+                    <span class="info">${p.thrust ? 'Schub ' + p.thrust : p.fuel ? 'Treibst. ' + p.fuel : ''}</span>
                 </div>`;
-            });
+            }).join('');
 
-            overlay.innerHTML = `
-            <div class="build-layout">
-                <div class="top-stats">
-                    <div class="stat-badge">Masse: <span>${mass}t</span></div>
-                    <div class="stat-badge">Schub: <span>${thrust}t</span></div>
-                    <div class="stat-badge">TWR: <span>${twr}</span></div>
-                    <div class="stat-badge">Treibst.: <span>${fuel}</span></div>
+            uiLayer.innerHTML = `
+                <div class="stats-bar">
+                    <div class="stat">Masse: <span>${mass}t</span></div>
+                    <div class="stat">Schub: <span>${thrust}t</span></div>
+                    <div class="stat">TWR: <span>${twr}</span></div>
+                    <div class="stat">Treibst.: <span>${fuel}</span></div>
                 </div>
-                <div class="sidebar" id="sidebar">${catButtons}</div>
-                <div class="parts-subpanel${showSubpanel?'':' hidden'}" id="subpanel">${partsHTML}</div>
-                <div class="launch-btn-area"><button class="launch-btn" id="btnLaunch">🚀 START</button></div>
-            </div>`;
+                <div class="sidebar">${catBtns}</div>
+                <div class="parts-panel${showPartsPanel ? '' : ' hidden'}" id="partsPanel">${partsCards}</div>
+                <div class="launch-area"><button class="launch-btn" id="btnLaunch">🚀 START</button></div>
+            `;
 
             // Attach events
             setTimeout(() => {
                 document.querySelectorAll('.cat-btn').forEach(btn => {
                     btn.addEventListener('click', (e) => {
-                        e.preventDefault(); e.stopPropagation();
+                        e.preventDefault();
+                        e.stopPropagation();
                         selectedCategory = btn.dataset.cat;
-                        showSubpanel = true;
-                        renderOverlay();
+                        showPartsPanel = true;
+                        renderUI();
                     });
                 });
-                document.querySelectorAll('.part-drag-item').forEach(item => {
-                    item.addEventListener('pointerdown', (e) => {
+                document.querySelectorAll('.part-card').forEach(card => {
+                    card.addEventListener('pointerdown', (e) => {
                         e.preventDefault();
-                        let cat = item.dataset.cat;
-                        let idx = parseInt(item.dataset.idx);
+                        let cat = card.dataset.cat;
+                        let idx = parseInt(card.dataset.idx);
                         let partDef = SHOP[cat][idx];
                         if (partDef) startDrag(partDef, e);
                     });
@@ -582,8 +643,12 @@
                 let launchBtn = document.getElementById('btnLaunch');
                 if (launchBtn) {
                     launchBtn.addEventListener('click', (e) => {
-                        e.preventDefault(); e.stopPropagation();
-                        if (!hasEngine()) { alert('⚠️ Baue zuerst ein Triebwerk ein!'); return; }
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (!hasEngine()) {
+                            alert('⚠️ Baue zuerst ein Triebwerk ein!');
+                            return;
+                        }
                         setMode('flight');
                     });
                 }
@@ -591,94 +656,122 @@
         }
 
         function renderFlightUI() {
-            overlay.innerHTML = `
-            <div class="flight-hud">
-                <div class="hud-box" style="gap:12px;">
-                    <span class="hud-info" id="speedBadge">0.0 m/s</span>
-                    <span class="hud-info" id="altBadge">0 m</span>
-                    <div class="fuel-mini"><div id="fuelFill" style="width:100%;"></div></div>
-                </div>
-                <div class="hud-box">
-                    <button id="btnLeft">◀</button>
-                    <div class="slider-row">
-                        <span style="color:#fff;font-size:10px;">Schub</span>
-                        <input type="range" id="throttleSlider" min="0" max="100" value="75">
+            uiLayer.innerHTML = `
+                <div class="flight-hud">
+                    <div class="hud-row" style="gap:12px;">
+                        <span class="hud-badge" id="speedBadge">0.0 m/s</span>
+                        <span class="hud-badge" id="altBadge">0 m</span>
+                        <div class="fuel-mini"><div id="fuelFill" style="width:100%;"></div></div>
                     </div>
-                    <button id="btnRight">▶</button>
+                    <div class="hud-row">
+                        <button id="btnLeft">◀</button>
+                        <div class="slider-wrap">
+                            <span style="color:#fff;font-size:10px;">Schub</span>
+                            <input type="range" id="throttleSlider" min="0" max="100" value="75">
+                        </div>
+                        <button id="btnRight">▶</button>
+                    </div>
+                    <button class="thrust-big" id="btnThrust">🔥 SCHUB</button>
+                    <button id="btnBack" style="background:#444;font-size:14px;padding:8px 20px;">🔧 Bauen</button>
                 </div>
-                <button class="thrust-big" id="btnThrust">🔥 SCHUB</button>
-                <button id="btnBack" style="background:#444;font-size:14px;padding:8px 20px;">🔧 Bauen</button>
-            </div>`;
+            `;
+
             setTimeout(() => {
-                let bl = document.getElementById('btnLeft'), br = document.getElementById('btnRight');
-                let bt = document.getElementById('btnThrust'), bs = document.getElementById('throttleSlider');
-                let bb = document.getElementById('btnBack');
-                function setActive(btn, active) { if(btn) btn.style.background = active ? '#4a80c0' : ''; }
-                if(bl) {
-                    bl.addEventListener('pointerdown', e => { e.preventDefault(); leftHeld=true; setActive(bl,true); });
-                    bl.addEventListener('pointerup', e => { e.preventDefault(); leftHeld=false; setActive(bl,false); });
-                    bl.addEventListener('pointerleave', () => { leftHeld=false; setActive(bl,false); });
+                let bl = document.getElementById('btnLeft'),
+                    br = document.getElementById('btnRight'),
+                    bt = document.getElementById('btnThrust'),
+                    bs = document.getElementById('throttleSlider'),
+                    bb = document.getElementById('btnBack');
+
+                function setActive(btn, active) { if (btn) btn.style.background = active ? '#4a80c0' : ''; }
+
+                if (bl) {
+                    bl.addEventListener('pointerdown', e => { e.preventDefault(); leftHeld = true; setActive(bl, true); });
+                    bl.addEventListener('pointerup', e => { e.preventDefault(); leftHeld = false; setActive(bl, false); });
+                    bl.addEventListener('pointerleave', () => { leftHeld = false; setActive(bl, false); });
                 }
-                if(br) {
-                    br.addEventListener('pointerdown', e => { e.preventDefault(); rightHeld=true; setActive(br,true); });
-                    br.addEventListener('pointerup', e => { e.preventDefault(); rightHeld=false; setActive(br,false); });
-                    br.addEventListener('pointerleave', () => { rightHeld=false; setActive(br,false); });
+                if (br) {
+                    br.addEventListener('pointerdown', e => { e.preventDefault(); rightHeld = true; setActive(br, true); });
+                    br.addEventListener('pointerup', e => { e.preventDefault(); rightHeld = false; setActive(br, false); });
+                    br.addEventListener('pointerleave', () => { rightHeld = false; setActive(br, false); });
                 }
-                if(bt) {
-                    bt.addEventListener('pointerdown', e => { e.preventDefault(); thrustHeld=true; bt.style.background='#ff4400'; });
-                    bt.addEventListener('pointerup', e => { e.preventDefault(); thrustHeld=false; bt.style.background=''; });
-                    bt.addEventListener('pointerleave', () => { thrustHeld=false; bt.style.background=''; });
+                if (bt) {
+                    bt.addEventListener('pointerdown', e => { e.preventDefault(); thrustHeld = true; bt.style.background = '#ff4400'; });
+                    bt.addEventListener('pointerup', e => { e.preventDefault(); thrustHeld = false; bt.style.background = ''; });
+                    bt.addEventListener('pointerleave', () => { thrustHeld = false; bt.style.background = ''; });
                 }
-                if(bs) bs.addEventListener('input', () => { throttle = parseInt(bs.value)/100; });
-                if(bb) bb.addEventListener('click', () => setMode('build'));
+                if (bs) bs.addEventListener('input', () => { throttle = parseInt(bs.value) / 100; });
+                if (bb) bb.addEventListener('click', () => setMode('build'));
             }, 50);
         }
 
+        // ═══════════ MODE SWITCH ═══════════
         function setMode(newMode) {
             mode = newMode;
             if (mode === 'build') {
-                rocket.worldX = 250; rocket.worldY = 745;
-                rocket.vx=0; rocket.vy=0; rocket.angle=0; rocket.angularVel=0;
+                rocket.worldX = 250;
+                rocket.worldY = 745;
+                rocket.vx = rocket.vy = 0;
+                rocket.angle = 0;
+                rocket.angularVel = 0;
                 updateMassProperties();
+                updateRocketStackBounds();
             } else {
                 updateMassProperties();
-                rocket.worldX = 250; rocket.worldY = WORLD_GROUND_Y - 40;
-                rocket.vx=0; rocket.vy=0; rocket.angle=0; rocket.angularVel=0;
+                rocket.worldX = 250;
+                rocket.worldY = WORLD_GROUND_Y - 40;
+                rocket.vx = rocket.vy = 0;
+                rocket.angle = 0;
+                rocket.angularVel = 0;
             }
-            renderOverlay();
+            renderUI();
         }
 
-        // ═══ CANVAS RENDER ═══
+        // ═══════════ CANVAS RENDERING ═══════════
         function drawGrid() {
             ctx.strokeStyle = 'rgba(100,130,180,0.12)';
             ctx.lineWidth = 0.6;
-            for (let x=0; x<canvas.width; x+=40) {
-                ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); ctx.stroke();
+            for (let x = 0; x < canvas.width; x += 40) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
             }
-            for (let y=0; y<canvas.height; y+=40) {
-                ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); ctx.stroke();
-            }
-        }
-
-        function drawStars(alpha=1) {
-            for (let s of stars) {
-                let twinkle = Math.sin(Date.now()*0.003 + s.phase)*0.3 + 0.7;
-                ctx.fillStyle = `rgba(255,250,200,${s.b*twinkle*alpha})`;
-                ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI*2); ctx.fill();
+            for (let y = 0; y < canvas.height; y += 40) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
             }
         }
 
         function drawPlanet() {
             ctx.fillStyle = '#2a4a6a';
-            ctx.beginPath(); ctx.arc(400, 200, 100, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath();
+            ctx.arc(380, 180, 90, 0, Math.PI * 2);
+            ctx.fill();
             ctx.fillStyle = '#1e3a50';
-            ctx.beginPath(); ctx.arc(400, 200, 90, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = 'rgba(255,255,255,0.1)';
-            ctx.beginPath(); ctx.arc(370, 170, 30, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath();
+            ctx.arc(380, 180, 82, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = 'rgba(255,255,255,0.07)';
+            ctx.beginPath();
+            ctx.arc(350, 150, 25, 0, Math.PI * 2);
+            ctx.fill();
         }
 
-        function drawRocketAt(wx, wy, angle, alpha=1) {
-            if (parts.length===0) return;
+        function drawStarsField(alpha = 1) {
+            for (let s of stars) {
+                let twinkle = Math.sin(Date.now() * 0.002 + s.phase) * 0.3 + 0.7;
+                ctx.fillStyle = `rgba(255,250,200,${s.b * twinkle * alpha})`;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function drawRocketAt(wx, wy, angle, alpha = 1) {
+            if (parts.length === 0) return;
             ctx.save();
             ctx.globalAlpha = alpha;
             ctx.translate(wx, wy);
@@ -686,176 +779,239 @@
             for (let p of parts) {
                 let ly = p._localY, h = p._height, w = p._width;
                 ctx.fillStyle = p.color || '#ccc';
-                ctx.fillRect(-w/2, ly, w, h);
-                ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.4;
-                ctx.strokeRect(-w/2, ly, w, h);
-                if (p.type==='tank' && p.fuel>0) {
-                    let maxF = 10; // approximate
-                    let ratio = p.fuel / Math.max(maxF,0.1);
+                ctx.fillRect(-w / 2, ly, w, h);
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 1.4;
+                ctx.strokeRect(-w / 2, ly, w, h);
+
+                if (p.type === 'tank' && p.fuel > 0) {
+                    let maxF = 10;
+                    let ratio = p.fuel / Math.max(maxF, 0.1);
                     ctx.fillStyle = '#ffc840';
-                    ctx.fillRect(-w/2, ly + h*(1-ratio), w, h*ratio);
+                    ctx.fillRect(-w / 2, ly + h * (1 - ratio), w, h * ratio);
                 }
-                if (p.type==='engine') {
+                if (p.type === 'engine') {
                     ctx.fillStyle = '#b84020';
                     ctx.beginPath();
-                    ctx.moveTo(-w/2-2, ly+h); ctx.lineTo(w/2+2, ly+h); ctx.lineTo(0, ly+h+10);
-                    ctx.closePath(); ctx.fill();
+                    ctx.moveTo(-w / 2 - 2, ly + h);
+                    ctx.lineTo(w / 2 + 2, ly + h);
+                    ctx.lineTo(0, ly + h + 10);
+                    ctx.closePath();
+                    ctx.fill();
                 }
-                if (p.type==='pod') {
+                if (p.type === 'pod') {
                     ctx.fillStyle = '#80c8ff';
-                    ctx.beginPath(); ctx.arc(0, ly+h/2, w/2+4, Math.PI,0); ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(0, ly + h / 2, w / 2 + 4, Math.PI, 0);
+                    ctx.fill();
                 }
             }
             ctx.restore();
         }
 
-        function renderBuild() {
-            ctx.clearRect(0,0,canvas.width,canvas.height);
+        function renderBuildCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
             // Space background
-            let grad = ctx.createLinearGradient(0,0,0,WORLD_GROUND_Y);
-            grad.addColorStop(0,'#050a18'); grad.addColorStop(0.6,'#152540'); grad.addColorStop(1,'#4a80a0');
+            let grad = ctx.createLinearGradient(0, 0, 0, WORLD_GROUND_Y);
+            grad.addColorStop(0, '#050a18');
+            grad.addColorStop(0.6, '#152540');
+            grad.addColorStop(1, '#4a80a0');
             ctx.fillStyle = grad;
-            ctx.fillRect(0,0,canvas.width,WORLD_GROUND_Y);
-            drawStars(0.6);
+            ctx.fillRect(0, 0, canvas.width, WORLD_GROUND_Y);
+
+            drawStarsField(0.7);
             drawGrid();
             drawPlanet();
 
             // Ground
-            let gGrad = ctx.createLinearGradient(0,WORLD_GROUND_Y-20,0,WORLD_GROUND_Y+40);
-            gGrad.addColorStop(0,'#5a8a3a'); gGrad.addColorStop(0.5,'#3a6020'); gGrad.addColorStop(1,'#2a3a20');
+            let gGrad = ctx.createLinearGradient(0, WORLD_GROUND_Y - 20, 0, WORLD_GROUND_Y + 40);
+            gGrad.addColorStop(0, '#5a8a3a');
+            gGrad.addColorStop(0.5, '#3a6020');
+            gGrad.addColorStop(1, '#2a3a20');
             ctx.fillStyle = gGrad;
-            ctx.fillRect(0,WORLD_GROUND_Y-10,canvas.width, canvas.height-WORLD_GROUND_Y+10);
-            ctx.strokeStyle = '#7cb342'; ctx.lineWidth=3;
-            ctx.beginPath(); ctx.moveTo(0,WORLD_GROUND_Y);
-            for (let x=0; x<canvas.width; x+=6) ctx.lineTo(x, WORLD_GROUND_Y - Math.sin(x*0.4)*3);
+            ctx.fillRect(0, WORLD_GROUND_Y - 10, canvas.width, canvas.height - WORLD_GROUND_Y + 10);
+            ctx.strokeStyle = '#7cb342';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(0, WORLD_GROUND_Y);
+            for (let x = 0; x < canvas.width; x += 6) {
+                ctx.lineTo(x, WORLD_GROUND_Y - Math.sin(x * 0.4) * 3);
+            }
             ctx.stroke();
 
             // Launchpad
-            let padX = 250, padY = 510;
-            ctx.fillStyle = '#333'; ctx.fillRect(padX-50, padY, 100, 14);
-            ctx.fillStyle = '#555'; ctx.fillRect(padX-30, padY-4, 60, 6);
-            ctx.fillStyle = '#777'; ctx.fillRect(padX-5, padY-35, 10, 30);
+            let padX = 250, padY = 500;
+            ctx.fillStyle = '#333';
+            ctx.fillRect(padX - 50, padY, 100, 14);
+            ctx.fillStyle = '#555';
+            ctx.fillRect(padX - 30, padY - 4, 60, 6);
+            ctx.fillStyle = '#777';
+            ctx.fillRect(padX - 5, padY - 35, 10, 30);
 
-            updateBuildStackBounds();
+            // Draw rocket
+            updateRocketStackBounds();
             drawRocketAt(padX, padY, 0, 1);
         }
 
-        function renderFlight() {
-            ctx.clearRect(0,0,canvas.width,canvas.height);
+        function renderFlightCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             let altitude = WORLD_GROUND_Y - rocket.worldY;
-            let spaceFactor = Math.min(1, Math.max(0, (altitude-60)/320));
+            let spaceFactor = Math.min(1, Math.max(0, (altitude - 60) / 320));
+
             let camY = rocket.worldY - 380;
-            let camX = rocket.worldX - canvas.width/2;
-            if (rocket.worldY > WORLD_GROUND_Y-250) camY = WORLD_GROUND_Y-630;
+            let camX = rocket.worldX - canvas.width / 2;
+            if (rocket.worldY > WORLD_GROUND_Y - 250) camY = WORLD_GROUND_Y - 630;
 
-            let bgGrad = ctx.createLinearGradient(0,WORLD_GROUND_Y-350-camY,0,WORLD_GROUND_Y-camY);
-            bgGrad.addColorStop(0,'#050a18');
-            bgGrad.addColorStop(0.5,`rgba(40,80,150,${0.7*(1-spaceFactor)})`);
-            bgGrad.addColorStop(1,`rgba(110,180,225,${1-spaceFactor})`);
+            let bgGrad = ctx.createLinearGradient(0, WORLD_GROUND_Y - 350 - camY, 0, WORLD_GROUND_Y - camY);
+            bgGrad.addColorStop(0, '#050a18');
+            bgGrad.addColorStop(0.5, `rgba(40,80,150,${0.7 * (1 - spaceFactor)})`);
+            bgGrad.addColorStop(1, `rgba(110,180,225,${1 - spaceFactor})`);
             ctx.fillStyle = bgGrad;
-            ctx.fillRect(0,0,canvas.width,canvas.height);
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            if (spaceFactor>0.08) { ctx.globalAlpha=spaceFactor; drawStars(1); ctx.globalAlpha=1; }
+            if (spaceFactor > 0.08) {
+                ctx.globalAlpha = spaceFactor;
+                drawStarsField(1);
+                ctx.globalAlpha = 1;
+            }
 
             let groundScreenY = WORLD_GROUND_Y - camY;
-            if (groundScreenY < canvas.height+60) {
-                ctx.save(); ctx.translate(-camX, -camY);
-                let gGrad = ctx.createLinearGradient(0,WORLD_GROUND_Y-20,0,WORLD_GROUND_Y+40);
-                gGrad.addColorStop(0,'#5a8a3a'); gGrad.addColorStop(0.5,'#3a6020'); gGrad.addColorStop(1,'#2a3a20');
+            if (groundScreenY < canvas.height + 60) {
+                ctx.save();
+                ctx.translate(-camX, -camY);
+                let gGrad = ctx.createLinearGradient(0, WORLD_GROUND_Y - 20, 0, WORLD_GROUND_Y + 40);
+                gGrad.addColorStop(0, '#5a8a3a');
+                gGrad.addColorStop(0.5, '#3a6020');
+                gGrad.addColorStop(1, '#2a3a20');
                 ctx.fillStyle = gGrad;
-                ctx.fillRect(0,WORLD_GROUND_Y-10,canvas.width,canvas.height-WORLD_GROUND_Y+10);
+                ctx.fillRect(0, WORLD_GROUND_Y - 10, canvas.width, canvas.height - WORLD_GROUND_Y + 10);
                 ctx.restore();
             }
 
-            ctx.save(); ctx.translate(-camX, -camY);
+            ctx.save();
+            ctx.translate(-camX, -camY);
             drawRocketAt(rocket.worldX, rocket.worldY, rocket.angle, 1);
-            if (thrustHeld && getTotalFuel()>0.001 && hasEngine()) {
+            if (thrustHeld && getTotalFuel() > 0.001 && hasEngine()) {
                 let flameIntensity = throttle;
-                let eng = parts[parts.length-1];
-                if (eng && eng.type==='engine') {
-                    ctx.save(); ctx.globalAlpha=flameIntensity; ctx.translate(rocket.worldX, rocket.worldY); ctx.rotate(rocket.angle);
-                    let fy = eng._localY + eng._height, fw = eng._width*0.75;
-                    let grad = ctx.createLinearGradient(0,fy,0,fy+38*flameIntensity);
-                    grad.addColorStop(0,'#ffee44'); grad.addColorStop(0.3,'#ff8800'); grad.addColorStop(0.7,'#ff3300'); grad.addColorStop(1,'rgba(255,20,0,0)');
-                    ctx.fillStyle = grad; ctx.beginPath(); ctx.moveTo(-fw/2,fy); ctx.lineTo(fw/2,fy); ctx.lineTo(0,fy+38*flameIntensity); ctx.closePath(); ctx.fill();
+                let eng = parts[parts.length - 1];
+                if (eng && eng.type === 'engine') {
+                    ctx.save();
+                    ctx.globalAlpha = flameIntensity;
+                    ctx.translate(rocket.worldX, rocket.worldY);
+                    ctx.rotate(rocket.angle);
+                    let fy = eng._localY + eng._height, fw = eng._width * 0.75;
+                    let grad = ctx.createLinearGradient(0, fy, 0, fy + 38 * flameIntensity);
+                    grad.addColorStop(0, '#ffee44');
+                    grad.addColorStop(0.3, '#ff8800');
+                    grad.addColorStop(0.7, '#ff3300');
+                    grad.addColorStop(1, 'rgba(255,20,0,0)');
+                    ctx.fillStyle = grad;
+                    ctx.beginPath();
+                    ctx.moveTo(-fw / 2, fy);
+                    ctx.lineTo(fw / 2, fy);
+                    ctx.lineTo(0, fy + 38 * flameIntensity);
+                    ctx.closePath();
+                    ctx.fill();
                     ctx.restore();
                 }
             }
             ctx.restore();
 
-            if (spaceFactor>0.7 && altitude>180) {
-                ctx.fillStyle='rgba(255,255,255,0.65)'; ctx.font='bold 14px "Segoe UI"'; ctx.textAlign='center';
-                ctx.fillText('🌌 IM WELTRAUM', canvas.width/2, 48);
+            if (spaceFactor > 0.7 && altitude > 180) {
+                ctx.fillStyle = 'rgba(255,255,255,0.6)';
+                ctx.font = 'bold 14px "Segoe UI"';
+                ctx.textAlign = 'center';
+                ctx.fillText('🌌 IM WELTRAUM', canvas.width / 2, 48);
             }
             ctx.textAlign = 'start';
         }
 
-        // ═══ GAME LOOP ═══
+        // ═══════════ PHYSICS UPDATE ═══════════
         function updateFlight(dt) {
             if (mode !== 'flight') return;
             let dtc = Math.min(dt, 0.05);
+
             let rotInput = 0;
             if (leftHeld) rotInput -= 1;
             if (rightHeld) rotInput += 1;
             rocket.angularVel = rotInput * 3.8;
             rocket.angle += rocket.angularVel * dtc;
+
             let hasFuel = getTotalFuel() > 0.001;
             let thrustActive = thrustHeld && hasFuel && hasEngine();
             let thrustForce = thrustActive ? throttle * getTotalThrust() : 0;
+
             let tx = Math.sin(rocket.angle), ty = -Math.cos(rocket.angle);
-            let eng = parts[parts.length-1];
-            if (eng && eng.type==='engine' && thrustForce>0) {
-                let engineLocalY = eng._localY + eng._height/2;
+            let eng = parts[parts.length - 1];
+            if (eng && eng.type === 'engine' && thrustForce > 0) {
+                let engineLocalY = eng._localY + eng._height / 2;
                 let torque = -engineLocalY * (tx * thrustForce);
                 rocket.angularVel += (torque / rocket.inertia) * dtc;
             }
-            let ax = (tx*thrustForce)/rocket.totalMass, ay = (ty*thrustForce)/rocket.totalMass + GRAVITY;
-            rocket.vx += ax*dtc; rocket.vy += ay*dtc;
-            rocket.vx *= 0.997; rocket.vy *= 0.997; rocket.angularVel *= 0.96;
-            rocket.worldX += rocket.vx*dtc; rocket.worldY += rocket.vy*dtc;
-            if (rocket.worldY >= WORLD_GROUND_Y-5) {
-                rocket.worldY = WORLD_GROUND_Y-5;
-                if (rocket.vy>0) rocket.vy=0;
-                rocket.vx *= 0.88; rocket.angularVel *= 0.4;
+
+            let ax = (tx * thrustForce) / rocket.totalMass;
+            let ay = (ty * thrustForce) / rocket.totalMass + GRAVITY;
+            rocket.vx += ax * dtc;
+            rocket.vy += ay * dtc;
+
+            rocket.vx *= 0.997;
+            rocket.vy *= 0.997;
+            rocket.angularVel *= 0.96;
+
+            rocket.worldX += rocket.vx * dtc;
+            rocket.worldY += rocket.vy * dtc;
+
+            if (rocket.worldY >= WORLD_GROUND_Y - 5) {
+                rocket.worldY = WORLD_GROUND_Y - 5;
+                if (rocket.vy > 0) rocket.vy = 0;
+                rocket.vx *= 0.88;
+                rocket.angularVel *= 0.4;
             }
             if (rocket.worldY < -200) rocket.worldY = -200;
-            if (rocket.worldX<-60) rocket.worldX = canvas.width+50;
-            if (rocket.worldX>canvas.width+60) rocket.worldX = -50;
+            if (rocket.worldX < -60) rocket.worldX = canvas.width + 50;
+            if (rocket.worldX > canvas.width + 60) rocket.worldX = -50;
+
             if (thrustActive) consumeFuel(throttle * FUEL_BURN_RATE * dtc);
-            let speed = Math.sqrt(rocket.vx**2 + rocket.vy**2);
+
+            let speed = Math.sqrt(rocket.vx ** 2 + rocket.vy ** 2);
             let alt = Math.max(0, WORLD_GROUND_Y - rocket.worldY);
             let speedBadge = document.getElementById('speedBadge');
             let altBadge = document.getElementById('altBadge');
             let fuelFill = document.getElementById('fuelFill');
-            if (speedBadge) speedBadge.textContent = speed.toFixed(1)+' m/s';
-            if (altBadge) altBadge.textContent = alt.toFixed(0)+' m';
+            if (speedBadge) speedBadge.textContent = speed.toFixed(1) + ' m/s';
+            if (altBadge) altBadge.textContent = alt.toFixed(0) + ' m';
             if (fuelFill) {
-                let maxFuel = Math.max(1, parts.filter(p=>p.type==='tank').length * 10);
-                let fp = (getTotalFuel()/maxFuel)*100;
-                fuelFill.style.width = Math.min(100,Math.max(0,fp))+'%';
+                let maxFuel = Math.max(1, parts.filter(p => p.type === 'tank').length * 10);
+                let fp = (getTotalFuel() / maxFuel) * 100;
+                fuelFill.style.width = Math.min(100, Math.max(0, fp)) + '%';
             }
         }
 
+        // ═══════════ GAME LOOP ═══════════
         let lastTime = performance.now();
+
         function loop(now) {
-            let dt = (now - lastTime)/1000;
-            if (dt>0.1) dt=0.1;
+            let dt = (now - lastTime) / 1000;
+            if (dt > 0.1) dt = 0.1;
             lastTime = now;
-            if (mode === 'build') renderBuild();
-            else {
+
+            if (mode === 'build') {
+                renderBuildCanvas();
+            } else {
                 updateFlight(dt);
-                renderFlight();
+                renderFlightCanvas();
             }
             requestAnimationFrame(loop);
         }
 
-        // ═══ INIT ═══
+        // ═══════════ INIT ═══════════
         updateMassProperties();
+        updateRocketStackBounds();
         setMode('build');
         requestAnimationFrame(loop);
 
-        window.addEventListener('resize', () => { if (mode==='build') renderOverlay(); });
-        window.addEventListener('orientationchange', () => { setTimeout(() => { if (mode==='build') renderOverlay(); }, 150); });
+        window.addEventListener('resize', () => { if (mode === 'build') renderUI(); });
     })();
 </script>
 </body>
