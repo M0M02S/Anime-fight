@@ -3,116 +3,123 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Klangformer</title>
+<title>Klangformer – Rainbow Rush</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Segoe UI', system-ui, sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
   canvas { display: block; }
-  body::after {
-    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 4;
-    background: radial-gradient(circle at 50% 50%, transparent 40%, rgba(0,0,0,0.7) 100%);
-  }
   #hud {
     position: fixed; top: 0; left: 0; right: 0; padding: 20px 24px;
     display: flex; justify-content: space-between; align-items: flex-start;
     pointer-events: none; z-index: 10;
-    text-shadow: 0 0 12px rgba(100,200,255,0.8);
   }
   .box {
-    background: rgba(0,20,40,0.45);
-    border: 1px solid rgba(100,200,255,0.4);
-    border-radius: 12px;
-    padding: 8px 16px;
+    background: rgba(20,0,40,0.5);
+    border: 2px solid;
+    border-image: linear-gradient(135deg, #ff00cc, #00ffff, #ffff00) 1;
+    border-radius: 14px;
+    padding: 8px 18px;
     backdrop-filter: blur(10px);
-    box-shadow: 0 0 20px rgba(50,150,255,0.3);
+    box-shadow: 0 0 30px rgba(255,0,255,0.4), inset 0 0 15px rgba(0,255,255,0.15);
   }
-  .label { font-size: 10px; letter-spacing: 3px; color: #88aacc; margin-bottom: 2px; }
-  #score { font-size: 26px; font-weight: 700; color: #66ccff; }
-  #combo { font-size: 26px; font-weight: 700; color: #ff66cc; }
-  #lives { font-size: 22px; color: #ff4466; letter-spacing: 2px; }
+  .label { font-size: 10px; letter-spacing: 3px; color: #ffee88; margin-bottom: 2px; font-weight: 700; }
+  #score { font-size: 28px; font-weight: 900; background: linear-gradient(90deg, #ff00cc, #ffff00, #00ffff); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  #combo { font-size: 28px; font-weight: 900; color: #ff66ff; text-shadow: 0 0 15px #ff00ff; }
+  #lives { font-size: 22px; letter-spacing: 3px; color: #ff2266; text-shadow: 0 0 12px #ff0055; }
   #combo-box { opacity: 0; transition: opacity 0.2s; }
   #combo-box.active { opacity: 1; }
   #flash {
     position: fixed; inset: 0; pointer-events: none; z-index: 5;
-    background: radial-gradient(circle, transparent 30%, rgba(255,60,80,0.7) 100%);
-    opacity: 0; transition: opacity 0.15s;
+    background: radial-gradient(circle, transparent 20%, rgba(255,60,120,0.75) 100%);
+    opacity: 0; transition: opacity 0.18s;
   }
   #perfect-flash {
     position: fixed; inset: 0; pointer-events: none; z-index: 5;
-    background: radial-gradient(circle, rgba(255,220,100,0.35), transparent 60%);
-    opacity: 0; transition: opacity 0.15s;
+    background: radial-gradient(circle, rgba(255,255,255,0.7), rgba(255,240,100,0.5) 30%, rgba(255,0,200,0.3) 60%, transparent 80%);
+    opacity: 0; transition: opacity 0.14s;
   }
   #start-screen, #game-over {
     position: fixed; inset: 0; display: flex; flex-direction: column;
     justify-content: center; align-items: center;
-    background: rgba(0,5,15,0.85);
+    background: radial-gradient(circle at 50% 50%, #330066, #000011 70%);
     color: #fff; z-index: 20; text-align: center; padding: 20px;
-    backdrop-filter: blur(20px);
   }
   #start-screen h1, #game-over h1 {
-    font-size: 48px; font-weight: 900; letter-spacing: 4px;
-    background: linear-gradient(135deg, #66ffff, #ff66cc);
+    font-size: 56px; font-weight: 900; letter-spacing: 6px;
+    background: linear-gradient(135deg, #ff00cc, #ffff00, #00ffcc, #00aaff, #ff00cc);
+    background-size: 300% 300%;
     -webkit-background-clip: text; background-clip: text;
     -webkit-text-fill-color: transparent;
-    margin-bottom: 10px;
-    filter: drop-shadow(0 0 20px rgba(100,200,255,0.5));
+    margin-bottom: 12px;
+    animation: rainbowShift 3s linear infinite;
+    filter: drop-shadow(0 0 30px rgba(255,0,200,0.7));
   }
-  #start-screen p, #game-over p { color: #aaccee; margin: 6px 0; font-size: 15px; }
-  .key { display: inline-block; background: #223344; border: 1px solid #445566; padding: 3px 10px; border-radius: 6px; font-family: monospace; color: #88ddff; margin: 0 3px; }
-  #game-over .final { font-size: 42px; color: #66ccff; margin: 16px 0; font-weight: 700; }
+  @keyframes rainbowShift {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 300% 50%; }
+  }
+  #start-screen p, #game-over p { color: #ddbbff; margin: 6px 0; font-size: 15px; }
+  .key { display: inline-block; background: linear-gradient(135deg, #4422aa, #ff00cc); padding: 4px 12px; border-radius: 8px; font-family: monospace; color: #fff; margin: 0 3px; font-weight: 700; box-shadow: 0 0 15px rgba(255,0,200,0.6); }
+  #game-over .final { font-size: 52px; margin: 18px 0; font-weight: 900; background: linear-gradient(90deg, #ff00cc, #ffff00, #00ffff); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
   button {
-    margin-top: 24px; padding: 14px 44px; font-size: 17px; font-weight: 700;
-    background: linear-gradient(135deg, #3399ff, #ff66cc);
-    border: none; border-radius: 12px; color: #fff; cursor: pointer;
-    letter-spacing: 3px; box-shadow: 0 0 30px rgba(100,150,255,0.5);
+    margin-top: 28px; padding: 16px 52px; font-size: 18px; font-weight: 900;
+    background: linear-gradient(135deg, #ff00cc, #ff8800, #ffff00, #00ff88, #00aaff, #cc00ff);
+    background-size: 300% 300%;
+    border: none; border-radius: 14px; color: #fff; cursor: pointer;
+    letter-spacing: 4px; box-shadow: 0 0 40px rgba(255,0,200,0.7), 0 0 80px rgba(0,200,255,0.4);
     transition: transform 0.15s; font-family: inherit;
+    animation: rainbowShift 2s linear infinite;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
   }
-  button:hover { transform: scale(1.05); }
-  button:active { transform: scale(0.98); }
+  button:hover { transform: scale(1.07); }
+  button:active { transform: scale(0.97); }
   .hidden { display: none !important; }
   #combo-popup {
     position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    font-size: 64px; font-weight: 900; color: #ffdd44; font-style: italic;
-    text-shadow: 0 0 40px rgba(255,200,50,0.9);
+    font-size: 72px; font-weight: 900; font-style: italic;
     pointer-events: none; z-index: 6; opacity: 0;
+    -webkit-text-stroke: 3px #fff;
+    filter: drop-shadow(0 0 30px currentColor);
+    letter-spacing: 4px;
+  }
+  #miss-popup {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    font-size: 60px; font-weight: 900; font-style: italic;
+    pointer-events: none; z-index: 6; opacity: 0;
+    color: #ff2244; -webkit-text-stroke: 2px #fff;
+    filter: drop-shadow(0 0 30px #ff0055);
   }
 </style>
 </head>
 <body>
 
 <div id="hud">
-  <div class="box">
-    <div class="label">SCORE</div>
-    <div id="score">0</div>
-  </div>
-  <div class="box" id="combo-box">
-    <div class="label">COMBO</div>
-    <div id="combo">x0</div>
-  </div>
-  <div class="box">
-    <div class="label">LIVES</div>
-    <div id="lives">♥♥♥</div>
-  </div>
+  <div class="box"><div class="label">SCORE</div><div id="score">0</div></div>
+  <div class="box" id="combo-box"><div class="label">COMBO</div><div id="combo">x0</div></div>
+  <div class="box"><div class="label">LIVES</div><div id="lives">♥♥♥♥♥</div></div>
 </div>
 
 <div id="flash"></div>
 <div id="perfect-flash"></div>
 <div id="combo-popup"></div>
+<div id="miss-popup"></div>
 
 <div id="start-screen">
   <h1>KLANGFORMER</h1>
-  <p>Shape sound. Ride the wave. Feel the beat.</p>
-  <p style="margin-top: 26px; font-size: 13px; color: #88aacc;">
+  <p style="font-size:17px;color:#ffff88;font-weight:700;">✦ Rainbow Rush ✦</p>
+  <p>Shape the sound. Ride the rainbow beat.</p>
+  <p style="margin-top: 30px; font-size: 14px;">
     Press <span class="key">SPACE</span> <span class="key">CLICK</span> <span class="key">TAP</span><br>
-    when a wave hits you
+    exactly when the ring hits you
   </p>
-  <button id="start-btn">START</button>
+  <button id="start-btn">START THE BEAT</button>
 </div>
 
 <div id="game-over" class="hidden">
   <h1>WAVE CRASHED</h1>
   <div class="final" id="final-score">0</div>
   <p id="final-combo">Best combo: x0</p>
+  <p id="final-beat">Beats hit: 0</p>
   <button id="restart-btn">PLAY AGAIN</button>
 </div>
 
@@ -123,120 +130,295 @@
 <script type="module">
 import * as THREE from 'three';
 
-// ============ CONFIG ============
-const BPM = 120;
-const BEAT_MS = 60000 / BPM;          // 500ms
-const APPROACH_MS = BEAT_MS * 3;      // 1500ms travel time
+// ============ TIMING / CONFIG ============
+const BPM = 140;
+const BEAT_DUR = 60 / BPM;           // ~0.4286s
+const STEP_DUR = BEAT_DUR / 4;       // 16th note
+const APPROACH_BEATS = 2;
+const APPROACH_SEC = BEAT_DUR * APPROACH_BEATS;
+const HIT_WINDOW_SEC = 0.20;
+const PERFECT_WINDOW_SEC = 0.08;
+const MISS_WINDOW_SEC = 0.16;
+const RING_START_BEAT = 8;           // 2 bars intro
 const SPAWN_Z = -45;
-const RING_SPEED = -SPAWN_Z / (APPROACH_MS / 1000); // 30 u/s
-const HIT_WINDOW = 160;               // ±ms for "good"
-const PERFECT_WINDOW = 60;            // ±ms for "perfect"
 const ONE = new THREE.Vector3(1, 1, 1);
 
+const CHORDS = [
+  [64, 67, 71],  // Em
+  [60, 64, 67],  // C
+  [67, 71, 74],  // G
+  [62, 66, 69],  // D
+];
+const BASS_ROOTS = [40, 36, 43, 38];
+
 // ============ STATE ============
+let audioCtx = null;
+let music = null;
+
 const state = {
-  score: 0, combo: 0, bestCombo: 0, lives: 3,
+  score: 0, combo: 0, bestCombo: 0, lives: 5, beatsHit: 0,
   running: false,
-  rings: [], particles: [],
-  lastBeatTime: 0,
+  rings: [], particles: [], shockwaves: [],
   shakeAmount: 0,
-  cameraBase: new THREE.Vector3(0, 4, 8),
+  beatIndexToSpawn: 0,
+  lastBeatIndex: -1,
 };
 
 // ============ SCENE ============
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x000814);
-scene.fog = new THREE.Fog(0x000814, 12, 80);
+scene.background = new THREE.Color(0x110022);
+scene.fog = new THREE.FogExp2(0x110022, 0.012);
 
-const camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.1, 200);
-camera.position.copy(state.cameraBase);
+const camera = new THREE.PerspectiveCamera(72, innerWidth / innerHeight, 0.1, 250);
+const camBase = new THREE.Vector3(0, 4, 9);
+camera.position.copy(camBase);
 camera.lookAt(0, 1, -15);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(innerWidth, innerHeight);
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.1;
 document.body.appendChild(renderer.domElement);
 
-// Lights
-scene.add(new THREE.AmbientLight(0x335588, 1.3));
-const keyLight = new THREE.PointLight(0xff44cc, 3, 60);
-keyLight.position.set(6, 8, 4);
-scene.add(keyLight);
-const rimLight = new THREE.PointLight(0x44aaff, 3, 60);
-rimLight.position.set(-6, 5, -8);
-scene.add(rimLight);
+// Lights (disco rig)
+scene.add(new THREE.AmbientLight(0x664488, 1.1));
+const light1 = new THREE.PointLight(0xff00cc, 4, 80);
+light1.position.set(8, 8, 4); scene.add(light1);
+const light2 = new THREE.PointLight(0x00ffff, 4, 80);
+light2.position.set(-8, 6, -4); scene.add(light2);
+const light3 = new THREE.PointLight(0xffff00, 3, 80);
+light3.position.set(0, 10, -10); scene.add(light3);
+const light4 = new THREE.PointLight(0x00ff88, 3, 80);
+light4.position.set(6, 5, -15); scene.add(light4);
 
-// Ground grid
-const grid = new THREE.GridHelper(200, 100, 0x0088ff, 0x004488);
+// Floor grid (rainbow-ish)
+const grid = new THREE.GridHelper(200, 100, 0xff00cc, 0x0066ff);
 grid.material.opacity = 0.35;
 grid.material.transparent = true;
 scene.add(grid);
 
-// Ground glow
+// Floor glow circle
 const floorGlow = new THREE.Mesh(
-  new THREE.CircleGeometry(28, 48),
-  new THREE.MeshBasicMaterial({ color: 0x0044aa, transparent: true, opacity: 0.12, blending: THREE.AdditiveBlending })
+  new THREE.CircleGeometry(30, 64),
+  new THREE.MeshBasicMaterial({ color: 0xff00aa, transparent: true, opacity: 0.15, blending: THREE.AdditiveBlending })
 );
 floorGlow.rotation.x = -Math.PI / 2;
 floorGlow.position.y = 0.01;
 scene.add(floorGlow);
 
-// Player ball
+// Pulsing floor ring (beat reactive)
+const floorRing = new THREE.Mesh(
+  new THREE.RingGeometry(3, 3.5, 64),
+  new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.7, side: THREE.DoubleSide, blending: THREE.AdditiveBlending })
+);
+floorRing.rotation.x = -Math.PI / 2;
+floorRing.position.y = 0.02;
+scene.add(floorRing);
+
+// Player ball (rainbow)
 const ball = new THREE.Mesh(
-  new THREE.IcosahedronGeometry(0.9, 2),
+  new THREE.IcosahedronGeometry(0.95, 2),
   new THREE.MeshStandardMaterial({
-    color: 0x66ffff, emissive: 0x22aaff, emissiveIntensity: 2.5,
-    metalness: 0.4, roughness: 0.15,
+    color: 0xffffff, emissive: 0xff00ff, emissiveIntensity: 2.8,
+    metalness: 0.5, roughness: 0.15,
   })
 );
-ball.position.set(0, 1, 0);
+ball.position.set(0, 1.05, 0);
 scene.add(ball);
 
 const ballGlow = new THREE.Mesh(
-  new THREE.SphereGeometry(1.6, 16, 16),
-  new THREE.MeshBasicMaterial({ color: 0x44aaff, transparent: true, opacity: 0.22, blending: THREE.AdditiveBlending })
+  new THREE.SphereGeometry(1.9, 20, 20),
+  new THREE.MeshBasicMaterial({ color: 0xff44ff, transparent: true, opacity: 0.28, blending: THREE.AdditiveBlending })
 );
 ball.add(ballGlow);
 
-// Stars
+// Star field (rainbow colors)
 const starsGeo = new THREE.BufferGeometry();
-const starArr = new Float32Array(500 * 3);
-for (let i = 0; i < 500 * 3; i++) starArr[i] = (Math.random() - 0.5) * 200;
-starsGeo.setAttribute('position', new THREE.BufferAttribute(starArr, 3));
+const starCount = 900;
+const starPos = new Float32Array(starCount * 3);
+const starCol = new Float32Array(starCount * 3);
+for (let i = 0; i < starCount; i++) {
+  starPos[i * 3]     = (Math.random() - 0.5) * 240;
+  starPos[i * 3 + 1] = Math.random() * 60 - 5;
+  starPos[i * 3 + 2] = (Math.random() - 0.5) * 240;
+  const col = new THREE.Color().setHSL(Math.random(), 1, 0.65);
+  starCol[i * 3]     = col.r;
+  starCol[i * 3 + 1] = col.g;
+  starCol[i * 3 + 2] = col.b;
+}
+starsGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+starsGeo.setAttribute('color', new THREE.BufferAttribute(starCol, 3));
 const stars = new THREE.Points(starsGeo,
-  new THREE.PointsMaterial({ color: 0x88ccff, size: 0.2, transparent: true, opacity: 0.55 }));
+  new THREE.PointsMaterial({ size: 0.35, vertexColors: true, transparent: true, opacity: 0.85 }));
 scene.add(stars);
 
-// ============ AUDIO ============
-let audioCtx = null;
-function initAudio() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  if (audioCtx.state === 'suspended') audioCtx.resume();
-}
-function playTone(freq, dur, type = 'sine', vol = 0.08) {
-  if (!audioCtx) return;
-  const o = audioCtx.createOscillator();
-  const g = audioCtx.createGain();
-  o.type = type;
-  o.frequency.value = freq;
-  g.gain.setValueAtTime(vol, audioCtx.currentTime);
-  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
-  o.connect(g).connect(audioCtx.destination);
-  o.start();
-  o.stop(audioCtx.currentTime + dur);
-}
-const playBeat = () => playTone(110, 0.08, 'sine', 0.05);
-function playHit(perfect, combo) {
-  if (perfect) {
-    playTone(660 + combo * 12, 0.14, 'triangle', 0.13);
-    setTimeout(() => playTone(990 + combo * 18, 0.14, 'triangle', 0.1), 35);
-  } else {
-    playTone(440 + combo * 8, 0.1, 'square', 0.09);
+// ============ MUSIC ENGINE ============
+class Music {
+  constructor(ctx) {
+    this.ctx = ctx;
+    this.master = ctx.createGain();
+    this.master.gain.value = 0.32;
+
+    // Ping-pong-ish echo for sparkle
+    const delay = ctx.createDelay(1);
+    delay.delayTime.value = BEAT_DUR * 0.75;
+    const fb = ctx.createGain();
+    fb.gain.value = 0.28;
+    const wet = ctx.createGain();
+    wet.gain.value = 0.25;
+    this.master.connect(ctx.destination);
+    this.master.connect(delay).connect(fb).connect(delay);
+    delay.connect(wet).connect(ctx.destination);
+
+    this.step = 0;
+    this.startTime = 0;
+    this.nextStepTime = 0;
+    this.isPlaying = false;
+    this.timer = null;
   }
-}
-function playMiss() {
-  playTone(140, 0.35, 'sawtooth', 0.14);
-  setTimeout(() => playTone(80, 0.35, 'sawtooth', 0.09), 50);
+
+  start() {
+    this.startTime = this.ctx.currentTime + 0.4;
+    this.nextStepTime = this.startTime;
+    this.step = 0;
+    this.isPlaying = true;
+    this.schedule();
+  }
+
+  stop() {
+    this.isPlaying = false;
+    if (this.timer) clearTimeout(this.timer);
+    // Fade out
+    const t = this.ctx.currentTime;
+    this.master.gain.cancelScheduledValues(t);
+    this.master.gain.setValueAtTime(this.master.gain.value, t);
+    this.master.gain.linearRampToValueAtTime(0, t + 0.4);
+  }
+
+  schedule() {
+    while (this.nextStepTime < this.ctx.currentTime + 0.25) {
+      this.playStep(this.step, this.nextStepTime);
+      this.nextStepTime += STEP_DUR;
+      this.step++;
+    }
+    if (this.isPlaying) {
+      this.timer = setTimeout(() => this.schedule(), 25);
+    }
+  }
+
+  playStep(step, t) {
+    const bar = Math.floor(step / 16) % 4;
+    const s = step % 16;
+    const chord = CHORDS[bar];
+    const root = BASS_ROOTS[bar];
+    const phrase = Math.floor(step / 64); // Every 4 bars = new phrase variation
+
+    // === DRUMS ===
+    if (s === 0 || s === 8) this.kick(t, 1.0);
+    if (s === 6 || s === 14) this.kick(t, 0.7);
+    if (s === 4 || s === 12) this.snare(t);
+    if (s % 2 === 0) this.hihat(t, s % 4 === 0 ? 0.28 : 0.14);
+
+    // Open hat accent
+    if (s === 10) this.hihat(t, 0.10, 0.15);
+
+    // === BASS ===
+    if (s % 4 === 0) this.bass(root, t, 0.28);
+    // Extra bass note on 6 and 14 for drive
+    if (s === 6 || s === 14) this.bass(root + 12, t, 0.15);
+
+    // === FAST ARP (Rush-E style) ===
+    // 16th note oscillation through chord tones
+    const arpPattern = [0, 1, 2, 1];
+    const arpNote = chord[arpPattern[s % 4]] + 12 + (phrase % 2 === 0 ? 0 : 12);
+    this.lead(arpNote, t, 0.055, 'triangle');
+
+    // === ACCENT LEAD ===
+    if (s === 0) this.lead(chord[0] + 24, t, 0.09, 'sawtooth');
+    if (s === 8 && (phrase % 2 === 1)) this.lead(chord[2] + 24, t, 0.08, 'sawtooth');
+
+    // === SPARKLE (high pitched, echoes via delay) ===
+    if (s === 0 && phrase % 2 === 0) this.lead(chord[0] + 36, t, 0.04, 'sine');
+  }
+
+  kick(t, vol = 1) {
+    const o = this.ctx.createOscillator();
+    const g = this.ctx.createGain();
+    o.frequency.setValueAtTime(160, t);
+    o.frequency.exponentialRampToValueAtTime(45, t + 0.09);
+    g.gain.setValueAtTime(vol * 0.85, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+    o.connect(g).connect(this.master);
+    o.start(t);
+    o.stop(t + 0.22);
+  }
+
+  snare(t) {
+    const buf = this.ctx.createBuffer(1, Math.floor(this.ctx.sampleRate * 0.16), this.ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    const src = this.ctx.createBufferSource();
+    src.buffer = buf;
+    const f = this.ctx.createBiquadFilter();
+    f.type = 'highpass';
+    f.frequency.value = 1400;
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(0.32, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.14);
+    src.connect(f).connect(g).connect(this.master);
+    src.start(t);
+    src.stop(t + 0.16);
+  }
+
+  hihat(t, vol, decay = 0.045) {
+    const buf = this.ctx.createBuffer(1, Math.floor(this.ctx.sampleRate * decay), this.ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    const src = this.ctx.createBufferSource();
+    src.buffer = buf;
+    const f = this.ctx.createBiquadFilter();
+    f.type = 'highpass';
+    f.frequency.value = 7500;
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + decay);
+    src.connect(f).connect(g).connect(this.master);
+    src.start(t);
+  }
+
+  bass(midi, t, vol) {
+    const freq = 440 * Math.pow(2, (midi - 69) / 12);
+    const o = this.ctx.createOscillator();
+    const g = this.ctx.createGain();
+    const f = this.ctx.createBiquadFilter();
+    o.type = 'sawtooth';
+    o.frequency.value = freq;
+    f.type = 'lowpass';
+    f.frequency.value = 600;
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+    o.connect(f).connect(g).connect(this.master);
+    o.start(t);
+    o.stop(t + 0.22);
+  }
+
+  lead(midi, t, vol, type = 'triangle') {
+    const freq = 440 * Math.pow(2, (midi - 69) / 12);
+    const o = this.ctx.createOscillator();
+    const g = this.ctx.createGain();
+    o.type = type;
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
+    o.connect(g).connect(this.master);
+    o.start(t);
+    o.stop(t + 0.11);
+  }
+
+  beatTimeOf(index) {
+    return this.startTime + index * BEAT_DUR;
+  }
 }
 
 // ============ UI ============
@@ -248,10 +430,12 @@ const ui = {
   flash: document.getElementById('flash'),
   perfectFlash: document.getElementById('perfect-flash'),
   comboPopup: document.getElementById('combo-popup'),
+  missPopup: document.getElementById('miss-popup'),
   startScreen: document.getElementById('start-screen'),
   gameOver: document.getElementById('game-over'),
   finalScore: document.getElementById('final-score'),
   finalCombo: document.getElementById('final-combo'),
+  finalBeat: document.getElementById('final-beat'),
 };
 
 function updateUI() {
@@ -263,44 +447,45 @@ function updateUI() {
 function flash(kind) {
   if (kind === 'perfect') {
     ui.perfectFlash.style.opacity = '1';
-    setTimeout(() => ui.perfectFlash.style.opacity = '0', 130);
+    setTimeout(() => ui.perfectFlash.style.opacity = '0', 140);
   } else {
     ui.flash.style.opacity = '1';
-    setTimeout(() => ui.flash.style.opacity = '0', 200);
+    setTimeout(() => ui.flash.style.opacity = '0', 220);
   }
 }
-function showComboPopup(text, color) {
-  ui.comboPopup.textContent = text;
-  ui.comboPopup.style.color = color;
-  ui.comboPopup.style.transition = 'none';
-  ui.comboPopup.style.opacity = '1';
-  ui.comboPopup.style.transform = 'translate(-50%, -50%) scale(1)';
-  void ui.comboPopup.offsetHeight;
-  ui.comboPopup.style.transition = 'all 0.55s ease-out';
-  ui.comboPopup.style.transform = 'translate(-50%, -140%) scale(1.6)';
-  ui.comboPopup.style.opacity = '0';
+function showPopup(el, text, color) {
+  el.textContent = text;
+  el.style.color = color;
+  el.style.transition = 'none';
+  el.style.opacity = '1';
+  el.style.transform = 'translate(-50%, -50%) scale(0.6)';
+  void el.offsetHeight;
+  el.style.transition = 'all 0.5s cubic-bezier(0.2, 0.9, 0.3, 1)';
+  el.style.transform = 'translate(-50%, -150%) scale(1.5)';
+  el.style.opacity = '0';
 }
 
-// ============ SPAWN & RESOLVE ============
-function spawnRing(spawnTime) {
-  const geo = new THREE.TorusGeometry(2, 0.12, 8, 40);
+// ============ SPAWN & EFFECTS ============
+function spawnRing(crossTime, beatIndex) {
+  const hue = (beatIndex * 37) % 360; // golden-angle rainbow spread
+  const color = new THREE.Color().setHSL(hue / 360, 1, 0.6);
+
+  const geo = new THREE.TorusGeometry(2.1, 0.18, 10, 48);
   const mat = new THREE.MeshStandardMaterial({
-    color: 0xff44aa, emissive: 0xff44aa, emissiveIntensity: 1.8,
-    transparent: true, opacity: 0.95,
+    color, emissive: color, emissiveIntensity: 2.2,
+    transparent: true, opacity: 1,
   });
   const ring = new THREE.Mesh(geo, mat);
-  ring.position.set(0, 1, SPAWN_Z);
+  ring.position.set(0, 1.05, SPAWN_Z);
   ring.userData = {
-    spawnTime,
-    crossTime: spawnTime + APPROACH_MS,
-    resolved: false,
-    fadeTime: 0,
+    crossTime, beatIndex, resolved: false, fadeTime: 0,
+    baseColor: color.clone(), hue,
   };
   scene.add(ring);
   state.rings.push(ring);
 }
 
-function burst(pos, color, count, speed) {
+function burst(pos, colorHex, count, speed, size = 0.32) {
   const geo = new THREE.BufferGeometry();
   const posArr = new Float32Array(count * 3);
   const vel = [];
@@ -308,95 +493,177 @@ function burst(pos, color, count, speed) {
     posArr[i * 3] = pos.x;
     posArr[i * 3 + 1] = pos.y;
     posArr[i * 3 + 2] = pos.z;
-    const t = Math.random() * Math.PI * 2;
-    const p = Math.random() * Math.PI * 2;
-    const v = speed * (0.5 + Math.random());
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.acos(2 * Math.random() - 1);
+    const v = speed * (0.4 + Math.random());
     vel.push({
-      vx: Math.cos(t) * Math.cos(p) * v,
-      vy: Math.sin(p) * v,
-      vz: Math.sin(t) * Math.cos(p) * v,
+      vx: Math.sin(phi) * Math.cos(theta) * v,
+      vy: Math.cos(phi) * v + 4,
+      vz: Math.sin(phi) * Math.sin(theta) * v,
     });
   }
   geo.setAttribute('position', new THREE.BufferAttribute(posArr, 3));
   const mat = new THREE.PointsMaterial({
-    color, size: 0.28, transparent: true, opacity: 1, blending: THREE.AdditiveBlending,
+    color: colorHex, size, transparent: true, opacity: 1, blending: THREE.AdditiveBlending,
   });
   const points = new THREE.Points(geo, mat);
   scene.add(points);
   state.particles.push({ points, velocities: vel, life: 1, positions: posArr });
 }
 
+function shockwave(colorHex, radiusStart = 1, radiusEnd = 12, dur = 0.55) {
+  const geo = new THREE.RingGeometry(radiusStart, radiusStart + 0.6, 48);
+  const mat = new THREE.MeshBasicMaterial({
+    color: colorHex, transparent: true, opacity: 1, side: THREE.DoubleSide, blending: THREE.AdditiveBlending,
+  });
+  const m = new THREE.Mesh(geo, mat);
+  m.position.set(0, 1.05, 0);
+  m.rotation.x = -Math.PI / 2;
+  scene.add(m);
+  state.shockwaves.push({ mesh: m, life: 1, dur, radiusEnd, radiusStart });
+}
+
 function resolveRing(ring, quality) {
   if (ring.userData.resolved) return;
   ring.userData.resolved = true;
   const pos = ring.position.clone();
+  const col = ring.userData.baseColor;
 
   if (quality === 'perfect') {
     state.combo++;
     state.bestCombo = Math.max(state.bestCombo, state.combo);
     state.score += 100 * state.combo;
+    state.beatsHit++;
     playHit(true, state.combo);
     flash('perfect');
-    showComboPopup('PERFECT', '#ffdd44');
-    burst(pos, 0xffdd44, 44, 28);
-    state.shakeAmount = 9;
+    showPopup(ui.comboPopup, 'PERFECT', '#ffff44');
+    // RAINBOW burst
+    for (let i = 0; i < 5; i++) {
+      const hue = (performance.now() / 5 + i * 72) % 360;
+      const c = new THREE.Color().setHSL(hue / 360, 1, 0.6).getHex();
+      burst(pos, c, 14, 32, 0.36);
+    }
+    shockwave(0xffffff, 1, 20, 0.55);
+    shockwave(col.getHex(), 1, 30, 0.7);
+    state.shakeAmount = 12;
+    // ball explosion visual
+    ball.material.emissiveIntensity = 8;
   } else if (quality === 'good') {
     state.combo++;
     state.bestCombo = Math.max(state.bestCombo, state.combo);
     state.score += 50 * state.combo;
+    state.beatsHit++;
     playHit(false, state.combo);
-    showComboPopup('GOOD', '#44ddff');
-    burst(pos, 0x44ddff, 22, 16);
-    state.shakeAmount = 4;
+    showPopup(ui.comboPopup, 'GOOD', '#44ffff');
+    burst(pos, col.getHex(), 26, 20, 0.3);
+    shockwave(col.getHex(), 1, 14, 0.5);
+    state.shakeAmount = 5;
+    ball.material.emissiveIntensity = 5;
   } else if (quality === 'miss') {
     state.combo = 0;
     state.lives--;
     playMiss();
     flash('miss');
-    showComboPopup('MISS', '#ff4466');
-    state.shakeAmount = 16;
+    showPopup(ui.missPopup, 'MISS', '#ff2244');
+    state.shakeAmount = 18;
     if (state.lives <= 0) gameOver();
   }
   updateUI();
 }
 
+// ============ AUDIO SFX ============
+function initAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+function playHit(perfect, combo) {
+  if (!audioCtx) return;
+  const t = audioCtx.currentTime;
+  const base = perfect ? 880 : 660;
+  const freq = base * Math.pow(2, Math.min(combo, 12) / 12);
+  // Hit tone
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type = perfect ? 'triangle' : 'square';
+  o.frequency.setValueAtTime(freq, t);
+  o.frequency.exponentialRampToValueAtTime(freq * 1.5, t + 0.08);
+  g.gain.setValueAtTime(perfect ? 0.12 : 0.08, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+  o.connect(g).connect(audioCtx.destination);
+  o.start(t);
+  o.stop(t + 0.16);
+
+  if (perfect) {
+    // Second harmony
+    setTimeout(() => {
+      const o2 = audioCtx.createOscillator();
+      const g2 = audioCtx.createGain();
+      o2.type = 'sine';
+      o2.frequency.value = freq * 1.5;
+      g2.gain.setValueAtTime(0.1, t + 0.05);
+      g2.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+      o2.connect(g2).connect(audioCtx.destination);
+      o2.start(t + 0.05);
+      o2.stop(t + 0.22);
+    }, 30);
+  }
+}
+function playMiss() {
+  if (!audioCtx) return;
+  const t = audioCtx.currentTime;
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type = 'sawtooth';
+  o.frequency.setValueAtTime(180, t);
+  o.frequency.exponentialRampToValueAtTime(60, t + 0.3);
+  g.gain.setValueAtTime(0.15, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+  o.connect(g).connect(audioCtx.destination);
+  o.start(t);
+  o.stop(t + 0.36);
+}
+
 // ============ INPUT ============
 function handlePress() {
-  if (!state.running) return;
-  const now = performance.now();
+  if (!state.running || !audioCtx) return;
+  const t = audioCtx.currentTime;
   let best = null, bestDist = Infinity;
   for (const ring of state.rings) {
     if (ring.userData.resolved) continue;
-    const d = Math.abs(now - ring.userData.crossTime);
-    if (d < HIT_WINDOW && d < bestDist) {
-      best = ring;
-      bestDist = d;
-    }
+    const d = Math.abs(t - ring.userData.crossTime);
+    if (d < HIT_WINDOW_SEC && d < bestDist) { best = ring; bestDist = d; }
   }
   if (best) {
-    resolveRing(best, bestDist < PERFECT_WINDOW ? 'perfect' : 'good');
+    resolveRing(best, bestDist < PERFECT_WINDOW_SEC ? 'perfect' : 'good');
   } else {
-    state.score = Math.max(0, state.score - 10);
-    state.shakeAmount = 5;
-    updateUI();
+    // harmless empty tap - just tiny visual
+    state.shakeAmount = Math.max(state.shakeAmount, 2);
   }
 }
 
 // ============ GAME FLOW ============
 function startGame() {
   initAudio();
+  if (music) music.stop();
+  music = new Music(audioCtx);
+
   // Cleanup
   for (const r of state.rings) { scene.remove(r); r.geometry.dispose(); r.material.dispose(); }
   state.rings = [];
   for (const p of state.particles) { scene.remove(p.points); p.points.geometry.dispose(); p.points.material.dispose(); }
   state.particles = [];
+  for (const s of state.shockwaves) { scene.remove(s.mesh); s.mesh.geometry.dispose(); s.mesh.material.dispose(); }
+  state.shockwaves = [];
 
-  state.score = 0; state.combo = 0; state.bestCombo = 0; state.lives = 3;
-  state.running = true;
-  state.lastBeatTime = performance.now();
-  state.shakeAmount = 0;
-  camera.position.copy(state.cameraBase);
+  Object.assign(state, {
+    score: 0, combo: 0, bestCombo: 0, lives: 5, beatsHit: 0,
+    running: true, shakeAmount: 0,
+    beatIndexToSpawn: RING_START_BEAT,
+    lastBeatIndex: -1,
+  });
+  camera.position.copy(camBase);
 
+  music.start();
   ui.startScreen.classList.add('hidden');
   ui.gameOver.classList.add('hidden');
   updateUI();
@@ -404,126 +671,210 @@ function startGame() {
 
 function gameOver() {
   state.running = false;
+  if (music) music.stop();
   ui.finalScore.textContent = state.score;
   ui.finalCombo.textContent = 'Best combo: x' + state.bestCombo;
-  setTimeout(() => ui.gameOver.classList.remove('hidden'), 400);
+  ui.finalBeat.textContent = 'Beats hit: ' + state.beatsHit;
+  setTimeout(() => ui.gameOver.classList.remove('hidden'), 500);
 }
 
 // ============ EVENTS ============
 window.addEventListener('keydown', (e) => {
-  if (e.code === 'Space' || e.code === 'KeyR') {
+  if (e.code === 'Space') {
     e.preventDefault();
-    if (state.running && e.code === 'Space') handlePress();
-    else if (!state.running) startGame();
+    if (state.running) handlePress();
+    else startGame();
   }
 });
 window.addEventListener('pointerdown', () => { if (state.running) handlePress(); });
-document.getElementById('start-btn').addEventListener('click', startGame);
-document.getElementById('restart-btn').addEventListener('click', startGame);
+document.getElementById('start-btn').addEventListener('click', (e) => { e.stopPropagation(); startGame(); });
+document.getElementById('restart-btn').addEventListener('click', (e) => { e.stopPropagation(); startGame(); });
 window.addEventListener('resize', () => {
   camera.aspect = innerWidth / innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight);
 });
 
-// ============ LOOP ============
+// ============ BEAT VISUALS ============
+function onBeat(beatIndex) {
+  // Hue cycle per beat
+  const hue = (beatIndex * 30) % 360;
+  const col = new THREE.Color().setHSL(hue / 360, 0.85, 0.5);
+
+  // Background pulse
+  scene.background.setHSL(hue / 360, 0.7, 0.045);
+  scene.fog.color.copy(scene.background);
+
+  // Ball pulse
+  ball.scale.setScalar(1.45);
+  ball.material.emissive.setHSL(hue / 360, 1, 0.5);
+  ballGlow.material.color.setHSL(hue / 360, 1, 0.55);
+
+  // Floor pulse
+  floorRing.scale.setScalar(1.35);
+  floorRing.material.opacity = 0.9;
+  floorRing.material.color.setHSL(hue / 360, 1, 0.65);
+  floorGlow.material.color.setHSL(hue / 360, 0.9, 0.4);
+
+  // Lights shift
+  light1.color.setHSL(((hue + 0) % 360) / 360, 1, 0.55);
+  light2.color.setHSL(((hue + 120) % 360) / 360, 1, 0.55);
+  light3.color.setHSL(((hue + 240) % 360) / 360, 1, 0.55);
+  light4.color.setHSL(((hue + 60) % 360) / 360, 1, 0.55);
+
+  // Every 4th beat - bigger flash
+  if (beatIndex % 4 === 0) {
+    ui.perfectFlash.style.opacity = '0.25';
+    setTimeout(() => ui.perfectFlash.style.opacity = '0', 90);
+  }
+}
+
+// ============ MAIN LOOP ============
 let lastFrame = performance.now();
 function tick() {
   requestAnimationFrame(tick);
-  const now = performance.now();
-  const dt = Math.min(0.05, (now - lastFrame) / 1000);
-  lastFrame = now;
+  const nowMs = performance.now();
+  const dt = Math.min(0.05, (nowMs - lastFrame) / 1000);
+  lastFrame = nowMs;
 
-  if (state.running) {
-    // Beat scheduler (sub-frame accurate)
-    while (now - state.lastBeatTime >= BEAT_MS) {
-      state.lastBeatTime += BEAT_MS;
-      spawnRing(state.lastBeatTime);
-      playBeat();
-      ball.scale.setScalar(1.35);
+  if (state.running && audioCtx && music && music.isPlaying) {
+    const t = audioCtx.currentTime;
+
+    // === Schedule ring spawns ===
+    while (music.beatTimeOf(state.beatIndexToSpawn) < t + APPROACH_SEC) {
+      const bt = music.beatTimeOf(state.beatIndexToSpawn);
+      spawnRing(bt, state.beatIndexToSpawn);
+      state.beatIndexToSpawn++;
     }
 
-    // Rings
+    // === Beat pulse detection ===
+    const currentBeat = Math.floor((t - music.startTime) / BEAT_DUR);
+    if (currentBeat > state.lastBeatIndex && currentBeat >= 0) {
+      state.lastBeatIndex = currentBeat;
+      onBeat(currentBeat);
+    }
+
+    // === Update rings ===
     for (let i = state.rings.length - 1; i >= 0; i--) {
       const ring = state.rings[i];
       const ud = ring.userData;
 
       if (!ud.resolved) {
-        const elapsed = (now - ud.spawnTime) / 1000;
-        ring.position.z = SPAWN_Z + RING_SPEED * elapsed;
+        const remaining = ud.crossTime - t;
+        // z from SPAWN_Z (at spawn) to 0 (at cross)
+        ring.position.z = SPAWN_Z * (remaining / APPROACH_SEC);
 
-        // Color feedback by proximity
-        const diff = Math.abs(now - ud.crossTime);
-        let col = 0xff44aa;
-        if (diff < PERFECT_WINDOW) col = 0xffdd44;
-        else if (diff < HIT_WINDOW) col = 0x44ffaa;
-        ring.material.color.setHex(col);
-        ring.material.emissive.setHex(col);
+        // Color feedback
+        const diff = Math.abs(remaining);
+        if (diff < PERFECT_WINDOW_SEC) {
+          ring.material.emissive.setHex(0xffffff);
+          ring.material.emissiveIntensity = 4;
+          ring.scale.setScalar(1.25);
+        } else if (diff < HIT_WINDOW_SEC) {
+          ring.material.emissive.copy(ud.baseColor);
+          ring.material.emissiveIntensity = 3.5;
+          ring.scale.setScalar(1.12);
+        } else {
+          ring.material.emissive.copy(ud.baseColor);
+          ring.material.emissiveIntensity = 2.2;
+          ring.scale.setScalar(1);
+        }
+        // Hue-rotate slightly for shimmer
+        const hueShift = (ud.hue + Math.sin(nowMs * 0.005 + ud.beatIndex) * 20 + 360) % 360;
+        ring.material.color.setHSL(hueShift / 360, 1, 0.6);
 
-        if (now > ud.crossTime + HIT_WINDOW) {
+        // Miss check
+        if (t > ud.crossTime + MISS_WINDOW_SEC) {
           resolveRing(ring, 'miss');
           if (!state.running) break;
         }
       } else {
+        // Fade out
         ud.fadeTime += dt;
-        const t = ud.fadeTime / 0.45;
-        if (t >= 1) {
+        const prog = ud.fadeTime / 0.5;
+        if (prog >= 1) {
           scene.remove(ring);
           ring.geometry.dispose();
           ring.material.dispose();
           state.rings.splice(i, 1);
           continue;
         }
-        ring.scale.setScalar(1 + t * 2.5);
-        ring.material.opacity = 1 - t;
-        ring.material.emissiveIntensity = 1.8 * (1 - t);
+        const s = 1 + prog * 3;
+        ring.scale.setScalar(s);
+        ring.material.opacity = 1 - prog;
+        ring.material.emissiveIntensity = 2.2 * (1 - prog);
       }
-    }
-
-    // Particles
-    for (let i = state.particles.length - 1; i >= 0; i--) {
-      const p = state.particles[i];
-      p.life -= dt / 0.7;
-      if (p.life <= 0) {
-        scene.remove(p.points);
-        p.points.geometry.dispose();
-        p.points.material.dispose();
-        state.particles.splice(i, 1);
-        continue;
-      }
-      for (let j = 0; j < p.velocities.length; j++) {
-        p.positions[j * 3]     += p.velocities[j].vx * dt;
-        p.positions[j * 3 + 1] += p.velocities[j].vy * dt;
-        p.positions[j * 3 + 2] += p.velocities[j].vz * dt;
-        p.velocities[j].vy -= 18 * dt;
-        p.velocities[j].vx *= 0.97;
-        p.velocities[j].vz *= 0.97;
-      }
-      p.points.geometry.attributes.position.needsUpdate = true;
-      p.points.material.opacity = p.life;
     }
   }
 
-  // Ball idle animation
-  ball.scale.lerp(ONE, dt * 10);
-  ball.rotation.x += dt * 0.6;
-  ball.rotation.y += dt * 0.8;
-  const pulse = 1 + Math.sin(now * 0.005) * 0.06;
+  // === Particles (always update) ===
+  for (let i = state.particles.length - 1; i >= 0; i--) {
+    const p = state.particles[i];
+    p.life -= dt / 0.75;
+    if (p.life <= 0) {
+      scene.remove(p.points);
+      p.points.geometry.dispose();
+      p.points.material.dispose();
+      state.particles.splice(i, 1);
+      continue;
+    }
+    for (let j = 0; j < p.velocities.length; j++) {
+      p.positions[j * 3]     += p.velocities[j].vx * dt;
+      p.positions[j * 3 + 1] += p.velocities[j].vy * dt;
+      p.positions[j * 3 + 2] += p.velocities[j].vz * dt;
+      p.velocities[j].vy -= 22 * dt;
+      p.velocities[j].vx *= 0.96;
+      p.velocities[j].vz *= 0.96;
+    }
+    p.points.geometry.attributes.position.needsUpdate = true;
+    p.points.material.opacity = p.life;
+  }
+
+  // === Shockwaves ===
+  for (let i = state.shockwaves.length - 1; i >= 0; i--) {
+    const s = state.shockwaves[i];
+    s.life -= dt / s.dur;
+    if (s.life <= 0) {
+      scene.remove(s.mesh);
+      s.mesh.geometry.dispose();
+      s.mesh.material.dispose();
+      state.shockwaves.splice(i, 1);
+      continue;
+    }
+    const prog = 1 - s.life;
+    const radius = s.radiusStart + (s.radiusEnd - s.radiusStart) * prog;
+    s.mesh.scale.setScalar(radius / s.radiusStart);
+    s.mesh.material.opacity = s.life;
+  }
+
+  // === Ball idle ===
+  ball.scale.lerp(ONE, dt * 9);
+  ball.rotation.x += dt * 0.7;
+  ball.rotation.y += dt * 0.9;
+  ball.material.emissiveIntensity = Math.max(2.5, ball.material.emissiveIntensity - dt * 15);
+  const hueNow = (nowMs * 0.08) % 360;
+  ballGlow.material.color.setHSL(hueNow / 360, 1, 0.6);
+  const pulse = 1 + Math.sin(nowMs * 0.006) * 0.08;
   ballGlow.scale.setScalar(pulse);
 
-  // Camera shake
+  // === Floor ring idle ===
+  floorRing.scale.lerp(ONE, dt * 7);
+  floorRing.material.opacity *= Math.pow(0.02, dt);
+
+  // === Camera shake ===
   if (state.shakeAmount > 0.1) {
-    state.shakeAmount *= Math.pow(0.005, dt);
-    camera.position.x = state.cameraBase.x + (Math.random() - 0.5) * state.shakeAmount * 0.06;
-    camera.position.y = state.cameraBase.y + (Math.random() - 0.5) * state.shakeAmount * 0.06;
+    state.shakeAmount *= Math.pow(0.003, dt);
+    camera.position.x = camBase.x + (Math.random() - 0.5) * state.shakeAmount * 0.07;
+    camera.position.y = camBase.y + (Math.random() - 0.5) * state.shakeAmount * 0.07;
+    camera.position.z = camBase.z + (Math.random() - 0.5) * state.shakeAmount * 0.04;
   } else {
     state.shakeAmount = 0;
-    camera.position.x += (state.cameraBase.x - camera.position.x) * dt * 6;
-    camera.position.y += (state.cameraBase.y - camera.position.y) * dt * 6;
+    camera.position.lerp(camBase, dt * 6);
   }
-  camera.lookAt(0, 1, -15);
+  camera.lookAt(0, 1.05, -15);
 
-  stars.rotation.y += dt * 0.02;
+  // === Stars drift ===
+  stars.rotation.y += dt * 0.03;
 
   renderer.render(scene, camera);
 }
