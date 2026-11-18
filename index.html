@@ -5,260 +5,740 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RNG Skin Idle</title>
 <style>
+  * { box-sizing: border-box; }
+
+  :root {
+    --bg-0: #020617;
+    --bg-1: #0f172a;
+    --bg-2: #1e293b;
+    --line: #334155;
+    --text: #e5e7eb;
+    --muted: #94a3b8;
+  }
+
   body {
-    font-family: system-ui, sans-serif;
-    background: #111827;
-    color: #f9fafb;
     margin: 0;
-    padding: 20px;
+    padding: 24px;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: var(--text);
+    background:
+      radial-gradient(circle at 20% -10%, #312e81 0%, transparent 45%),
+      radial-gradient(circle at 80% 0%, #0e7490 0%, transparent 40%),
+      radial-gradient(circle at 50% 100%, #4c1d95 0%, transparent 50%),
+      var(--bg-0);
+    min-height: 100vh;
+    overflow-x: hidden;
   }
-  h1, h2 { margin-top: 0; }
-  .stats {
+
+  h2 {
+    font-size: 20px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 28px 0 14px;
+  }
+
+  /* ---------- TOP BAR ---------- */
+  .topbar {
     display: flex;
-    gap: 20px;
     flex-wrap: wrap;
-    background: #1f2937;
-    padding: 15px;
-    border-radius: 12px;
-    margin-bottom: 20px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 22px;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
   }
-  .grid {
+
+  .brand {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    background: linear-gradient(90deg, #a78bfa, #22d3ee, #f472b6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .stats { display: flex; flex-wrap: wrap; gap: 10px; }
+
+  .stat {
+    display: flex; flex-direction: column;
+    padding: 8px 16px;
+    border-radius: 12px;
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid var(--line);
+    min-width: 110px;
+  }
+  .stat .label { font-size: 11px; text-transform: uppercase; color: var(--muted); letter-spacing: 1px; }
+  .stat .value { font-size: 18px; font-weight: 700; color: #f8fafc; }
+  .stat.coins .value { color: #fbbf24; }
+  .stat.cps .value { color: #34d399; }
+
+  /* ---------- BOXES ---------- */
+  .box-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 12px;
-    margin-bottom: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
   }
-  .box {
-    background: #1f2937;
-    color: #f9fafb;
-    border: 2px solid #374151;
-    border-radius: 12px;
-    padding: 14px;
+
+  .box-card {
+    position: relative;
+    border-radius: 20px;
+    padding: 20px 18px 18px;
+    color: #f8fafc;
+    text-align: center;
     cursor: pointer;
-    text-align: left;
-    font-size: 14px;
+    border: 2px solid var(--glow);
+    background: linear-gradient(160deg, var(--c1), var(--c2));
+    box-shadow:
+      0 0 0 rgba(0,0,0,0),
+      inset 0 0 30px rgba(255,255,255,0.06),
+      0 8px 24px rgba(0,0,0,0.5);
+    transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+    overflow: hidden;
+    user-select: none;
   }
-  .box:hover { background: #374151; }
-  .inventory {
+  .box-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.18) 50%, transparent 70%);
+    transform: translateX(-100%);
+    transition: transform .6s ease;
+  }
+  .box-card:hover:not(.locked) { transform: translateY(-4px) scale(1.02); box-shadow: 0 0 30px var(--glow), 0 12px 30px rgba(0,0,0,0.6); }
+  .box-card:hover:not(.locked)::before { transform: translateX(100%); }
+  .box-card.locked { filter: grayscale(0.7) brightness(0.6); cursor: not-allowed; }
+  .box-card.pulse { animation: boxPulse .25s ease; }
+  @keyframes boxPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+
+  .box-icon {
+    font-size: 52px;
+    line-height: 1;
+    margin-bottom: 8px;
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.6));
+  }
+  .box-name { font-weight: 800; font-size: 16px; margin-bottom: 6px; letter-spacing: .5px; }
+  .box-cost { font-size: 14px; font-weight: 700; color: #fbbf24; margin-bottom: 4px; }
+  .box-luck {
+    display: inline-block;
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgba(0,0,0,0.35);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #f0f9ff;
+    letter-spacing: .5px;
+  }
+
+  /* ---------- INVENTORY ---------- */
+  .inv-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 10px;
-    margin-bottom: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 14px;
   }
-  .skin {
-    background: #1f2937;
-    border: 2px solid #374151;
-    border-radius: 10px;
-    padding: 10px;
+
+  .skin-card {
+    position: relative;
+    border-radius: 16px;
+    padding: 16px 12px 14px;
+    text-align: center;
+    border: 2px solid var(--rc);
+    background: linear-gradient(160deg, var(--g1), var(--g2));
+    box-shadow: 0 0 20px rgba(0,0,0,0.4), inset 0 0 40px rgba(255,255,255,0.04);
+    overflow: hidden;
+    transition: transform .18s ease, box-shadow .18s ease;
   }
+  .skin-card:hover { transform: translateY(-3px); box-shadow: 0 0 25px var(--rc); }
+  .skin-card.shiny::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(120deg, transparent 40%, rgba(255,255,255,0.35) 50%, transparent 60%);
+    transform: translateX(-100%);
+    animation: shine 3s infinite;
+  }
+  @keyframes shine { 0% { transform: translateX(-100%); } 50% { transform: translateX(100%); } 100% { transform: translateX(100%); } }
+
+  .skin-emoji {
+    font-size: 48px;
+    line-height: 1;
+    margin-bottom: 6px;
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.7));
+  }
+  .skin-name { font-size: 13px; font-weight: 700; color: #f8fafc; margin-bottom: 4px; }
+  .skin-rarity { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--rc); font-weight: 800; margin-bottom: 6px; }
+  .skin-cps { font-size: 12px; color: #34d399; font-weight: 700; }
+  .skin-count {
+    position: absolute;
+    top: 8px; right: 10px;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(0,0,0,0.5);
+    color: #f8fafc;
+    font-weight: 700;
+  }
+
+  /* ---------- LOG ---------- */
   .log {
-    background: #0f172a;
-    border-radius: 10px;
-    padding: 10px;
-    min-height: 100px;
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 14px 18px;
     font-size: 14px;
-    line-height: 1.6;
+    line-height: 1.8;
+    min-height: 120px;
+    max-height: 220px;
+    overflow-y: auto;
   }
+  .log div { animation: logIn .3s ease; }
+  @keyframes logIn { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: none; } }
+
+  /* ---------- REVEAL OVERLAY ---------- */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(15,23,42,0.85), rgba(0,0,0,0.95));
+    backdrop-filter: blur(6px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    opacity: 1;
+    transition: opacity .3s ease;
+  }
+  .overlay.hidden { opacity: 0; pointer-events: none; }
+
+  .reveal-stage {
+    position: relative;
+    width: 340px;
+    height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .reveal-box {
+    width: 180px;
+    height: 180px;
+    border-radius: 28px;
+    background: linear-gradient(160deg, var(--c1), var(--c2));
+    border: 4px solid var(--glow);
+    box-shadow: 0 0 80px var(--glow), inset 0 0 40px rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 90px;
+    color: rgba(255,255,255,0.9);
+    text-shadow: 0 0 20px rgba(0,0,0,0.5);
+    position: absolute;
+  }
+  .reveal-box.shaking { animation: boxShake .9s cubic-bezier(.5,.05,.5,1) forwards; }
+  .reveal-box.burst { animation: boxBurst .45s ease-out forwards; }
+
+  @keyframes boxShake {
+    0%   { transform: rotate(0deg) scale(1); }
+    10%  { transform: rotate(-10deg) scale(1.05); }
+    20%  { transform: rotate(10deg)  scale(1.1); }
+    30%  { transform: rotate(-9deg)  scale(1.15); }
+    40%  { transform: rotate(9deg)   scale(1.2); }
+    50%  { transform: rotate(-7deg)  scale(1.25); }
+    60%  { transform: rotate(7deg)   scale(1.3); }
+    70%  { transform: rotate(-5deg)  scale(1.35); }
+    80%  { transform: rotate(5deg)   scale(1.4); }
+    90%  { transform: rotate(-3deg)  scale(1.45); }
+    100% { transform: rotate(0deg)   scale(1.5); }
+  }
+
+  @keyframes boxBurst {
+    0%   { transform: scale(1.5); opacity: 1; filter: brightness(1); }
+    100% { transform: scale(3); opacity: 0; filter: brightness(3); }
+  }
+
+  .reveal-card {
+    position: absolute;
+    width: 240px;
+    border-radius: 24px;
+    padding: 28px 20px;
+    text-align: center;
+    border: 3px solid var(--rc);
+    background: linear-gradient(160deg, var(--g1), var(--g2));
+    box-shadow: 0 0 60px var(--rc), inset 0 0 50px rgba(255,255,255,0.06);
+    animation: cardIn .55s cubic-bezier(.2,.9,.3,1.3) forwards;
+    display: none;
+  }
+  @keyframes cardIn {
+    from { transform: perspective(900px) rotateY(90deg) scale(0.6); opacity: 0; }
+    to   { transform: perspective(900px) rotateY(0deg) scale(1); opacity: 1; }
+  }
+  .reveal-card .rc-emoji {
+    font-size: 110px;
+    line-height: 1;
+    margin-bottom: 12px;
+    filter: drop-shadow(0 6px 20px rgba(0,0,0,0.8));
+    animation: floatEmoji 2.5s ease-in-out infinite;
+  }
+  @keyframes floatEmoji { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+  .reveal-card .rc-rarity {
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--rc);
+    margin-bottom: 6px;
+  }
+  .reveal-card .rc-name {
+    font-size: 20px;
+    font-weight: 800;
+    color: #f8fafc;
+    margin-bottom: 8px;
+  }
+  .reveal-card .rc-cps {
+    font-size: 14px;
+    color: #34d399;
+    font-weight: 700;
+  }
+
+  .reveal-hint {
+    margin-top: 30px;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    opacity: 0;
+    animation: hintIn .4s ease 1.4s forwards;
+  }
+  @keyframes hintIn { to { opacity: 1; } }
+
+  .particle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    pointer-events: none;
+    animation: floatUp 1.4s ease-out forwards;
+  }
+  @keyframes floatUp {
+    0%   { opacity: 1; transform: translate(0,0) scale(1); }
+    100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.2); }
+  }
+
+  /* ---------- TOAST ---------- */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #7f1d1d;
+    color: #fecaca;
+    padding: 12px 22px;
+    border-radius: 12px;
+    border: 1px solid #ef4444;
+    font-weight: 700;
+    opacity: 0;
+    pointer-events: none;
+    transition: all .3s ease;
+    z-index: 200;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ---------- TOGGLE ---------- */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .toggle-row input { accent-color: #a78bfa; }
 </style>
 </head>
 <body>
 
-<h1>RNG Skin Idle</h1>
+<header class="topbar">
+  <div class="brand">✨ RNG Skin Idle</div>
+  <div class="stats">
+    <div class="stat coins"><span class="label">Münzen</span><span id="coins" class="value">0</span></div>
+    <div class="stat cps"><span class="label">Münzen/s</span><span id="cps" class="value">0</span></div>
+    <div class="stat"><span class="label">Skins</span><span id="skinCount" class="value">0</span></div>
+    <div class="stat"><span class="label">Entdeckt</span><span id="discovered" class="value">0/0</span></div>
+  </div>
+</header>
 
-<div class="stats">
-  <div>Münzen: <b id="coins">0</b></div>
-  <div>Münzen/Sek: <b id="cps">0</b></div>
-  <div>Skins: <b id="skinCount">0</b></div>
+<section>
+  <h2>Boxen</h2>
+  <div class="toggle-row">
+    <label><input type="checkbox" id="skipAnim"> Schnellöffnen (Animation überspringen)</label>
+  </div>
+  <div id="boxes" class="box-grid"></div>
+</section>
+
+<section>
+  <h2>Inventar</h2>
+  <div id="inventory" class="inv-grid"></div>
+</section>
+
+<section>
+  <h2>Log</h2>
+  <div id="log" class="log"></div>
+</section>
+
+<div id="overlay" class="overlay hidden">
+  <div id="revealStage" class="reveal-stage">
+    <div id="revealBox" class="reveal-box">?</div>
+    <div id="revealCard" class="reveal-card"></div>
+  </div>
+  <div id="revealHint" class="reveal-hint">Klicken zum Fortfahren</div>
 </div>
 
-<h2>Boxen</h2>
-<div id="boxes" class="grid"></div>
-
-<h2>Inventar</h2>
-<div id="inventory" class="inventory"></div>
-
-<h2>Log</h2>
-<div id="log" class="log"></div>
+<div id="toast" class="toast">Nicht genug Münzen!</div>
 
 <script>
+/* ============================================================
+   DATA
+============================================================ */
 const rarities = [
-  { name: "Common",    weight: 1000, color: "#9ca3af" },
-  { name: "Uncommon",  weight: 500,  color: "#22c55e" },
-  { name: "Rare",      weight: 200,  color: "#3b82f6" },
-  { name: "Epic",      weight: 50,   color: "#a855f7" },
-  { name: "Legendary", weight: 10,   color: "#f59e0b" },
-  { name: "Mythic",    weight: 1,    color: "#ef4444" }
+  { name: "Common",    color: "#9ca3af", g1: "#374151", g2: "#111827", weight: 1000 },
+  { name: "Uncommon",  color: "#22c55e", g1: "#14532d", g2: "#052e16", weight: 500  },
+  { name: "Rare",      color: "#3b82f6", g1: "#1e3a8a", g2: "#0c1938", weight: 200  },
+  { name: "Epic",      color: "#a855f7", g1: "#4c1d95", g2: "#1e1b4b", weight: 50   },
+  { name: "Legendary", color: "#f59e0b", g1: "#78350f", g2: "#2c1006", weight: 10   },
+  { name: "Mythic",    color: "#ef4444", g1: "#7f1d1d", g2: "#3b0a0a", weight: 1    }
 ];
 
 const skins = [
   // Common
-  { id: "stein_slime",      name: "Stein-Slime",      rarity: 0, cps: 1 },
-  { id: "holz_fuchs",       name: "Holz-Fuchs",       rarity: 0, cps: 2 },
-  { id: "grass_kaefer",     name: "Gras-Käfer",       rarity: 0, cps: 3 },
+  { id: "stein_slime",   name: "Stein-Slime",     emoji: "🪨", rarity: 0, cps: 1 },
+  { id: "holz_fuchs",    name: "Holz-Fuchs",      emoji: "🦊", rarity: 0, cps: 2 },
+  { id: "gras_kaefer",   name: "Gras-Käfer",      emoji: "🪲", rarity: 0, cps: 3 },
+  { id: "teich_frosch",  name: "Teich-Frosch",    emoji: "🐸", rarity: 0, cps: 4 },
 
   // Uncommon
-  { id: "bronze_wolf",      name: "Bronze-Wolf",      rarity: 1, cps: 6 },
-  { id: "silber_eule",      name: "Silber-Eule",      rarity: 1, cps: 8 },
-  { id: "kristall_hase",    name: "Kristall-Hase",    rarity: 1, cps: 10 },
+  { id: "bronze_wolf",   name: "Bronze-Wolf",     emoji: "🐺", rarity: 1, cps: 8 },
+  { id: "silber_eule",   name: "Silber-Eule",     emoji: "🦉", rarity: 1, cps: 12 },
+  { id: "kristall_hase", name: "Kristall-Hase",   emoji: "🐰", rarity: 1, cps: 16 },
+  { id: "wald_waschbaer",name: "Wald-Waschbär",   emoji: "🦝", rarity: 1, cps: 20 },
 
   // Rare
-  { id: "gold_drache",      name: "Gold-Drache",      rarity: 2, cps: 25 },
-  { id: "regenbogen_frosch",name: "Regenbogen-Frosch",rarity: 2, cps: 30 },
-  { id: "lava_golem",       name: "Lava-Golem",       rarity: 2, cps: 35 },
+  { id: "gold_drache",   name: "Gold-Drache",     emoji: "🐉", rarity: 2, cps: 45 },
+  { id: "regenbogen_echse", name: "Regenbogen-Echse", emoji: "🦎", rarity: 2, cps: 60 },
+  { id: "lava_golem",    name: "Lava-Golem",      emoji: "🗿", rarity: 2, cps: 75 },
+  { id: "wuesten_skorpion", name: "Wüsten-Skorpion", emoji: "🦂", rarity: 2, cps: 90 },
 
   // Epic
-  { id: "diamant_phoenix",  name: "Diamant-Phönix",   rarity: 3, cps: 90 },
-  { id: "schatten_tiger",   name: "Schatten-Tiger",   rarity: 3, cps: 110 },
-  { id: "plasma_roboter",   name: "Plasma-Roboter",   rarity: 3, cps: 130 },
+  { id: "diamant_adler", name: "Diamant-Adler",   emoji: "🦅", rarity: 3, cps: 220 },
+  { id: "schatten_tiger",name: "Schatten-Tiger",  emoji: "🐯", rarity: 3, cps: 280 },
+  { id: "plasma_roboter",name: "Plasma-Roboter",  emoji: "🤖", rarity: 3, cps: 340 },
+  { id: "tiefsee_krake", name: "Tiefsee-Krake",   emoji: "🐙", rarity: 3, cps: 420 },
 
   // Legendary
-  { id: "galaxy_drache",    name: "Galaxy-Drache",    rarity: 4, cps: 400 },
-  { id: "zeit_waechter",    name: "Zeit-Wächter",     rarity: 4, cps: 500 },
-  { id: "traum_koenigin",   name: "Traum-Königin",    rarity: 4, cps: 600 },
+  { id: "galaxy_drache", name: "Galaxy-Drache",   emoji: "🐲", rarity: 4, cps: 1100 },
+  { id: "zeit_waechter", name: "Zeit-Wächter",    emoji: "⏳", rarity: 4, cps: 1400 },
+  { id: "traum_koenigin",name: "Traum-Königin",   emoji: "👑", rarity: 4, cps: 1700 },
+  { id: "sternen_einhorn",name: "Sternen-Einhorn",emoji: "🦄", rarity: 4, cps: 2000 },
 
   // Mythic
-  { id: "omega_gott",       name: "Omega-Gott",       rarity: 5, cps: 2500 },
-  { id: "unendlichkeits_kern", name: "Unendlichkeits-Kern", rarity: 5, cps: 3000 }
+  { id: "omega_gott",    name: "Omega-Gott",      emoji: "👁️", rarity: 5, cps: 8000 },
+  { id: "unendlichkeit", name: "Unendlichkeits-Kern", emoji: "🌌", rarity: 5, cps: 12000 },
+  { id: "schicksal",     name: "Schicksals-Kugel",emoji: "🔮", rarity: 5, cps: 16000 }
 ];
 
 const boxes = [
-  { name: "Holzbox",    cost: 50,   luck: 1,   color: "#a16207" },
-  { name: "Silberbox",  cost: 250,  luck: 1.5, color: "#94a3b8" },
-  { name: "Goldbox",    cost: 1000, luck: 2.5, color: "#f59e0b" },
-  { name: "Glücksbox",  cost: 5000, luck: 5,   color: "#ef4444" }
+  { name: "Holzbox",        icon: "📦", cost: 50,     luck: 1,   c1: "#92400e", c2: "#3b1a06", glow: "#b45309" },
+  { name: "Silberbox",      icon: "🎁", cost: 300,    luck: 1.6, c1: "#64748b", c2: "#1e293b", glow: "#94a3b8" },
+  { name: "Goldbox",        icon: "🧰", cost: 1500,   luck: 2.4, c1: "#b45309", c2: "#451a03", glow: "#fbbf24" },
+  { name: "Diamantbox",     icon: "💎", cost: 8000,   luck: 3.5, c1: "#0e7490", c2: "#083344", glow: "#22d3ee" },
+  { name: "Kosmische Box",  icon: "🌠", cost: 40000,  luck: 5,   c1: "#6d28d9", c2: "#2e1065", glow: "#a78bfa" },
+  { name: "Omega-Box",      icon: "🎆", cost: 250000, luck: 8,   c1: "#b91c1c", c2: "#450a0a", glow: "#f87171" }
 ];
 
-let coins = 100;
+/* ============================================================
+   STATE
+============================================================ */
+let coins = 200;
 let owned = {};
 let logEntries = [];
+let pity = 0;              // Boxen ohne Rare+
+let animating = false;
+let canClose = false;
+
+/* ============================================================
+   HELPERS
+============================================================ */
+const $ = id => document.getElementById(id);
+const fmt = n => Math.floor(n).toLocaleString("de-DE");
 
 function getCps() {
-  return skins.reduce((sum, skin) => {
-    return sum + (owned[skin.id] || 0) * skin.cps;
-  }, 0);
+  return skins.reduce((sum, s) => sum + (owned[s.id] || 0) * s.cps, 0);
 }
-
 function getSkinCount() {
   return Object.values(owned).reduce((a, b) => a + b, 0);
 }
+function getDiscovered() {
+  return Object.values(owned).filter(v => v > 0).length;
+}
 
-function updateStats() {
-  document.getElementById("coins").textContent = Math.floor(coins);
-  document.getElementById("cps").textContent = getCps();
-  document.getElementById("skinCount").textContent = getSkinCount();
+/* ============================================================
+   RENDERING
+============================================================ */
+function updateCoinsDisplay() {
+  $("coins").textContent = fmt(coins);
+  $("cps").textContent = fmt(getCps());
+}
+
+function updateFullStats() {
+  $("skinCount").textContent = getSkinCount();
+  $("discovered").textContent = `${getDiscovered()}/${skins.length}`;
 }
 
 function renderBoxes() {
-  const el = document.getElementById("boxes");
+  const el = $("boxes");
   el.innerHTML = "";
-
-  boxes.forEach((box, index) => {
-    const btn = document.createElement("button");
-    btn.className = "box";
-    btn.style.borderColor = box.color;
-    btn.innerHTML = `
-      <strong>${box.name}</strong><br>
-      Kosten: ${box.cost} Münzen<br>
-      Glück: x${box.luck}
+  boxes.forEach((box, i) => {
+    const locked = coins < box.cost;
+    const card = document.createElement("div");
+    card.className = "box-card" + (locked ? " locked" : "");
+    card.style.setProperty("--c1", box.c1);
+    card.style.setProperty("--c2", box.c2);
+    card.style.setProperty("--glow", box.glow);
+    card.innerHTML = `
+      <div class="box-icon">${box.icon}</div>
+      <div class="box-name">${box.name}</div>
+      <div class="box-cost">💰 ${fmt(box.cost)}</div>
+      <div class="box-luck">🍀 Glück x${box.luck}</div>
     `;
-    btn.onclick = () => openBox(index);
-    el.appendChild(btn);
+    card.addEventListener("click", () => openBox(i, card));
+    el.appendChild(card);
   });
 }
 
 function renderInventory() {
-  const el = document.getElementById("inventory");
-  const entries = Object.entries(owned).filter(([, count]) => count > 0);
+  const el = $("inventory");
+  const entries = Object.entries(owned).filter(([, c]) => c > 0);
 
   if (entries.length === 0) {
-    el.innerHTML = "<div>Noch keine Skins. Öffne eine Box!</div>";
+    el.innerHTML = `<div style="grid-column:1/-1;color:#64748b;padding:20px;">Noch keine Skins – öffne eine Box!</div>`;
     return;
   }
 
   entries.sort((a, b) => {
-    const skinA = skins.find(s => s.id === a[0]);
-    const skinB = skins.find(s => s.id === b[0]);
-    return skinB.rarity - skinA.rarity || skinB.cps - skinA.cps;
+    const sa = skins.find(s => s.id === a[0]);
+    const sb = skins.find(s => s.id === b[0]);
+    return sb.rarity - sa.rarity || sb.cps - sa.cps;
   });
 
   el.innerHTML = entries.map(([id, count]) => {
     const skin = skins.find(s => s.id === id);
-    const rarity = rarities[skin.rarity];
-
+    const r = rarities[skin.rarity];
+    const shiny = skin.rarity >= 4;
     return `
-      <div class="skin" style="border-color:${rarity.color}">
-        <b>${skin.name}</b> x${count}<br>
-        <span style="color:${rarity.color}">${rarity.name}</span><br>
-        +${skin.cps} Münzen/s pro Stück
+      <div class="skin-card${shiny ? " shiny" : ""}"
+           style="--rc:${r.color};--g1:${r.g1};--g2:${r.g2}">
+        <div class="skin-count">x${count}</div>
+        <div class="skin-emoji">${skin.emoji}</div>
+        <div class="skin-name">${skin.name}</div>
+        <div class="skin-rarity">${r.name}</div>
+        <div class="skin-cps">+${skin.cps}/s</div>
       </div>
     `;
   }).join("");
 }
 
-function chooseRarity(luck) {
-  const weights = rarities.map((rarity, index) => {
-    return rarity.weight * Math.pow(luck, index);
-  });
+function addLog(html) {
+  logEntries.unshift(html);
+  if (logEntries.length > 10) logEntries.pop();
+  $("log").innerHTML = logEntries.map(t => `<div>${t}</div>`).join("");
+}
 
+/* ============================================================
+   RARITY ROLL
+============================================================ */
+function chooseRarity(luck) {
+  const weights = rarities.map((r, i) => r.weight * Math.pow(luck, i));
   const total = weights.reduce((a, b) => a + b, 0);
   let roll = Math.random() * total;
-
   for (let i = 0; i < weights.length; i++) {
     roll -= weights[i];
     if (roll <= 0) return i;
   }
-
   return 0;
 }
 
-function openBox(index) {
-  const box = boxes[index];
+/* ============================================================
+   BOX OPENING
+============================================================ */
+function openBox(index, cardEl) {
+  if (animating) return;
 
+  const box = boxes[index];
   if (coins < box.cost) {
-    addLog(`Nicht genug Münzen für ${box.name}.`);
+    showToast("Nicht genug Münzen!");
+    if (cardEl) { cardEl.classList.add("pulse"); setTimeout(() => cardEl.classList.remove("pulse"), 260); }
     return;
   }
 
   coins -= box.cost;
+  pity++;
 
-  const rarityIndex = chooseRarity(box.luck);
-  const pool = skins.filter(skin => skin.rarity === rarityIndex);
+  let rarityIndex = chooseRarity(box.luck);
+
+  // Pity: nach 15 Boxen garantiert Rare+
+  if (pity >= 15 && rarityIndex < 2) {
+    rarityIndex = 2;
+  }
+  if (rarityIndex >= 2) pity = 0;
+
+  const pool = skins.filter(s => s.rarity === rarityIndex);
   const skin = pool[Math.floor(Math.random() * pool.length)];
-
   owned[skin.id] = (owned[skin.id] || 0) + 1;
 
-  const rarity = rarities[rarityIndex];
-  addLog(
-    `<span style="color:${rarity.color}">${rarity.name}</span>: ` +
-    `<b>${skin.name}</b> aus ${box.name}! ` +
-    `(+${skin.cps} Münzen/s)`
-  );
+  const r = rarities[rarityIndex];
+  addLog(`<span style="color:${r.color};font-weight:800">${r.name}</span> · ${skin.emoji} <b>${skin.name}</b> aus ${box.name} (+${skin.cps}/s)`);
 
-  updateAll();
-}
-
-function addLog(text) {
-  logEntries.unshift(text);
-  if (logEntries.length > 8) logEntries.pop();
-
-  document.getElementById("log").innerHTML = logEntries
-    .map(entry => `<div>${entry}</div>`)
-    .join("");
-}
-
-function updateAll() {
-  updateStats();
+  updateCoinsDisplay();
+  updateFullStats();
+  renderBoxes();
   renderInventory();
+
+  if ($("skipAnim").checked) return;
+
+  playReveal(box, skin, rarityIndex);
 }
 
-setInterval(() => {
-  coins += getCps() / 10;
-  updateStats();
-}, 100);
+/* ============================================================
+   REVEAL ANIMATION
+============================================================ */
+function playReveal(box, skin, rarityIndex) {
+  animating = true;
+  canClose = false;
 
+  const overlay = $("overlay");
+  const stage = $("revealStage");
+  const revealBox = $("revealBox");
+  const revealCard = $("revealCard");
+  const hint = $("revealHint");
+
+  // Stage leeren von alten Partikeln
+  stage.querySelectorAll(".particle").forEach(p => p.remove());
+
+  revealBox.style.display = "flex";
+  revealBox.style.setProperty("--c1", box.c1);
+  revealBox.style.setProperty("--c2", box.c2);
+  revealBox.style.setProperty("--glow", box.glow);
+  revealBox.textContent = box.icon;
+  revealBox.className = "reveal-box shaking";
+
+  revealCard.style.display = "none";
+  revealCard.className = "reveal-card";
+  revealCard.innerHTML = "";
+  hint.style.opacity = "0";
+  overlay.classList.remove("hidden");
+
+  // Phase 1: Wackeln
+  setTimeout(() => {
+    revealBox.classList.remove("shaking");
+    revealBox.classList.add("burst");
+
+    // Phase 2: Karte zeigen
+    setTimeout(() => {
+      revealBox.style.display = "none";
+      const r = rarities[rarityIndex];
+      revealCard.style.setProperty("--rc", r.color);
+      revealCard.style.setProperty("--g1", r.g1);
+      revealCard.style.setProperty("--g2", r.g2);
+      revealCard.innerHTML = `
+        <div class="rc-emoji">${skin.emoji}</div>
+        <div class="rc-rarity">${r.name}</div>
+        <div class="rc-name">${skin.name}</div>
+        <div class="rc-cps">+${skin.cps} Münzen/s</div>
+      `;
+      revealCard.style.display = "block";
+      revealCard.className = "reveal-card";
+
+      if (rarityIndex >= 2) spawnParticles(rarityIndex, r.color);
+      if (rarityIndex >= 4) spawnParticles(rarityIndex, r.color, 20);
+
+      hint.style.opacity = "1";
+      canClose = true;
+    }, 420);
+  }, 950);
+}
+
+function spawnParticles(rarity, color, count = 14) {
+  const stage = $("revealStage");
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement("div");
+    p.className = "particle";
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 120 + Math.random() * 160;
+    p.style.setProperty("--dx", `${Math.cos(angle) * dist}px`);
+    p.style.setProperty("--dy", `${Math.sin(angle) * dist}px`);
+    p.style.left = "50%";
+    p.style.top = "50%";
+    p.style.background = color;
+    p.style.boxShadow = `0 0 12px ${color}`;
+    p.style.animationDelay = `${Math.random() * 0.2}s`;
+    stage.appendChild(p);
+    setTimeout(() => p.remove(), 1700);
+  }
+}
+
+$("overlay").addEventListener("click", () => {
+  if (!canClose) return;
+  $("overlay").classList.add("hidden");
+  animating = false;
+  canClose = false;
+});
+
+/* ============================================================
+   TOAST
+============================================================ */
+let toastTimer;
+function showToast(msg) {
+  const t = $("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 1400);
+}
+
+/* ============================================================
+   GAME LOOP
+============================================================ */
+let lastTick = performance.now();
+function tick(now) {
+  const dt = (now - lastTick) / 1000;
+  lastTick = now;
+  coins += getCps() * dt;
+  updateCoinsDisplay();
+
+  // Boxen bei Münz-Wechsel freischalten
+  const shouldRefresh = boxes.some((b, i) => {
+    const card = $("boxes").children[i];
+    if (!card) return true;
+    const locked = card.classList.contains("locked");
+    return locked && coins >= b.cost;
+  });
+  if (shouldRefresh) renderBoxes();
+
+  requestAnimationFrame(tick);
+}
+
+/* ============================================================
+   INIT
+============================================================ */
 renderBoxes();
-updateAll();
-addLog("Willkommen! Öffne eine Box und sammle Skins.");
+renderInventory();
+updateCoinsDisplay();
+updateFullStats();
+addLog("Willkommen bei <b>RNG Skin Idle</b>! Öffne eine Box und starte deine Sammlung.");
+requestAnimationFrame(tick);
 </script>
 
 </body>
