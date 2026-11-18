@@ -1,251 +1,133 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>KLANGFORMER – Neon Odyssey</title>
+<title>Klangformer – Rainbow Rush</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body {
-    width: 100%; height: 100%; overflow: hidden;
-    background: #04000a;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    user-select: none; -webkit-user-select: none;
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
-  }
-  canvas { display: block; position: fixed; inset: 0; z-index: 1; }
-
-  /* HUD */
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Segoe UI', system-ui, sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
+  canvas { display: block; }
   #hud {
-    position: fixed; top: 0; left: 0; right: 0;
-    padding: max(18px, env(safe-area-inset-top)) 24px 16px;
+    position: fixed; top: 0; left: 0; right: 0; padding: 20px 24px;
     display: flex; justify-content: space-between; align-items: flex-start;
     pointer-events: none; z-index: 10;
-    transition: opacity 0.3s;
   }
-  .hud-card {
-    background: rgba(12, 6, 28, 0.65);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 16px;
-    padding: 10px 20px;
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.15);
-    min-width: 110px;
+  .box {
+    background: rgba(15,0,30,0.65);
+    border: 2px solid;
+    border-image: linear-gradient(135deg, #ff00cc, #00ffff, #ffff00) 1;
+    border-radius: 14px;
+    padding: 8px 18px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 30px rgba(255,0,255,0.4), inset 0 0 15px rgba(0,255,255,0.15);
   }
-  .hud-label {
-    font-size: 10px; letter-spacing: 2.5px; color: #a899cc;
-    font-weight: 700; text-transform: uppercase; margin-bottom: 2px;
+  .label { font-size: 10px; letter-spacing: 3px; color: #ffee88; margin-bottom: 2px; font-weight: 700; }
+  #score { font-size: 28px; font-weight: 900; background: linear-gradient(90deg, #ff00cc, #ffff00, #00ffff); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  #combo { font-size: 28px; font-weight: 900; color: #ff66ff; text-shadow: 0 0 15px #ff00ff; }
+  #lives { font-size: 22px; letter-spacing: 3px; color: #ff2266; text-shadow: 0 0 12px #ff0055; }
+  #combo-box { opacity: 0; transition: opacity 0.2s; }
+  #combo-box.active { opacity: 1; }
+  #pattern-tag {
+    position: fixed; top: 88px; left: 50%; transform: translateX(-50%);
+    font-size: 11px; letter-spacing: 4px; color: #00ffff; font-weight: 800;
+    text-shadow: 0 0 10px #00ffff; pointer-events: none; z-index: 10;
+    opacity: 0.75;
   }
-  #score {
-    font-size: 30px; font-weight: 900;
-    background: linear-gradient(90deg, #ff2a85, #ffbe0b, #00f5d4);
-    -webkit-background-clip: text; background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  #combo {
-    font-size: 30px; font-weight: 900; color: #00f5d4;
-    text-shadow: 0 0 18px rgba(0, 245, 212, 0.6);
-  }
-  #lives {
-    font-size: 22px; letter-spacing: 4px; color: #ff2a85;
-    text-shadow: 0 0 14px rgba(255, 42, 133, 0.7);
-  }
-  #combo-box { opacity: 0.25; transform: scale(0.95); transition: all 0.2s cubic-bezier(0.2, 0.9, 0.3, 1.3); }
-  #combo-box.active { opacity: 1; transform: scale(1.05); border-color: rgba(0, 245, 212, 0.5); }
-
-  #phase-pill {
-    position: fixed; top: max(92px, calc(env(safe-area-inset-top) + 72px)); left: 50%;
-    transform: translateX(-50%);
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    padding: 5px 16px; border-radius: 999px;
-    font-size: 11px; letter-spacing: 3px; color: #e0d4ff; font-weight: 700;
-    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-    pointer-events: none; z-index: 10;
-  }
-
-  /* Screen Flashes & Popups */
   #flash {
     position: fixed; inset: 0; pointer-events: none; z-index: 5;
-    background: radial-gradient(circle, transparent 40%, rgba(255, 30, 90, 0.65) 100%);
-    opacity: 0; transition: opacity 0.15s;
+    background: radial-gradient(circle, transparent 35%, rgba(255,40,100,0.65) 100%);
+    opacity: 0; transition: opacity 0.18s;
   }
   #perfect-flash {
     position: fixed; inset: 0; pointer-events: none; z-index: 5;
-    background: radial-gradient(circle, transparent 50%, rgba(255, 220, 80, 0.3) 80%, rgba(0, 245, 212, 0.35) 100%);
-    opacity: 0; transition: opacity 0.12s;
+    background: radial-gradient(circle, transparent 45%, rgba(255,240,100,0.35) 75%, rgba(255,0,200,0.35) 100%);
+    opacity: 0; transition: opacity 0.14s;
   }
-  #combo-popup, #miss-popup {
-    position: fixed; top: 34%; left: 50%; transform: translate(-50%, -50%);
-    font-size: 56px; font-weight: 900; font-style: italic;
-    pointer-events: none; z-index: 8; opacity: 0;
-    letter-spacing: 3px;
+  #start-screen, #game-over {
+    position: fixed; inset: 0; display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    background: radial-gradient(circle at 50% 50%, #330066, #000011 70%);
+    color: #fff; z-index: 20; text-align: center; padding: 20px;
   }
-  #combo-popup { -webkit-text-stroke: 2px rgba(255,255,255,0.9); filter: drop-shadow(0 0 25px currentColor); }
-  #miss-popup { color: #ff2a6d; -webkit-text-stroke: 2px #fff; filter: drop-shadow(0 0 25px #ff2a6d); }
-
-  /* OVERLAY MENUS (Start & Game Over) */
-  .overlay {
-    position: fixed; inset: 0; z-index: 30;
-    display: flex; flex-direction: column; justify-content: center; align-items: center;
-    background: radial-gradient(circle at 50% 40%, rgba(35, 10, 75, 0.78), rgba(4, 0, 12, 0.92));
-    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-    color: #fff; text-align: center; padding: 24px;
-    transition: opacity 0.35s ease;
-  }
-  .menu-panel {
-    background: rgba(18, 10, 38, 0.75);
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    border-radius: 28px;
-    padding: 36px 32px;
-    max-width: 460px; width: 100%;
-    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  }
-  .badge {
-    display: inline-block; padding: 5px 14px; border-radius: 999px;
-    background: rgba(0, 245, 212, 0.15); border: 1px solid rgba(0, 245, 212, 0.4);
-    color: #00f5d4; font-size: 11px; font-weight: 800; letter-spacing: 3px;
-    margin-bottom: 14px;
-  }
-  h1 {
-    font-size: clamp(36px, 7vw, 52px); font-weight: 900; letter-spacing: 4px;
-    background: linear-gradient(135deg, #ff2a85, #ffbe0b, #00f5d4, #8338ec, #ff2a85);
+  #start-screen h1, #game-over h1 {
+    font-size: 56px; font-weight: 900; letter-spacing: 6px;
+    background: linear-gradient(135deg, #ff00cc, #ffff00, #00ffcc, #00aaff, #ff00cc);
     background-size: 300% 300%;
     -webkit-background-clip: text; background-clip: text;
     -webkit-text-fill-color: transparent;
-    animation: rainbowShift 4s linear infinite;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
+    animation: rainbowShift 3s linear infinite;
+    filter: drop-shadow(0 0 30px rgba(255,0,200,0.7));
   }
   @keyframes rainbowShift {
     0% { background-position: 0% 50%; }
     100% { background-position: 300% 50%; }
   }
-  .subtitle { color: #c4b5fd; font-size: 15px; line-height: 1.5; margin-bottom: 24px; }
-
-  /* Difficulty Selector */
-  .diff-group {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
-    background: rgba(0, 0, 0, 0.35); padding: 6px; border-radius: 14px;
-    margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.08);
+  #start-screen p, #game-over p { color: #ddbbff; margin: 6px 0; font-size: 15px; }
+  .key { display: inline-block; background: linear-gradient(135deg, #4422aa, #ff00cc); padding: 4px 12px; border-radius: 8px; font-family: monospace; color: #fff; margin: 0 3px; font-weight: 700; box-shadow: 0 0 15px rgba(255,0,200,0.6); }
+  #game-over .final { font-size: 52px; margin: 18px 0; font-weight: 900; background: linear-gradient(90deg, #ff00cc, #ffff00, #00ffff); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  button {
+    margin-top: 28px; padding: 16px 52px; font-size: 18px; font-weight: 900;
+    background: linear-gradient(135deg, #ff00cc, #ff8800, #ffff00, #00ff88, #00aaff, #cc00ff);
+    background-size: 300% 300%;
+    border: none; border-radius: 14px; color: #fff; cursor: pointer;
+    letter-spacing: 4px; box-shadow: 0 0 40px rgba(255,0,200,0.7), 0 0 80px rgba(0,200,255,0.4);
+    transition: transform 0.15s; font-family: inherit;
+    animation: rainbowShift 2s linear infinite;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
   }
-  .diff-btn {
-    padding: 10px 6px; border: none; border-radius: 10px;
-    background: transparent; color: #9d8ec7; font-size: 12px; font-weight: 800;
-    letter-spacing: 1.5px; cursor: pointer; transition: all 0.2s;
-  }
-  .diff-btn.active {
-    background: linear-gradient(135deg, #ff2a85, #8338ec);
-    color: #fff; box-shadow: 0 4px 15px rgba(255, 42, 133, 0.4);
-  }
-
-  /* Primary & Secondary Buttons */
-  .btn-primary {
-    width: 100%; padding: 18px 28px; font-size: 17px; font-weight: 900;
-    background: linear-gradient(135deg, #ff2a85, #ff8800, #ffbe0b, #00f5d4, #8338ec);
-    background-size: 250% 250%;
-    border: none; border-radius: 16px; color: #fff; cursor: pointer;
-    letter-spacing: 3px;
-    box-shadow: 0 10px 35px rgba(255, 42, 133, 0.5);
-    animation: rainbowShift 3s linear infinite;
-    text-shadow: 0 2px 6px rgba(0,0,0,0.4);
-    transition: transform 0.15s;
-  }
-  .btn-primary:active { transform: scale(0.96); }
-
-  .btn-audio {
-    margin-top: 12px; width: 100%; padding: 12px 18px;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 12px; color: #e0d4ff;
-    font-size: 13px; font-weight: 700; letter-spacing: 1px;
-    cursor: pointer; transition: background 0.2s;
-  }
-  .btn-audio:active { background: rgba(255, 255, 255, 0.2); }
-
-  .ipad-hint {
-    margin-top: 16px; font-size: 12px; color: #9d8ec7; line-height: 1.4;
-  }
-  .highscore-line {
-    margin-top: 14px; font-size: 13px; font-weight: 700; color: #ffbe0b; letter-spacing: 1px;
-  }
-
-  .final-score {
-    font-size: 56px; font-weight: 900; margin: 10px 0;
-    background: linear-gradient(90deg, #ff2a85, #ffbe0b, #00f5d4);
-    -webkit-background-clip: text; background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  .stats-grid {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 18px 0 24px;
-  }
-  .stat-item {
-    background: rgba(255,255,255,0.06); padding: 12px; border-radius: 12px;
-    border: 1px solid rgba(255,255,255,0.1);
-  }
-  .stat-val { font-size: 20px; font-weight: 800; color: #fff; }
-  .stat-lbl { font-size: 11px; color: #a899cc; text-transform: uppercase; letter-spacing: 1px; }
-
+  button:hover { transform: scale(1.07); }
+  button:active { transform: scale(0.97); }
   .hidden { display: none !important; }
+  #combo-popup {
+    position: fixed; top: 36%; left: 50%; transform: translate(-50%, -50%);
+    font-size: 54px; font-weight: 900; font-style: italic;
+    pointer-events: none; z-index: 6; opacity: 0;
+    -webkit-text-stroke: 2px #fff;
+    filter: drop-shadow(0 0 20px currentColor);
+    letter-spacing: 4px;
+  }
+  #miss-popup {
+    position: fixed; top: 36%; left: 50%; transform: translate(-50%, -50%);
+    font-size: 50px; font-weight: 900; font-style: italic;
+    pointer-events: none; z-index: 6; opacity: 0;
+    color: #ff2244; -webkit-text-stroke: 2px #fff;
+    filter: drop-shadow(0 0 25px #ff0055);
+  }
 </style>
 </head>
 <body>
 
 <div id="hud">
-  <div class="hud-card"><div class="hud-label">SCORE</div><div id="score">0</div></div>
-  <div class="hud-card" id="combo-box"><div class="hud-label">COMBO</div><div id="combo">x0</div></div>
-  <div class="hud-card"><div class="hud-label">LIVES</div><div id="lives">♥♥♥♥♥</div></div>
+  <div class="box"><div class="label">SCORE</div><div id="score">0</div></div>
+  <div class="box" id="combo-box"><div class="label">COMBO</div><div id="combo">x0</div></div>
+  <div class="box"><div class="label">LIVES</div><div id="lives">♥♥♥♥♥</div></div>
 </div>
-<div id="phase-pill">READY // SYNTHWAVE</div>
+<div id="pattern-tag">PHASE 1 // GROOVE</div>
 
 <div id="flash"></div>
 <div id="perfect-flash"></div>
 <div id="combo-popup"></div>
 <div id="miss-popup"></div>
 
-<!-- START MENU -->
-<div id="start-screen" class="overlay">
-  <div class="menu-panel">
-    <div class="badge">✦ NEON ODYSSEY ✦</div>
-    <h1>KLANGFORMER</h1>
-    <p class="subtitle">Tippe auf den Bildschirm, sobald ein leuchtender Ring durch das weiße Ziel-Tor fliegt.</p>
-
-    <div class="diff-group">
-      <button class="diff-btn" data-mode="chill">CHILL (96 BPM)</button>
-      <button class="diff-btn active" data-mode="groove">GROOVE (110 BPM)</button>
-      <button class="diff-btn" data-mode="rush">RUSH (126 BPM)</button>
-    </div>
-
-    <button id="start-btn" class="btn-primary">SPIEL STARTEN</button>
-    <button id="test-sound-btn" class="btn-audio">🔊 SOUND TESTEN (IPAD AUDIO AKTIVIEREN)</button>
-
-    <div class="highscore-line" id="menu-highscore">BESTSCORE: 0</div>
-    <p class="ipad-hint">iPad-Tipp: Falls kein Ton kommt, prüfe im Kontrollzentrum, ob der Stumm-Modus (Glocke) deaktiviert ist.</p>
-  </div>
+<div id="start-screen">
+  <h1>KLANGFORMER</h1>
+  <p style="font-size:17px;color:#ffff88;font-weight:700;">✦ Rainbow Rush ✦</p>
+  <p>Shape the sound. Ride the rainbow beat.</p>
+  <p style="margin-top: 30px; font-size: 14px;">
+    Press <span class="key">SPACE</span> <span class="key">CLICK</span> <span class="key">TAP</span><br>
+    when the ring enters the white target gate
+  </p>
+  <button id="start-btn">START THE BEAT</button>
 </div>
 
-<!-- GAME OVER MENU -->
-<div id="game-over" class="overlay hidden">
-  <div class="menu-panel">
-    <div class="badge" style="color:#ff2a85; border-color:rgba(255,42,133,0.4); background:rgba(255,42,133,0.15);">SESSION BEENDET</div>
-    <h1>GAME OVER</h1>
-    <div class="final-score" id="final-score">0</div>
-
-    <div class="stats-grid">
-      <div class="stat-item">
-        <div class="stat-val" id="final-combo">x0</div>
-        <div class="stat-lbl">Max Combo</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-val" id="final-beat">0</div>
-        <div class="stat-lbl">Treffer</div>
-      </div>
-    </div>
-
-    <button id="restart-btn" class="btn-primary">NOCHMAL SPIELEN</button>
-    <button id="menu-btn" class="btn-audio">ZURÜCK ZUM MENÜ</button>
-  </div>
+<div id="game-over" class="hidden">
+  <h1>WAVE CRASHED</h1>
+  <div class="final" id="final-score">0</div>
+  <p id="final-combo">Best combo: x0</p>
+  <p id="final-beat">Beats hit: 0</p>
+  <button id="restart-btn">PLAY AGAIN</button>
 </div>
 
 <script type="importmap">
@@ -255,62 +137,50 @@
 <script type="module">
 import * as THREE from 'three';
 
-// ============ DIFFICULTY & TIMING CONFIG ============
-const MODES = {
-  chill:  { bpm: 96,  hitWin: 0.34, perfWin: 0.14, missWin: 0.28, label: 'CHILL' },
-  groove: { bpm: 110, hitWin: 0.30, perfWin: 0.12, missWin: 0.25, label: 'GROOVE' },
-  rush:   { bpm: 126, hitWin: 0.26, perfWin: 0.10, missWin: 0.22, label: 'RUSH' },
-};
-
-let currentMode = MODES.groove;
-let BPM = currentMode.bpm;
-let BEAT_DUR = 60 / BPM;
-let STEP_DUR = BEAT_DUR / 4;
-const APPROACH_BEATS = 3.5; // Mehr Vorlaufzeit = viel übersichtlicher!
-let APPROACH_SEC = BEAT_DUR * APPROACH_BEATS;
-const RING_START_STEP = 16; // 1 Takt entspanntes Intro
-const SPAWN_Z = -60;
+// ============ TIMING / CONFIG ============
+const BPM = 136;
+const BEAT_DUR = 60 / BPM;           // ~0.441s
+const STEP_DUR = BEAT_DUR / 4;       // 16th note
+const APPROACH_BEATS = 2.5;
+const APPROACH_SEC = BEAT_DUR * APPROACH_BEATS;
+const HIT_WINDOW_SEC = 0.21;
+const PERFECT_WINDOW_SEC = 0.085;
+const MISS_WINDOW_SEC = 0.17;
+const RING_START_STEP = 16;          // 1 bar intro so music starts cleanly first
+const SPAWN_Z = -52;
 const ONE = new THREE.Vector3(1, 1, 1);
 
-// Harmonische Synthwave-Akkorde (Am - F - C - G)
 const CHORDS = [
-  [57, 60, 64, 69], // Am
-  [53, 57, 60, 65], // F
-  [60, 64, 67, 72], // C
-  [55, 59, 62, 67], // G
+  [64, 67, 71],  // Em
+  [60, 64, 67],  // C
+  [67, 71, 74],  // G
+  [62, 66, 69],  // D
 ];
-const BASS_ROOTS = [33, 29, 36, 31];
-const MELODY_NOTES = [
-  76, null, 72, null, 74, null, 76, 79,
-  77, null, 72, null, 74, null, 72, null,
-  79, null, 76, null, 74, null, 72, 74,
-  76, null, 74, null, 71, null, 67, null
-];
+const BASS_ROOTS = [40, 36, 43, 38];
 
-// Faire, musikalische Patterns (kein unspielbares Spamming!)
+// Musical step patterns (16 steps per bar: 0, 4, 8, 12 are main beats)
+// 'M' = Main Beat Ring, 'S' = Syncopated / Fast Accent Ring, null = rest
 const BAR_PATTERNS = [
-  // Takt 1: Klarer 4/4 Takt
-  ['M', null, null, null, 'M', null, null, null, 'M', null, null, null, 'M', null, null, null],
-  // Takt 2: Entspannter Groove mit einem Offbeat
-  ['M', null, null, null, 'M', null, 'S', null,  'M', null, null, null, 'M', null, null, null],
-  // Takt 3: Doppel-Impuls am Ende
-  ['M', null, null, null, 'M', null, null, null, 'M', null, 'S', null,  'M', null, 'S', null],
-  // Takt 4: Melodischer Aufbau
-  ['M', null, 'S', null,  'M', null, null, null, 'M', null, 'S', null,  'M', null, null, null],
+  // Bar 0: Classic 4-on-the-floor with end-of-bar pickup
+  ['M', null, null, null, 'M', null, null, null, 'M', null, null, null, 'M', null, 'S', null],
+  // Bar 1: Syncopated Groove (Kick + Offbeat)
+  ['M', null, null, 'S',  null, null, 'M', null, 'M', null, 'S', null,  'M', null, null, null],
+  // Bar 2: Double-Time Build-up
+  ['M', null, 'S', null,  'M', null, 'S', null,  'M', null, 'S', null,  'M', 'S', 'S', null],
+  // Bar 3: Heavy Drop & Dramatic Pause
+  ['M', null, null, null, 'M', null, 'S', 'S',   'M', null, null, null, null, null, 'S', null],
 ];
 
 const PHASE_NAMES = [
-  'PART 1 // DEEP PULSE',
-  'PART 2 // NEON GROOVE',
-  'PART 3 // SYNTH RISE',
-  'PART 4 // HORIZON FLOW'
+  'PHASE 1 // STEADY PULSE',
+  'PHASE 2 // OFFBEAT SYNC',
+  'PHASE 3 // RUSH ARPEGGIO',
+  'PHASE 4 // DROP & BREAK'
 ];
 
 // ============ STATE ============
 let audioCtx = null;
 let music = null;
-let highScore = Number(localStorage.getItem('klangformer_hs') || 0);
-document.getElementById('menu-highscore').textContent = 'BESTSCORE: ' + highScore;
 
 const state = {
   score: 0, combo: 0, bestCombo: 0, lives: 5, beatsHit: 0,
@@ -323,110 +193,107 @@ const state = {
 
 // ============ SCENE ============
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x060114);
-scene.fog = new THREE.FogExp2(0x060114, 0.012);
+scene.background = new THREE.Color(0x0b0018);
+scene.fog = new THREE.FogExp2(0x0b0018, 0.015);
 
-const camera = new THREE.PerspectiveCamera(68, innerWidth / innerHeight, 0.1, 250);
-const camBase = new THREE.Vector3(0, 4.4, 10.2);
+const camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.1, 250);
+const camBase = new THREE.Vector3(0, 4.3, 9.5);
 camera.position.copy(camBase);
-camera.lookAt(0, 1.05, -18);
+camera.lookAt(0, 1.05, -16);
 
-const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(innerWidth, innerHeight);
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.15;
+renderer.toneMappingExposure = 1.05;
 document.body.appendChild(renderer.domElement);
 
-// Lights
-scene.add(new THREE.AmbientLight(0x8855cc, 1.2));
-const light1 = new THREE.PointLight(0xff2a85, 4.5, 90);
+// Lights (disco rig)
+scene.add(new THREE.AmbientLight(0x664488, 1.0));
+const light1 = new THREE.PointLight(0xff00cc, 3.5, 80);
 light1.position.set(8, 8, 4); scene.add(light1);
-const light2 = new THREE.PointLight(0x00f5d4, 4.5, 90);
+const light2 = new THREE.PointLight(0x00ffff, 3.5, 80);
 light2.position.set(-8, 6, -4); scene.add(light2);
-const light3 = new THREE.PointLight(0xffbe0b, 3.5, 90);
-light3.position.set(0, 10, -12); scene.add(light3);
+const light3 = new THREE.PointLight(0xffff00, 2.8, 80);
+light3.position.set(0, 10, -10); scene.add(light3);
+const light4 = new THREE.PointLight(0x00ff88, 2.8, 80);
+light4.position.set(6, 5, -15); scene.add(light4);
 
-// Cyber Tunnel Arches (für perfektes Geschwindigkeitsgefühl & Übersicht)
-const tunnelGroup = new THREE.Group();
-const archGeo = new THREE.TorusGeometry(6.5, 0.05, 8, 48, Math.PI);
-for (let i = 0; i < 12; i++) {
-  const archMat = new THREE.MeshBasicMaterial({
-    color: i % 2 === 0 ? 0x8338ec : 0x00f5d4,
-    transparent: true, opacity: 0.22
-  });
-  const arch = new THREE.Mesh(archGeo, archMat);
-  arch.position.set(0, 0, -i * 8);
-  tunnelGroup.add(arch);
-}
-scene.add(tunnelGroup);
-
-// Track Rails
-const laneMat = new THREE.MeshBasicMaterial({ color: 0x00f5d4, transparent: true, opacity: 0.35 });
-const leftRail = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.06, 140), laneMat);
-leftRail.position.set(-2.35, 0.03, -50);
+// Track lane lines (for clear depth perception without removing effects)
+const laneMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.25 });
+const leftRail = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.05, 120), laneMat);
+leftRail.position.set(-2.3, 0.02, -40);
 scene.add(leftRail);
-const rightRail = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.06, 140), laneMat);
-rightRail.position.set(2.35, 0.03, -50);
+const rightRail = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.05, 120), laneMat);
+rightRail.position.set(2.3, 0.02, -40);
 scene.add(rightRail);
 
-// Floor Grid
-const grid = new THREE.GridHelper(220, 110, 0xff2a85, 0x240046);
-grid.material.opacity = 0.35;
+// Floor grid (rainbow-ish)
+const grid = new THREE.GridHelper(200, 100, 0xff00cc, 0x0055dd);
+grid.material.opacity = 0.25;
 grid.material.transparent = true;
 scene.add(grid);
 
-// Pulsing Floor Ring
+// Floor glow circle
+const floorGlow = new THREE.Mesh(
+  new THREE.CircleGeometry(30, 64),
+  new THREE.MeshBasicMaterial({ color: 0xff00aa, transparent: true, opacity: 0.12, blending: THREE.AdditiveBlending })
+);
+floorGlow.rotation.x = -Math.PI / 2;
+floorGlow.position.y = 0.01;
+scene.add(floorGlow);
+
+// Pulsing floor ring (beat reactive)
 const floorRing = new THREE.Mesh(
-  new THREE.RingGeometry(2.8, 3.3, 64),
-  new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.8, side: THREE.DoubleSide, blending: THREE.AdditiveBlending })
+  new THREE.RingGeometry(3, 3.5, 64),
+  new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.7, side: THREE.DoubleSide, blending: THREE.AdditiveBlending })
 );
 floorRing.rotation.x = -Math.PI / 2;
 floorRing.position.y = 0.02;
 scene.add(floorRing);
 
-// TARGET GATE (Klares Ziel-Tor bei z = 0)
+// CLEAR TARGET GATE (shows exact hit position at z = 0)
 const targetGate = new THREE.Mesh(
-  new THREE.TorusGeometry(2.15, 0.08, 16, 64),
-  new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.95 })
+  new THREE.TorusGeometry(2.15, 0.06, 12, 64),
+  new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.85 })
 );
 targetGate.position.set(0, 1.05, 0);
 scene.add(targetGate);
 
 const targetOuterHalo = new THREE.Mesh(
-  new THREE.TorusGeometry(2.4, 0.04, 12, 64),
-  new THREE.MeshBasicMaterial({ color: 0x00f5d4, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending })
+  new THREE.TorusGeometry(2.35, 0.03, 8, 64),
+  new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.45, blending: THREE.AdditiveBlending })
 );
 targetOuterHalo.position.set(0, 1.05, 0);
 scene.add(targetOuterHalo);
 
-// Player Orb
+// Player ball (rainbow)
 const ball = new THREE.Mesh(
-  new THREE.IcosahedronGeometry(0.88, 3),
+  new THREE.IcosahedronGeometry(0.9, 2),
   new THREE.MeshStandardMaterial({
-    color: 0xffffff, emissive: 0xff2a85, emissiveIntensity: 2.5,
-    metalness: 0.4, roughness: 0.15,
+    color: 0xffffff, emissive: 0xff00ff, emissiveIntensity: 2.4,
+    metalness: 0.5, roughness: 0.15,
   })
 );
 ball.position.set(0, 1.05, 0);
 scene.add(ball);
 
 const ballGlow = new THREE.Mesh(
-  new THREE.SphereGeometry(1.7, 24, 24),
-  new THREE.MeshBasicMaterial({ color: 0xff2a85, transparent: true, opacity: 0.25, blending: THREE.AdditiveBlending })
+  new THREE.SphereGeometry(1.75, 20, 20),
+  new THREE.MeshBasicMaterial({ color: 0xff44ff, transparent: true, opacity: 0.22, blending: THREE.AdditiveBlending })
 );
 ball.add(ballGlow);
 
-// Star Field
+// Star field (rainbow colors)
 const starsGeo = new THREE.BufferGeometry();
 const starCount = 900;
 const starPos = new Float32Array(starCount * 3);
 const starCol = new Float32Array(starCount * 3);
 for (let i = 0; i < starCount; i++) {
   starPos[i * 3]     = (Math.random() - 0.5) * 240;
-  starPos[i * 3 + 1] = Math.random() * 60 + 5;
+  starPos[i * 3 + 1] = Math.random() * 60 + 4;
   starPos[i * 3 + 2] = (Math.random() - 0.5) * 240;
-  const col = new THREE.Color().setHSL(Math.random(), 0.9, 0.7);
+  const col = new THREE.Color().setHSL(Math.random(), 1, 0.65);
   starCol[i * 3]     = col.r;
   starCol[i * 3 + 1] = col.g;
   starCol[i * 3 + 2] = col.b;
@@ -434,62 +301,18 @@ for (let i = 0; i < starCount; i++) {
 starsGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
 starsGeo.setAttribute('color', new THREE.BufferAttribute(starCol, 3));
 const stars = new THREE.Points(starsGeo,
-  new THREE.PointsMaterial({ size: 0.36, vertexColors: true, transparent: true, opacity: 0.8 }));
+  new THREE.PointsMaterial({ size: 0.35, vertexColors: true, transparent: true, opacity: 0.75 }));
 scene.add(stars);
 
-// ============ IOS / IPAD AUDIO UNLOCKER ============
-function unlockAudio() {
-  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-  if (!audioCtx) {
-    audioCtx = new AudioContextClass();
-  }
-  if (audioCtx.state === 'suspended') {
-    audioCtx.resume();
-  }
-  // Wichtiger iOS Safari Fix: Direkt synchron im Touch-Event einen kurzen Oszillator starten
-  try {
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start(0);
-    osc.stop(audioCtx.currentTime + 0.01);
-  } catch (e) {}
-}
-
-// Sound-Test-Button für iPad
-document.getElementById('test-sound-btn').addEventListener('click', (e) => {
-  e.stopPropagation();
-  unlockAudio();
-  const t = audioCtx.currentTime;
-  const notes = [523.25, 659.25, 783.99, 1046.5]; // C5 - E5 - G5 - C6 Akkord
-  notes.forEach((freq, idx) => {
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(freq, t + idx * 0.07);
-    gain.gain.setValueAtTime(0.25, t + idx * 0.07);
-    gain.gain.exponentialRampToValueAtTime(0.001, t + idx * 0.07 + 0.4);
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start(t + idx * 0.07);
-    osc.stop(t + idx * 0.07 + 0.42);
-  });
-  e.target.textContent = '✅ TON AKTIV! JETZT SPIEL STARTEN';
-  e.target.style.borderColor = '#00f5d4';
-  e.target.style.color = '#00f5d4';
-});
-
-// ============ SYNTHWAVE MUSIC ENGINE ============
+// ============ MUSIC ENGINE ============
 class Music {
   constructor(ctx) {
     this.ctx = ctx;
     this.master = ctx.createGain();
-    this.master.gain.setValueAtTime(0.65, ctx.currentTime);
+    this.master.gain.setValueAtTime(0.45, ctx.currentTime);
 
-    // Stereo-Delay für breiten Synthwave-Sound
-    const delay = ctx.createDelay(1.0);
+    // Ping-pong-ish echo for sparkle
+    const delay = ctx.createDelay(1);
     delay.delayTime.value = BEAT_DUR * 0.75;
     const fb = ctx.createGain();
     fb.gain.value = 0.25;
@@ -511,7 +334,7 @@ class Music {
   }
 
   start() {
-    this.startTime = this.ctx.currentTime + 0.12;
+    this.startTime = this.ctx.currentTime + 0.15;
     this.nextStepTime = this.startTime;
     this.step = 0;
     this.isPlaying = true;
@@ -524,7 +347,7 @@ class Music {
     const t = this.ctx.currentTime;
     this.master.gain.cancelScheduledValues(t);
     this.master.gain.setValueAtTime(this.master.gain.value, t);
-    this.master.gain.linearRampToValueAtTime(0.0001, t + 0.3);
+    this.master.gain.linearRampToValueAtTime(0.0001, t + 0.35);
   }
 
   schedule() {
@@ -544,72 +367,72 @@ class Music {
     const root = BASS_ROOTS[bar];
     const phrase = Math.floor(step / 64);
 
-    // 1. Punchy Kick & Snare
-    if (s === 0 || s === 4 || s === 8 || s === 12) this.kick(t, 1.0);
+    // === DRUMS ===
+    if (s === 0 || s === 8) this.kick(t, 1.0);
+    if (s === 6 || s === 14) this.kick(t, 0.75);
     if (s === 4 || s === 12) this.snare(t);
-    if (s % 2 === 0) this.hihat(t, s % 4 === 2 ? 0.28 : 0.12);
+    if (s % 2 === 0) this.hihat(t, s % 4 === 0 ? 0.32 : 0.16);
+    if (s === 10) this.hihat(t, 0.14, 0.16);
 
-    // 2. Rolling Synthwave Bassline (8tel Noten)
-    if (s % 2 === 0) {
-      const octaveShift = (s % 4 === 2) ? 12 : 0;
-      this.bass(root + octaveShift, t, 0.38);
-    }
+    // === BASS ===
+    if (s % 4 === 0) this.bass(root, t, 0.36);
+    if (s === 6 || s === 14) this.bass(root + 12, t, 0.22);
 
-    // 3. Warmes Pad / Akkord auf Takt-Beginn
-    if (s === 0) {
-      chord.forEach(note => this.pad(note, t, BEAT_DUR * 3.8));
-    }
+    // === FAST ARP (Rush-E style) ===
+    const arpPattern = [0, 1, 2, 1];
+    const arpNote = chord[arpPattern[s % 4]] + 12 + (phrase % 2 === 0 ? 0 : 12);
+    this.lead(arpNote, t, 0.11, 'triangle');
 
-    // 4. Eingängige Haupt-Melodie
-    const melIdx = step % MELODY_NOTES.length;
-    const melNote = MELODY_NOTES[melIdx];
-    if (melNote !== null) {
-      const lift = (phrase % 2 === 1) ? 12 : 0;
-      this.lead(melNote + lift, t, 0.16, 'triangle');
-    }
+    // === ACCENT LEAD (Matches 'S' syncopated notes too!) ===
+    if (s === 0) this.lead(chord[0] + 24, t, 0.14, 'sawtooth');
+    if (s === 3 || s === 10 || s === 14) this.lead(chord[2] + 24, t, 0.11, 'sawtooth');
+    if (s === 8 && (phrase % 2 === 1)) this.lead(chord[1] + 24, t, 0.12, 'sawtooth');
+
+    // === SPARKLE ===
+    if (s === 0 && phrase % 2 === 0) this.lead(chord[0] + 36, t, 0.06, 'sine');
   }
 
   kick(t, vol = 1) {
     const o = this.ctx.createOscillator();
     const g = this.ctx.createGain();
-    o.frequency.setValueAtTime(150, t);
-    o.frequency.exponentialRampToValueAtTime(42, t + 0.11);
-    g.gain.setValueAtTime(vol * 0.9, t);
-    g.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+    o.frequency.setValueAtTime(165, t);
+    o.frequency.exponentialRampToValueAtTime(42, t + 0.09);
+    g.gain.setValueAtTime(vol * 0.95, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.19);
     o.connect(g).connect(this.master);
     o.start(t);
-    o.stop(t + 0.24);
+    o.stop(t + 0.22);
   }
 
   snare(t) {
-    const buf = this.ctx.createBuffer(1, Math.floor(this.ctx.sampleRate * 0.18), this.ctx.sampleRate);
+    const buf = this.ctx.createBuffer(1, Math.floor(this.ctx.sampleRate * 0.16), this.ctx.sampleRate);
     const d = buf.getChannelData(0);
     for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
     const src = this.ctx.createBufferSource();
     src.buffer = buf;
     const f = this.ctx.createBiquadFilter();
     f.type = 'highpass';
-    f.frequency.value = 1100;
+    f.frequency.value = 1300;
     const g = this.ctx.createGain();
-    g.gain.setValueAtTime(0.38, t);
-    g.gain.exponentialRampToValueAtTime(0.001, t + 0.17);
+    g.gain.setValueAtTime(0.4, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
     src.connect(f).connect(g).connect(this.master);
     src.start(t);
-    src.stop(t + 0.18);
+    src.stop(t + 0.16);
   }
 
-  hihat(t, vol) {
-    const buf = this.ctx.createBuffer(1, Math.floor(this.ctx.sampleRate * 0.05), this.ctx.sampleRate);
+  hihat(t, vol, decay = 0.045) {
+    const buf = this.ctx.createBuffer(1, Math.floor(this.ctx.sampleRate * decay), this.ctx.sampleRate);
     const d = buf.getChannelData(0);
     for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
     const src = this.ctx.createBufferSource();
     src.buffer = buf;
     const f = this.ctx.createBiquadFilter();
     f.type = 'highpass';
-    f.frequency.value = 6500;
+    f.frequency.value = 7000;
     const g = this.ctx.createGain();
     g.gain.setValueAtTime(vol, t);
-    g.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+    g.gain.exponentialRampToValueAtTime(0.001, t + decay);
     src.connect(f).connect(g).connect(this.master);
     src.start(t);
   }
@@ -622,27 +445,12 @@ class Music {
     o.type = 'sawtooth';
     o.frequency.value = freq;
     f.type = 'lowpass';
-    f.frequency.setValueAtTime(900, t);
-    f.frequency.exponentialRampToValueAtTime(280, t + 0.18);
+    f.frequency.value = 680;
     g.gain.setValueAtTime(vol, t);
-    g.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
     o.connect(f).connect(g).connect(this.master);
     o.start(t);
     o.stop(t + 0.22);
-  }
-
-  pad(midi, t, dur) {
-    const freq = 440 * Math.pow(2, (midi - 69) / 12);
-    const o = this.ctx.createOscillator();
-    const g = this.ctx.createGain();
-    o.type = 'sine';
-    o.frequency.value = freq;
-    g.gain.setValueAtTime(0.001, t);
-    g.gain.linearRampToValueAtTime(0.065, t + 0.25);
-    g.gain.exponentialRampToValueAtTime(0.001, t + dur);
-    o.connect(g).connect(this.master);
-    o.start(t);
-    o.stop(t + dur + 0.05);
   }
 
   lead(midi, t, vol, type = 'triangle') {
@@ -652,10 +460,10 @@ class Music {
     o.type = type;
     o.frequency.value = freq;
     g.gain.setValueAtTime(vol, t);
-    g.gain.exponentialRampToValueAtTime(0.001, t + 0.26);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
     o.connect(g).connect(this.master);
     o.start(t);
-    o.stop(t + 0.28);
+    o.stop(t + 0.12);
   }
 
   stepTimeOf(stepIndex) {
@@ -663,13 +471,13 @@ class Music {
   }
 }
 
-// ============ UI & DIFFICULTY BUTTONS ============
+// ============ UI ============
 const ui = {
   score: document.getElementById('score'),
   combo: document.getElementById('combo'),
   comboBox: document.getElementById('combo-box'),
   lives: document.getElementById('lives'),
-  phasePill: document.getElementById('phase-pill'),
+  patternTag: document.getElementById('pattern-tag'),
   flash: document.getElementById('flash'),
   perfectFlash: document.getElementById('perfect-flash'),
   comboPopup: document.getElementById('combo-popup'),
@@ -681,74 +489,60 @@ const ui = {
   finalBeat: document.getElementById('final-beat'),
 };
 
-document.querySelectorAll('.diff-btn').forEach(btn => {
-  btn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currentMode = MODES[btn.dataset.mode];
-    BPM = currentMode.bpm;
-    BEAT_DUR = 60 / BPM;
-    STEP_DUR = BEAT_DUR / 4;
-    APPROACH_SEC = BEAT_DUR * APPROACH_BEATS;
-  });
-});
-
 function updateUI() {
   ui.score.textContent = state.score;
   ui.combo.textContent = 'x' + state.combo;
   ui.comboBox.classList.toggle('active', state.combo > 1);
   ui.lives.textContent = '♥'.repeat(Math.max(0, state.lives)) || '—';
 }
-
 function flash(kind) {
   if (kind === 'perfect') {
     ui.perfectFlash.style.opacity = '0.85';
-    setTimeout(() => ui.perfectFlash.style.opacity = '0', 130);
+    setTimeout(() => ui.perfectFlash.style.opacity = '0', 120);
   } else {
-    ui.flash.style.opacity = '0.85';
-    setTimeout(() => ui.flash.style.opacity = '0', 180);
+    ui.flash.style.opacity = '0.9';
+    setTimeout(() => ui.flash.style.opacity = '0', 200);
   }
 }
-
 function showPopup(el, text, color) {
   el.textContent = text;
   el.style.color = color;
   el.style.transition = 'none';
   el.style.opacity = '1';
-  el.style.transform = 'translate(-50%, -50%) scale(0.65)';
+  el.style.transform = 'translate(-50%, -50%) scale(0.7)';
   void el.offsetHeight;
-  el.style.transition = 'all 0.42s cubic-bezier(0.18, 0.89, 0.32, 1.28)';
-  el.style.transform = 'translate(-50%, -145%) scale(1.3)';
+  el.style.transition = 'all 0.45s cubic-bezier(0.2, 0.9, 0.3, 1)';
+  el.style.transform = 'translate(-50%, -140%) scale(1.3)';
   el.style.opacity = '0';
 }
 
-// ============ SPAWN & DOPAMINE EFFECTS ============
+// ============ SPAWN & EFFECTS ============
 function spawnRing(crossTime, stepIndex, noteType) {
   const isSync = noteType === 'S';
-  const hue = (stepIndex * 22 + (isSync ? 150 : 0)) % 360;
+  const hue = (stepIndex * 19 + (isSync ? 140 : 0)) % 360;
   const color = new THREE.Color().setHSL(hue / 360, 1, 0.6);
 
+  // Main beat = smooth circle torus | Syncopated accent = sharp diamond/octagon torus for clear rhythm readability
   const radialSegs = isSync ? 4 : 48;
   const radius = isSync ? 1.85 : 2.15;
-  const tube = isSync ? 0.17 : 0.22;
+  const tube = isSync ? 0.16 : 0.2;
 
   const geo = new THREE.TorusGeometry(radius, tube, 12, radialSegs);
   const mat = new THREE.MeshStandardMaterial({
-    color, emissive: color, emissiveIntensity: 2.0,
+    color, emissive: color, emissiveIntensity: 1.8,
     transparent: true, opacity: 1,
   });
   const ring = new THREE.Mesh(geo, mat);
 
-  // Kontrast-Rahmen für klare Sichtbarkeit
-  const outlineGeo = new THREE.TorusGeometry(radius, tube + 0.08, 8, radialSegs);
+  // Dark contrast backing outline so rings stay 100% readable through particles & glow
+  const outlineGeo = new THREE.TorusGeometry(radius, tube + 0.07, 8, radialSegs);
   const outlineMat = new THREE.MeshBasicMaterial({
-    color: 0x050010, transparent: true, opacity: 0.85, side: THREE.BackSide
+    color: 0x050010, transparent: true, opacity: 0.75, side: THREE.BackSide
   });
   const outline = new THREE.Mesh(outlineGeo, outlineMat);
   ring.add(outline);
 
-  if (isSync) ring.rotation.z = Math.PI / 4;
+  if (isSync) ring.rotation.z = Math.PI / 4; // Diamond orientation
 
   ring.position.set(0, 1.05, SPAWN_Z);
   ring.userData = {
@@ -759,7 +553,7 @@ function spawnRing(crossTime, stepIndex, noteType) {
   state.rings.push(ring);
 }
 
-function burst(pos, colorHex, count, speed, size = 0.32) {
+function burst(pos, colorHex, count, speed, size = 0.28) {
   const geo = new THREE.BufferGeometry();
   const posArr = new Float32Array(count * 3);
   const vel = [];
@@ -769,26 +563,27 @@ function burst(pos, colorHex, count, speed, size = 0.32) {
     posArr[i * 3 + 2] = pos.z;
     const theta = Math.random() * Math.PI * 2;
     const phi = Math.acos(2 * Math.random() - 1);
-    const v = speed * (0.5 + Math.random() * 0.8);
+    const v = speed * (0.4 + Math.random());
+    // Push particles slightly outward radially so center lane remains clear
     vel.push({
-      vx: Math.sin(phi) * Math.cos(theta) * v * 1.4,
-      vy: Math.cos(phi) * v + 5,
-      vz: Math.sin(phi) * Math.sin(theta) * v * 0.8,
+      vx: Math.sin(phi) * Math.cos(theta) * v * 1.35,
+      vy: Math.cos(phi) * v + 4,
+      vz: Math.sin(phi) * Math.sin(theta) * v * 0.7,
     });
   }
   geo.setAttribute('position', new THREE.BufferAttribute(posArr, 3));
   const mat = new THREE.PointsMaterial({
-    color: colorHex, size, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending,
+    color: colorHex, size, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending,
   });
   const points = new THREE.Points(geo, mat);
   scene.add(points);
   state.particles.push({ points, velocities: vel, life: 1, positions: posArr });
 }
 
-function shockwave(colorHex, radiusStart = 1.5, radiusEnd = 16, dur = 0.5) {
-  const geo = new THREE.RingGeometry(radiusStart, radiusStart + 0.6, 48);
+function shockwave(colorHex, radiusStart = 1.5, radiusEnd = 14, dur = 0.5) {
+  const geo = new THREE.RingGeometry(radiusStart, radiusStart + 0.5, 48);
   const mat = new THREE.MeshBasicMaterial({
-    color: colorHex, transparent: true, opacity: 0.9, side: THREE.DoubleSide, blending: THREE.AdditiveBlending,
+    color: colorHex, transparent: true, opacity: 0.85, side: THREE.DoubleSide, blending: THREE.AdditiveBlending,
   });
   const m = new THREE.Mesh(geo, mat);
   m.position.set(0, 1.05, 0);
@@ -810,43 +605,59 @@ function resolveRing(ring, quality) {
     state.beatsHit++;
     playHit(true, state.combo);
     flash('perfect');
-    showPopup(ui.comboPopup, 'PERFECT!', '#ffbe0b');
-
-    for (let i = 0; i < 6; i++) {
-      const hue = (performance.now() / 4 + i * 60) % 360;
-      const c = new THREE.Color().setHSL(hue / 360, 1, 0.65).getHex();
-      burst(pos, c, 16, 32, 0.36);
+    showPopup(ui.comboPopup, 'PERFECT', '#ffff44');
+    // RAINBOW burst
+    for (let i = 0; i < 5; i++) {
+      const hue = (performance.now() / 5 + i * 72) % 360;
+      const c = new THREE.Color().setHSL(hue / 360, 1, 0.6).getHex();
+      burst(pos, c, 12, 28, 0.32);
     }
-    shockwave(0xffffff, 1.5, 22, 0.55);
-    shockwave(col.getHex(), 1.5, 30, 0.7);
-    targetGate.scale.setScalar(1.32);
-    state.shakeAmount = 11;
-    ball.material.emissiveIntensity = 8.0;
+    shockwave(0xffffff, 1.5, 18, 0.5);
+    shockwave(col.getHex(), 1.5, 26, 0.65);
+    targetGate.scale.setScalar(1.25);
+    state.shakeAmount = 8;
+    ball.material.emissiveIntensity = 6.5;
   } else if (quality === 'good') {
     state.combo++;
     state.bestCombo = Math.max(state.bestCombo, state.combo);
     state.score += 50 * state.combo;
     state.beatsHit++;
     playHit(false, state.combo);
-    showPopup(ui.comboPopup, 'GOOD', '#00f5d4');
-    burst(pos, col.getHex(), 26, 20, 0.3);
-    shockwave(col.getHex(), 1.5, 14, 0.45);
-    targetGate.scale.setScalar(1.18);
-    state.shakeAmount = 5;
-    ball.material.emissiveIntensity = 5.0;
+    showPopup(ui.comboPopup, 'GOOD', '#44ffff');
+    burst(pos, col.getHex(), 22, 18, 0.28);
+    shockwave(col.getHex(), 1.5, 13, 0.45);
+    targetGate.scale.setScalar(1.15);
+    state.shakeAmount = 4;
+    ball.material.emissiveIntensity = 4.5;
   } else if (quality === 'miss') {
     state.combo = 0;
     state.lives--;
     playMiss();
     flash('miss');
-    showPopup(ui.missPopup, 'MISS', '#ff2a6d');
-    state.shakeAmount = 16;
+    showPopup(ui.missPopup, 'MISS', '#ff2244');
+    state.shakeAmount = 14;
     if (state.lives <= 0) gameOver();
   }
   updateUI();
 }
 
-// ============ HIT & MISS SFX ============
+// ============ AUDIO SFX ============
+function initAudio() {
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if (!audioCtx) {
+    audioCtx = new AudioContextClass();
+  }
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+  // Unlock silent buffer for iOS/Safari/Chrome autoplay policies
+  const buffer = audioCtx.createBuffer(1, 1, 22050);
+  const source = audioCtx.createBufferSource();
+  source.buffer = buffer;
+  source.connect(audioCtx.destination);
+  source.start(0);
+}
+
 function playHit(perfect, combo) {
   if (!audioCtx) return;
   const t = audioCtx.currentTime;
@@ -857,22 +668,22 @@ function playHit(perfect, combo) {
   o.type = perfect ? 'triangle' : 'sine';
   o.frequency.setValueAtTime(freq, t);
   o.frequency.exponentialRampToValueAtTime(freq * 1.5, t + 0.08);
-  g.gain.setValueAtTime(perfect ? 0.22 : 0.16, t);
-  g.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+  g.gain.setValueAtTime(perfect ? 0.14 : 0.1, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
   o.connect(g).connect(audioCtx.destination);
   o.start(t);
-  o.stop(t + 0.2);
+  o.stop(t + 0.16);
 
   if (perfect) {
     const o2 = audioCtx.createOscillator();
     const g2 = audioCtx.createGain();
     o2.type = 'sine';
     o2.frequency.value = freq * 1.5;
-    g2.gain.setValueAtTime(0.16, t + 0.03);
-    g2.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+    g2.gain.setValueAtTime(0.11, t + 0.04);
+    g2.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
     o2.connect(g2).connect(audioCtx.destination);
-    o2.start(t + 0.03);
-    o2.stop(t + 0.24);
+    o2.start(t + 0.04);
+    o2.stop(t + 0.22);
   }
 }
 
@@ -880,48 +691,42 @@ function playMiss() {
   if (!audioCtx) return;
   const t = audioCtx.currentTime;
   const o = audioCtx.createOscillator();
-  const g = audioCtx.createGain();
+  const g = this.audioCtx.createGain();
   o.type = 'sawtooth';
-  o.frequency.setValueAtTime(160, t);
-  o.frequency.exponentialRampToValueAtTime(55, t + 0.3);
-  g.gain.setValueAtTime(0.22, t);
+  o.frequency.setValueAtTime(180, t);
+  o.frequency.exponentialRampToValueAtTime(60, t + 0.3);
+  g.gain.setValueAtTime(0.18, t);
   g.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
   o.connect(g).connect(audioCtx.destination);
   o.start(t);
   o.stop(t + 0.36);
 }
 
-// ============ INPUT (FAIR & RESPONSIVE) ============
+// ============ INPUT ============
 function handlePress() {
-  if (!state.running) return;
-  unlockAudio();
+  if (!state.running || !audioCtx) return;
+  if (audioCtx.state === 'suspended') audioCtx.resume();
   const t = audioCtx.currentTime;
   let best = null, bestDist = Infinity;
-
-  // Finde den nächsten ungelösten Ring im großzügigen Treffer-Fenster
   for (const ring of state.rings) {
     if (ring.userData.resolved) continue;
     const d = Math.abs(t - ring.userData.crossTime);
-    if (d < currentMode.hitWin && d < bestDist) {
-      best = ring;
-      bestDist = d;
-    }
+    if (d < HIT_WINDOW_SEC && d < bestDist) { best = ring; bestDist = d; }
   }
-
   if (best) {
-    resolveRing(best, bestDist < currentMode.perfWin ? 'perfect' : 'good');
+    resolveRing(best, bestDist < PERFECT_WINDOW_SEC ? 'perfect' : 'good');
   } else {
-    // Leerer Tap bestraft nicht, gibt nur kurzes Feedback
-    targetGate.scale.setScalar(0.92);
+    state.shakeAmount = Math.max(state.shakeAmount, 1.5);
   }
 }
 
 // ============ GAME FLOW ============
 function startGame() {
-  unlockAudio();
+  initAudio();
   if (music) music.stop();
   music = new Music(audioCtx);
 
+  // Cleanup
   for (const r of state.rings) { scene.remove(r); r.geometry.dispose(); r.material.dispose(); }
   state.rings = [];
   for (const p of state.particles) { scene.remove(p.points); p.points.geometry.dispose(); p.points.material.dispose(); }
@@ -940,22 +745,16 @@ function startGame() {
   music.start();
   ui.startScreen.classList.add('hidden');
   ui.gameOver.classList.add('hidden');
-  ui.phasePill.textContent = currentMode.label + ' // INTRO';
   updateUI();
 }
 
 function gameOver() {
   state.running = false;
   if (music) music.stop();
-  if (state.score > highScore) {
-    highScore = state.score;
-    localStorage.setItem('klangformer_hs', highScore);
-    document.getElementById('menu-highscore').textContent = 'NEUER BESTSCORE: ' + highScore;
-  }
   ui.finalScore.textContent = state.score;
-  ui.finalCombo.textContent = 'x' + state.bestCombo;
-  ui.finalBeat.textContent = state.beatsHit;
-  setTimeout(() => ui.gameOver.classList.remove('hidden'), 450);
+  ui.finalCombo.textContent = 'Best combo: x' + state.bestCombo;
+  ui.finalBeat.textContent = 'Beats hit: ' + state.beatsHit;
+  setTimeout(() => ui.gameOver.classList.remove('hidden'), 500);
 }
 
 // ============ EVENTS ============
@@ -963,33 +762,12 @@ window.addEventListener('keydown', (e) => {
   if (e.code === 'Space') {
     e.preventDefault();
     if (state.running) handlePress();
-    else if (!ui.startScreen.classList.contains('hidden')) startGame();
+    else startGame();
   }
 });
-
-// Touch & Mouse Support für iPad & Desktop
-window.addEventListener('pointerdown', (e) => {
-  if (e.target.closest('button')) return;
-  if (state.running) {
-    e.preventDefault();
-    handlePress();
-  }
-});
-
-document.getElementById('start-btn').addEventListener('click', (e) => {
-  e.stopPropagation();
-  startGame();
-});
-document.getElementById('restart-btn').addEventListener('click', (e) => {
-  e.stopPropagation();
-  startGame();
-});
-document.getElementById('menu-btn').addEventListener('click', (e) => {
-  e.stopPropagation();
-  ui.gameOver.classList.add('hidden');
-  ui.startScreen.classList.remove('hidden');
-});
-
+window.addEventListener('pointerdown', () => { if (state.running) handlePress(); });
+document.getElementById('start-btn').addEventListener('click', (e) => { e.stopPropagation(); startGame(); });
+document.getElementById('restart-btn').addEventListener('click', (e) => { e.stopPropagation(); startGame(); });
 window.addEventListener('resize', () => {
   camera.aspect = innerWidth / innerHeight;
   camera.updateProjectionMatrix();
@@ -999,25 +777,36 @@ window.addEventListener('resize', () => {
 // ============ BEAT VISUALS ============
 function onBeat(beatIndex) {
   const bar = Math.floor(beatIndex / 4) % 4;
-  ui.phasePill.textContent = `${currentMode.label} // ${PHASE_NAMES[bar]}`;
+  ui.patternTag.textContent = PHASE_NAMES[bar];
 
-  const hue = (beatIndex * 28 + bar * 45) % 360;
+  const hue = (beatIndex * 32 + bar * 45) % 360;
 
+  // Background pulse (kept subtle so foreground rings pop cleanly)
   scene.background.setHSL(hue / 360, 0.75, 0.035);
   scene.fog.color.copy(scene.background);
 
+  // Ball pulse
   ball.scale.setScalar(1.38);
-  ball.material.emissive.setHSL(hue / 360, 1, 0.55);
-  ballGlow.material.color.setHSL(hue / 360, 1, 0.6);
+  ball.material.emissive.setHSL(hue / 360, 1, 0.5);
+  ballGlow.material.color.setHSL(hue / 360, 1, 0.55);
 
-  floorRing.scale.setScalar(1.32);
+  // Floor pulse
+  floorRing.scale.setScalar(1.3);
   floorRing.material.opacity = 0.85;
-  floorRing.material.color.setHSL(hue / 360, 1, 0.7);
-  laneMat.color.setHSL(hue / 360, 1, 0.65);
+  floorRing.material.color.setHSL(hue / 360, 1, 0.65);
+  floorGlow.material.color.setHSL(hue / 360, 0.9, 0.4);
+  laneMat.color.setHSL(hue / 360, 1, 0.6);
 
-  light1.color.setHSL(((hue + 0) % 360) / 360, 1, 0.6);
-  light2.color.setHSL(((hue + 140) % 360) / 360, 1, 0.6);
-  light3.color.setHSL(((hue + 260) % 360) / 360, 1, 0.6);
+  // Lights shift
+  light1.color.setHSL(((hue + 0) % 360) / 360, 1, 0.55);
+  light2.color.setHSL(((hue + 120) % 360) / 360, 1, 0.55);
+  light3.color.setHSL(((hue + 240) % 360) / 360, 1, 0.55);
+  light4.color.setHSL(((hue + 60) % 360) / 360, 1, 0.55);
+
+  if (beatIndex % 4 === 0) {
+    ui.perfectFlash.style.opacity = '0.18';
+    setTimeout(() => ui.perfectFlash.style.opacity = '0', 85);
+  }
 }
 
 // ============ MAIN LOOP ============
@@ -1028,15 +817,10 @@ function tick() {
   const dt = Math.min(0.05, (nowMs - lastFrame) / 1000);
   lastFrame = nowMs;
 
-  // Tunnel-Bögen bewegen sich sanft nach vorne
-  tunnelGroup.children.forEach((arch, idx) => {
-    arch.position.z += dt * (state.running ? 16 : 5);
-    if (arch.position.z > 8) arch.position.z = -88;
-  });
-
   if (state.running && audioCtx && music && music.isPlaying) {
     const t = audioCtx.currentTime;
 
+    // === Schedule rhythmic ring spawns based on musical bar patterns ===
     while (music.stepTimeOf(state.stepIndexToSpawn) < t + APPROACH_SEC) {
       const sIdx = state.stepIndexToSpawn;
       const bar = Math.floor(sIdx / 16) % 4;
@@ -1050,54 +834,61 @@ function tick() {
       state.stepIndexToSpawn++;
     }
 
+    // === Beat pulse detection ===
     const currentBeat = Math.floor((t - music.startTime) / BEAT_DUR);
     if (currentBeat > state.lastBeatIndex && currentBeat >= 0) {
       state.lastBeatIndex = currentBeat;
       onBeat(currentBeat);
     }
 
+    // === Update rings ===
     for (let i = state.rings.length - 1; i >= 0; i--) {
       const ring = state.rings[i];
       const ud = ring.userData;
 
       if (!ud.resolved) {
         const remaining = ud.crossTime - t;
-        const progress = 1 - (remaining / APPROACH_SEC);
+        const progress = 1 - (remaining / APPROACH_SEC); // 0 at spawn, 1 at target gate
         ring.position.z = SPAWN_Z * (remaining / APPROACH_SEC);
 
-        const entryAlpha = Math.min(1, Math.max(0.25, progress * 3));
+        // Smooth fade-in at far distance so rings don't pop abruptly out of fog
+        const entryAlpha = Math.min(1, Math.max(0.2, progress * 3));
         ring.material.opacity = entryAlpha;
-        ud.outlineMat.opacity = entryAlpha * 0.85;
+        ud.outlineMat.opacity = entryAlpha * 0.8;
 
+        // Color & scale feedback near hit zone
         const diff = Math.abs(remaining);
-        if (diff < currentMode.perfWin) {
+        if (diff < PERFECT_WINDOW_SEC) {
           ring.material.emissive.setHex(0xffffff);
-          ring.material.emissiveIntensity = 4;
-          ring.scale.setScalar(1.22);
-          targetGate.material.color.setHex(0xffbe0b);
-        } else if (diff < currentMode.hitWin) {
+          ring.material.emissiveIntensity = 3.5;
+          ring.scale.setScalar(1.18);
+          targetGate.material.color.setHex(0xffff44);
+        } else if (diff < HIT_WINDOW_SEC) {
           ring.material.emissive.copy(ud.baseColor);
-          ring.material.emissiveIntensity = 3.2;
-          ring.scale.setScalar(1.1);
-          targetGate.material.color.setHex(0x00f5d4);
+          ring.material.emissiveIntensity = 2.8;
+          ring.scale.setScalar(1.08);
+          targetGate.material.color.setHex(0x00ffff);
         } else {
           ring.material.emissive.copy(ud.baseColor);
-          ring.material.emissiveIntensity = 2.0;
+          ring.material.emissiveIntensity = 1.8;
           ring.scale.setScalar(1);
         }
 
+        // Rotate syncopated diamond rings gently for visual distinction
         if (ud.noteType === 'S') {
           ring.rotation.z = Math.PI / 4 + Math.sin(nowMs * 0.008) * 0.15;
         }
 
         const hueShift = (ud.hue + Math.sin(nowMs * 0.005 + ud.stepIndex) * 18 + 360) % 360;
-        ring.material.color.setHSL(hueShift / 360, 1, 0.65);
+        ring.material.color.setHSL(hueShift / 360, 1, 0.6);
 
-        if (t > ud.crossTime + currentMode.missWin) {
+        // Miss check
+        if (t > ud.crossTime + MISS_WINDOW_SEC) {
           resolveRing(ring, 'miss');
           if (!state.running) break;
         }
       } else {
+        // Fade out
         ud.fadeTime += dt;
         const prog = ud.fadeTime / 0.45;
         if (prog >= 1) {
@@ -1107,18 +898,19 @@ function tick() {
           state.rings.splice(i, 1);
           continue;
         }
-        const s = 1 + prog * 2.8;
+        const s = 1 + prog * 2.6;
         ring.scale.setScalar(s);
         ring.material.opacity = 1 - prog;
-        ud.outlineMat.opacity = (1 - prog) * 0.6;
-        ring.material.emissiveIntensity = 2.5 * (1 - prog);
+        ud.outlineMat.opacity = (1 - prog) * 0.5;
+        ring.material.emissiveIntensity = 2.0 * (1 - prog);
       }
     }
   }
 
+  // === Particles (always update) ===
   for (let i = state.particles.length - 1; i >= 0; i--) {
     const p = state.particles[i];
-    p.life -= dt / 0.65;
+    p.life -= dt / 0.7;
     if (p.life <= 0) {
       scene.remove(p.points);
       p.points.geometry.dispose();
@@ -1131,13 +923,14 @@ function tick() {
       p.positions[j * 3 + 1] += p.velocities[j].vy * dt;
       p.positions[j * 3 + 2] += p.velocities[j].vz * dt;
       p.velocities[j].vy -= 22 * dt;
-      p.velocities[j].vx *= 0.95;
-      p.velocities[j].vz *= 0.95;
+      p.velocities[j].vx *= 0.96;
+      p.velocities[j].vz *= 0.96;
     }
     p.points.geometry.attributes.position.needsUpdate = true;
     p.points.material.opacity = p.life;
   }
 
+  // === Shockwaves ===
   for (let i = state.shockwaves.length - 1; i >= 0; i--) {
     const s = state.shockwaves[i];
     s.life -= dt / s.dur;
@@ -1154,31 +947,35 @@ function tick() {
     s.mesh.material.opacity = s.life;
   }
 
-  ball.scale.lerp(ONE, dt * 10);
-  targetGate.scale.lerp(ONE, dt * 12);
-  targetGate.material.color.lerp(new THREE.Color(0xffffff), dt * 9);
-  ball.rotation.x += dt * 0.8;
-  ball.rotation.y += dt * 1.0;
-  ball.material.emissiveIntensity = Math.max(2.3, ball.material.emissiveIntensity - dt * 15);
+  // === Ball & Target Gate idle ===
+  ball.scale.lerp(ONE, dt * 9);
+  targetGate.scale.lerp(ONE, dt * 10);
+  targetGate.material.color.lerp(new THREE.Color(0xffffff), dt * 8);
+  ball.rotation.x += dt * 0.7;
+  ball.rotation.y += dt * 0.9;
+  ball.material.emissiveIntensity = Math.max(2.2, ball.material.emissiveIntensity - dt * 15);
   const hueNow = (nowMs * 0.08) % 360;
-  ballGlow.material.color.setHSL(hueNow / 360, 1, 0.65);
+  ballGlow.material.color.setHSL(hueNow / 360, 1, 0.6);
   const pulse = 1 + Math.sin(nowMs * 0.006) * 0.08;
   ballGlow.scale.setScalar(pulse);
 
-  floorRing.scale.lerp(ONE, dt * 8);
-  floorRing.material.opacity *= Math.pow(0.015, dt);
+  // === Floor ring idle ===
+  floorRing.scale.lerp(ONE, dt * 7);
+  floorRing.material.opacity *= Math.pow(0.02, dt);
 
+  // === Camera shake ===
   if (state.shakeAmount > 0.1) {
-    state.shakeAmount *= Math.pow(0.002, dt);
+    state.shakeAmount *= Math.pow(0.003, dt);
     camera.position.x = camBase.x + (Math.random() - 0.5) * state.shakeAmount * 0.06;
     camera.position.y = camBase.y + (Math.random() - 0.5) * state.shakeAmount * 0.06;
     camera.position.z = camBase.z + (Math.random() - 0.5) * state.shakeAmount * 0.03;
   } else {
     state.shakeAmount = 0;
-    camera.position.lerp(camBase, dt * 7);
+    camera.position.lerp(camBase, dt * 6);
   }
-  camera.lookAt(0, 1.05, -18);
+  camera.lookAt(0, 1.05, -16);
 
+  // === Stars drift ===
   stars.rotation.y += dt * 0.03;
 
   renderer.render(scene, camera);
