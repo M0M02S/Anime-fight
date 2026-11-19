@@ -3,20 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#08080f">
-<title>RNG SKIN IDLE</title>
+<meta name="theme-color" content="#050510">
+<title>RNG SKIN IDLE — ULTIMATE</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
 :root {
-  --bg: #08080f;
-  --panel: #12121c;
-  --panel2: #1a1a26;
+  --bg: #050510;
+  --panel: #0f0f1a;
+  --panel2: #181824;
   --line: #2a2a3d;
-  --line2: #3a3a55;
   --text: #e2e8f0;
   --muted: #64748b;
   --gold: #fbbf24;
@@ -25,9 +23,7 @@
   --purple: #a78bfa;
   --cyan: #22d3ee;
 }
-
 html, body { height: 100%; }
-
 body {
   font-family: 'VT323', monospace;
   font-size: 18px;
@@ -38,99 +34,112 @@ body {
   min-height: 100vh;
   position: relative;
 }
-
-/* === ANIMATED BACKGROUND === */
+#bgCanvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -3;
+  pointer-events: none;
+}
 body::before {
   content: '';
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(circle at 15% 20%, rgba(124, 58, 237, 0.18) 0%, transparent 40%),
-    radial-gradient(circle at 85% 75%, rgba(34, 211, 238, 0.15) 0%, transparent 40%),
-    radial-gradient(circle at 50% 100%, rgba(236, 72, 153, 0.12) 0%, transparent 50%);
-  animation: bgPulse 10s ease-in-out infinite;
+    radial-gradient(circle at 15% 20%, rgba(124, 58, 237, 0.22) 0%, transparent 45%),
+    radial-gradient(circle at 85% 75%, rgba(34, 211, 238, 0.18) 0%, transparent 45%),
+    radial-gradient(circle at 50% 100%, rgba(236, 72, 153, 0.15) 0%, transparent 55%);
+  animation: bgPulse 12s ease-in-out infinite;
   pointer-events: none;
   z-index: -2;
 }
-
 body::after {
   content: '';
   position: fixed;
   inset: 0;
   background-image:
-    linear-gradient(rgba(124, 58, 237, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(124, 58, 237, 0.06) 1px, transparent 1px);
+    linear-gradient(rgba(124, 58, 237, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(124, 58, 237, 0.08) 1px, transparent 1px);
   background-size: 48px 48px;
-  animation: gridScroll 20s linear infinite;
+  animation: gridScroll 25s linear infinite;
   pointer-events: none;
   z-index: -1;
 }
-
-@keyframes bgPulse {
-  0%, 100% { opacity: 0.9; }
-  50% { opacity: 0.6; }
-}
-
+@keyframes bgPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.65; } }
 @keyframes gridScroll {
   from { background-position: 0 0, 0 0; }
   to { background-position: 48px 48px, 48px 48px; }
 }
-
-/* Scanlines overlay */
 .scanlines {
   position: fixed;
   inset: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    rgba(0, 0, 0, 0.15) 0px,
-    rgba(0, 0, 0, 0.15) 1px,
-    transparent 1px,
-    transparent 3px
-  );
+  background: repeating-linear-gradient(0deg,
+    rgba(0,0,0,0.18) 0px, rgba(0,0,0,0.18) 1px,
+    transparent 1px, transparent 3px);
   pointer-events: none;
-  z-index: 90;
+  z-index: 95;
   mix-blend-mode: multiply;
 }
-
-/* === TOPBAR === */
+.vignette {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.7) 100%);
+  pointer-events: none;
+  z-index: 94;
+}
+/* TOPBAR */
 .topbar {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(8, 8, 15, 0.92);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(5, 5, 16, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-bottom: 2px solid var(--line);
-  padding: 8px 12px;
+  padding: 10px 14px;
   display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
 }
-
+.topbar::after {
+  content: '';
+  position: absolute;
+  bottom: -2px; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #7c3aed, #22d3ee, #ec4899, #7c3aed);
+  background-size: 300% 100%;
+  animation: borderSlide 4s linear infinite;
+}
+@keyframes borderSlide { 0% { background-position: 0% 0; } 100% { background-position: 300% 0; } }
 .logo {
   font-family: 'Press Start 2P', monospace;
   font-size: 11px;
-  color: var(--text);
   letter-spacing: 1px;
-  text-shadow: 0 0 8px var(--purple), 2px 2px 0 #000;
+  text-shadow: 0 0 10px var(--purple), 2px 2px 0 #000;
   white-space: nowrap;
 }
-.logo span { color: var(--gold); }
-
-.stats-bar {
-  margin-left: auto;
-  display: flex;
-  gap: 6px;
+.logo span {
+  background: linear-gradient(90deg, #fbbf24, #f97316);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
-
+.stats-bar { margin-left: auto; display: flex; gap: 6px; }
 .stat-box {
   background: var(--panel);
   border: 2px solid var(--line);
-  padding: 4px 10px;
+  padding: 5px 10px;
   min-width: 90px;
   text-align: center;
   border-radius: 4px;
+  transition: transform .15s;
+}
+.stat-box.bump { animation: statBump .3s ease; }
+@keyframes statBump {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.12); }
 }
 .stat-label {
   font-family: 'Press Start 2P', monospace;
@@ -147,23 +156,21 @@ body::after {
   display: block;
   line-height: 1;
 }
-.stat-box.coins { border-color: var(--gold); box-shadow: 0 0 12px rgba(251,191,36,0.2); }
+.stat-box.coins { border-color: var(--gold); box-shadow: 0 0 12px rgba(251,191,36,0.25); }
 .stat-box.coins .stat-value { color: var(--gold); text-shadow: 0 0 6px rgba(251,191,36,0.5); }
 .stat-box.cps { border-color: var(--green); }
 .stat-box.cps .stat-value { color: var(--green); text-shadow: 0 0 6px rgba(74,222,128,0.5); }
-
-/* === TABS === */
+/* TABS */
 .tabs {
   display: flex;
   gap: 4px;
-  padding: 10px 12px;
-  background: rgba(8, 8, 15, 0.85);
+  padding: 10px 14px;
+  background: rgba(5, 5, 16, 0.85);
   border-bottom: 2px solid var(--line);
   overflow-x: auto;
   scrollbar-width: none;
 }
 .tabs::-webkit-scrollbar { display: none; }
-
 .tab {
   font-family: 'Press Start 2P', monospace;
   font-size: 8px;
@@ -186,27 +193,20 @@ body::after {
   border-color: var(--gold);
   box-shadow: 0 0 0 2px rgba(251,191,36,0.2), inset 0 0 12px rgba(251,191,36,0.1);
 }
-
-/* === MAIN === */
-main {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 14px 12px 80px;
-}
-
+/* MAIN */
+main { max-width: 1200px; margin: 0 auto; padding: 14px 12px 100px; }
 .view { display: none; }
 .view.active { display: block; animation: fadeUp .3s ease; }
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: none; }
 }
-
 .section-title {
   font-family: 'Press Start 2P', monospace;
   font-size: 10px;
   color: var(--muted);
   letter-spacing: 2px;
-  margin: 20px 0 12px;
+  margin: 22px 0 12px;
   padding-left: 10px;
   border-left: 4px solid var(--gold);
   display: flex;
@@ -220,20 +220,19 @@ main {
   color: var(--gold);
   letter-spacing: 0;
 }
-
-/* Toggle row */
+/* Toggle Row */
 .toggle-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 14px;
+  gap: 10px;
   margin-bottom: 14px;
+  align-items: center;
+}
+.toggle-row label {
   font-family: 'Press Start 2P', monospace;
   font-size: 8px;
   color: var(--muted);
   letter-spacing: 1px;
-  align-items: center;
-}
-.toggle-row label {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -247,7 +246,6 @@ main {
 }
 .toggle-row label:active { transform: scale(0.96); }
 .toggle-row input { accent-color: var(--gold); width: 16px; height: 16px; }
-
 .reset-btn {
   font-family: 'Press Start 2P', monospace;
   font-size: 8px;
@@ -263,87 +261,87 @@ main {
   margin-left: auto;
 }
 .reset-btn:active { transform: scale(0.95); }
-
-/* === BOXES === */
+/* BOXES */
 .box-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 12px;
 }
-
 .box {
   position: relative;
   background: linear-gradient(160deg, var(--c1), var(--c2));
   border: 3px solid var(--glow);
-  padding: 16px 10px;
+  padding: 16px 10px 12px;
   text-align: center;
   cursor: pointer;
   transition: transform .15s, box-shadow .15s;
   overflow: hidden;
   border-radius: 6px;
   touch-action: manipulation;
-  min-height: 200px;
+  min-height: 220px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 0 rgba(0,0,0,0.4), inset 0 0 20px rgba(255,255,255,0.05);
+  box-shadow: 0 5px 0 rgba(0,0,0,0.5), inset 0 0 30px rgba(255,255,255,0.06);
 }
 .box::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.2) 50%, transparent 70%);
+  background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.22) 50%, transparent 70%);
   transform: translateX(-100%);
-  transition: transform .5s;
+  transition: transform .6s;
   pointer-events: none;
+}
+.box.affordable { animation: boxGlow 2s ease-in-out infinite; }
+@keyframes boxGlow {
+  0%, 100% { box-shadow: 0 5px 0 rgba(0,0,0,0.5), 0 0 15px var(--glow), inset 0 0 30px rgba(255,255,255,0.06); }
+  50% { box-shadow: 0 5px 0 rgba(0,0,0,0.5), 0 0 30px var(--glow), inset 0 0 40px rgba(255,255,255,0.15); }
 }
 .box:active:not(.locked) {
   transform: translateY(3px);
-  box-shadow: 0 1px 0 rgba(0,0,0,0.4), inset 0 0 20px rgba(255,255,255,0.05);
+  box-shadow: 0 2px 0 rgba(0,0,0,0.5), inset 0 0 30px rgba(255,255,255,0.06);
 }
-.box.locked { filter: grayscale(0.9) brightness(0.45); cursor: not-allowed; }
+.box.locked { filter: grayscale(0.9) brightness(0.42); cursor: not-allowed; }
 .box.locked::after {
   content: "🔒";
   position: absolute;
   top: 8px; right: 8px;
-  font-size: 18px;
-  filter: grayscale(1);
+  font-size: 16px;
   opacity: 0.8;
 }
-
 .box-pixel {
-  width: 80px;
-  height: 80px;
-  margin: 0 auto 10px;
+  width: 84px;
+  height: 84px;
+  margin: 0 auto 8px;
   image-rendering: pixelated;
-  filter: drop-shadow(0 3px 6px rgba(0,0,0,0.7));
-  animation: boxFloat 3s ease-in-out infinite;
+  filter: drop-shadow(0 3px 8px rgba(0,0,0,0.7));
+  animation: boxFloat 3.5s ease-in-out infinite;
 }
 @keyframes boxFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  50% { transform: translateY(-5px) rotate(1deg); }
 }
-
 .box-name {
   font-family: 'Press Start 2P', monospace;
-  font-size: 8px;
+  font-size: 9px;
   color: #fff;
   letter-spacing: 1px;
   margin-bottom: 8px;
-  text-shadow: 2px 2px 0 rgba(0,0,0,0.7);
-  line-height: 1.6;
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.8);
+  line-height: 1.5;
 }
 .box-cost {
   color: var(--gold);
   font-size: 22px;
   font-weight: bold;
-  text-shadow: 0 0 10px rgba(251,191,36,0.6), 2px 2px 0 rgba(0,0,0,0.6);
+  text-shadow: 0 0 10px rgba(251,191,36,0.6), 2px 2px 0 rgba(0,0,0,0.7);
   line-height: 1;
 }
 .box-luck {
   display: inline-block;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.55);
   padding: 3px 10px;
   margin-top: 8px;
   font-size: 14px;
@@ -352,14 +350,30 @@ main {
   border-radius: 3px;
   letter-spacing: 1px;
 }
-
-/* === INVENTORY / COLLECTION === */
+.box-info {
+  position: absolute;
+  top: 6px; left: 6px;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.6);
+  border: 1.5px solid rgba(255,255,255,0.4);
+  color: #fff;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  transition: all .15s;
+}
+.box-info:active { transform: scale(0.9); background: var(--gold); color: #000; }
+/* INVENTORY / COLLECTION */
 .inv-grid, .collection-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   gap: 8px;
 }
-
 .skin-card {
   position: relative;
   background: linear-gradient(160deg, var(--g1), var(--g2));
@@ -369,13 +383,13 @@ main {
   overflow: hidden;
   border-radius: 4px;
   transition: transform .15s, box-shadow .15s;
-  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+  box-shadow: 0 0 12px rgba(0,0,0,0.5);
 }
 .skin-card:active { transform: scale(0.97); }
-
+.skin-card.shiny { box-shadow: 0 0 20px var(--rc), 0 0 0 1px var(--rc) inset; }
 .skin-pixel {
-  width: 56px;
-  height: 56px;
+  width: 60px;
+  height: 60px;
   margin: 0 auto 6px;
   image-rendering: pixelated;
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.7));
@@ -388,7 +402,7 @@ main {
   line-height: 1.6;
   margin-bottom: 4px;
   min-height: 20px;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.7);
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.8);
 }
 .skin-rarity {
   font-family: 'Press Start 2P', monospace;
@@ -406,11 +420,10 @@ main {
 }
 .skin-count {
   position: absolute;
-  top: 3px;
-  right: 3px;
-  background: rgba(0,0,0,0.75);
+  top: 3px; right: 3px;
+  background: rgba(0,0,0,0.8);
   color: #fff;
-  font-size: 11px;
+  font-size: 10px;
   padding: 1px 5px;
   border: 1px solid var(--rc);
   font-family: 'Press Start 2P', monospace;
@@ -420,7 +433,7 @@ main {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(120deg, transparent 40%, rgba(255,255,255,0.35) 50%, transparent 60%);
+  background: linear-gradient(120deg, transparent 40%, rgba(255,255,255,0.4) 50%, transparent 60%);
   transform: translateX(-100%);
   animation: shine 2.5s infinite;
   pointer-events: none;
@@ -430,18 +443,16 @@ main {
   50% { transform: translateX(100%); }
   100% { transform: translateX(100%); }
 }
-
 .collection-grid .skin-card.unknown {
   background: #0d0d15;
   border-color: #1f1f2e;
   box-shadow: none;
 }
-.collection-grid .skin-card.unknown .skin-pixel { filter: brightness(0) opacity(0.3); }
+.collection-grid .skin-card.unknown .skin-pixel { filter: brightness(0) opacity(0.25); }
 .collection-grid .skin-card.unknown .skin-name,
 .collection-grid .skin-card.unknown .skin-rarity,
 .collection-grid .skin-card.unknown .skin-cps { color: #2a2a3d; text-shadow: none; }
-
-/* === STATS === */
+/* STATS */
 .stats-panel {
   background: var(--panel);
   border: 2px solid var(--line);
@@ -460,13 +471,12 @@ main {
 .stat-row .v { color: var(--text); font-weight: bold; }
 .stat-row .v.gold { color: var(--gold); }
 .stat-row .v.green { color: var(--green); }
-
-/* === LOG === */
+/* LOG */
 .log {
   background: var(--panel);
   border: 2px solid var(--line);
   padding: 12px;
-  max-height: 180px;
+  max-height: 200px;
   overflow-y: auto;
   line-height: 1.8;
   border-radius: 4px;
@@ -483,8 +493,7 @@ main {
   to { opacity: 1; transform: none; }
 }
 .log-entry .time { color: var(--muted); margin-right: 6px; font-size: 14px; }
-
-/* === REVEAL OVERLAY === */
+/* REVEAL OVERLAY */
 .reveal-overlay {
   position: fixed;
   inset: 0;
@@ -492,25 +501,22 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(circle at center, rgba(8,8,15,0.8), rgba(0,0,0,0.99));
+  background: radial-gradient(circle at center, rgba(5,5,16,0.85), rgba(0,0,0,0.99));
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   opacity: 1;
   transition: opacity .25s;
 }
 .reveal-overlay.hidden { opacity: 0; pointer-events: none; }
-
 .reveal-stage {
   position: relative;
-  width: 90vw;
-  max-width: 380px;
-  height: 500px;
+  width: 96vw;
+  max-width: 500px;
+  height: 520px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-
-/* Flash */
 .flash {
   position: fixed;
   inset: 0;
@@ -519,97 +525,175 @@ main {
   pointer-events: none;
   z-index: 210;
 }
-.flash.go { animation: flashAnim .35s ease-out; }
+.flash.go { animation: flashAnim .4s ease-out; }
 @keyframes flashAnim {
   0% { opacity: 0; }
-  15% { opacity: 1; }
+  12% { opacity: 1; }
   100% { opacity: 0; }
 }
-
-/* Screen shake */
 .shake-screen { animation: screenShake .5s ease-out; }
 @keyframes screenShake {
   0%, 100% { transform: translate(0,0); }
-  15% { transform: translate(-8px, 6px); }
-  30% { transform: translate(8px, -6px); }
-  45% { transform: translate(-6px, 8px); }
-  60% { transform: translate(6px, -8px); }
-  75% { transform: translate(-3px, 4px); }
+  12% { transform: translate(-10px, 6px); }
+  28% { transform: translate(10px, -6px); }
+  44% { transform: translate(-8px, 8px); }
+  60% { transform: translate(8px, -8px); }
+  76% { transform: translate(-4px, 4px); }
 }
-
-/* Rays */
-.rays {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  pointer-events: none;
-}
-.rays.grow { animation: raysGrow 2s ease-out forwards; }
-@keyframes raysGrow {
-  0% { opacity: 0; transform: scale(0.2) rotate(0deg); }
-  30% { opacity: 0.8; }
-  100% { opacity: 0; transform: scale(3) rotate(45deg); }
-}
-.rays svg { width: 100%; height: 100%; max-width: 500px; max-height: 500px; }
-
 /* Reveal Box */
 .reveal-box {
   position: absolute;
-  width: 160px;
-  height: 160px;
+  width: 170px;
+  height: 170px;
   background: linear-gradient(160deg, var(--c1), var(--c2));
   border: 4px solid var(--glow);
-  border-radius: 12px;
-  box-shadow: 0 0 60px var(--glow), inset 0 0 30px rgba(255,255,255,0.1);
+  border-radius: 14px;
+  box-shadow: 0 0 70px var(--glow), inset 0 0 40px rgba(255,255,255,0.1);
   display: flex;
   align-items: center;
   justify-content: center;
-  image-rendering: pixelated;
   transform: translateY(-100vh) rotate(-25deg);
   opacity: 0;
 }
-.reveal-box svg { width: 110px; height: 110px; image-rendering: pixelated; }
+.reveal-box svg { width: 120px; height: 120px; image-rendering: pixelated; }
 .reveal-box.enter { animation: boxEnter .6s cubic-bezier(.34,1.56,.64,1) forwards; }
 @keyframes boxEnter {
   0% { transform: translateY(-100vh) rotate(-25deg); opacity: 0; }
   60% { opacity: 1; }
   100% { transform: translateY(0) rotate(0) scale(1); opacity: 1; }
 }
-.reveal-box.shake { animation: boxShake .9s cubic-bezier(.36,.07,.19,.97) forwards; }
+.reveal-box.shake { animation: boxShake .7s cubic-bezier(.36,.07,.19,.97) forwards; }
 @keyframes boxShake {
   0% { transform: translate(0,0) rotate(0) scale(1); }
-  10% { transform: translate(-6px, 3px) rotate(-5deg) scale(1.05); }
-  20% { transform: translate(6px, -3px) rotate(5deg) scale(1.1); }
-  30% { transform: translate(-8px, 5px) rotate(-7deg) scale(1.15); }
-  40% { transform: translate(8px, -5px) rotate(7deg) scale(1.2); }
-  50% { transform: translate(-10px, 7px) rotate(-9deg) scale(1.25); }
-  60% { transform: translate(10px, -7px) rotate(9deg) scale(1.3); }
-  70% { transform: translate(-12px, 8px) rotate(-10deg) scale(1.35); }
-  80% { transform: translate(12px, -8px) rotate(10deg) scale(1.4); }
-  90% { transform: translate(-8px, 5px) rotate(-6deg) scale(1.45); }
+  15% { transform: translate(-8px, 4px) rotate(-6deg) scale(1.08); }
+  30% { transform: translate(8px, -4px) rotate(6deg) scale(1.16); }
+  45% { transform: translate(-10px, 6px) rotate(-9deg) scale(1.24); }
+  60% { transform: translate(10px, -6px) rotate(9deg) scale(1.32); }
+  75% { transform: translate(-12px, 8px) rotate(-12deg) scale(1.4); }
+  90% { transform: translate(8px, -4px) rotate(6deg) scale(1.45); }
   100% { transform: translate(0,0) rotate(0) scale(1.5); }
 }
-.reveal-box.burst { animation: boxBurst .4s ease-out forwards; }
+.reveal-box.burst { animation: boxBurst .35s ease-out forwards; }
 @keyframes boxBurst {
   0% { transform: scale(1.5); opacity: 1; filter: brightness(1); }
-  50% { transform: scale(2); opacity: 0.8; filter: brightness(3); }
-  100% { transform: scale(2.5); opacity: 0; filter: brightness(5); }
+  40% { transform: scale(2); opacity: 0.85; filter: brightness(3); }
+  100% { transform: scale(3); opacity: 0; filter: brightness(6); }
 }
-
+/* Roulette */
+.roulette-wrap {
+  position: absolute;
+  width: 100%;
+  max-width: 460px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity .3s;
+}
+.roulette-wrap.show { opacity: 1; }
+.roulette-window {
+  width: 100%;
+  height: 160px;
+  overflow: hidden;
+  position: relative;
+  background: linear-gradient(180deg, #0a0a14, #181824);
+  border: 3px solid #2a2a3d;
+  border-radius: 8px;
+  box-shadow: inset 0 0 30px rgba(0,0,0,0.8), 0 0 40px rgba(124,58,237,0.25);
+}
+.roulette-window::before,
+.roulette-window::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 70px;
+  z-index: 2;
+  pointer-events: none;
+}
+.roulette-window::before { left: 0; background: linear-gradient(90deg, #0a0a14 20%, transparent); }
+.roulette-window::after { right: 0; background: linear-gradient(270deg, #0a0a14 20%, transparent); }
+.roulette-strip {
+  display: flex;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  will-change: transform;
+}
+.roulette-item {
+  width: 110px;
+  height: 100%;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 4px;
+  border-right: 1px solid rgba(42,42,61,0.6);
+  background: linear-gradient(180deg, var(--g1), var(--g2));
+}
+.roulette-item svg {
+  width: 60px;
+  height: 60px;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
+}
+.roulette-item .ri-name {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 5px;
+  color: #fff;
+  text-align: center;
+  margin-top: 6px;
+  text-shadow: 1px 1px 0 #000;
+  line-height: 1.5;
+  height: 18px;
+  overflow: hidden;
+  width: 100%;
+}
+.roulette-item .ri-rarity {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 5px;
+  color: var(--rc);
+  margin-top: 2px;
+  text-shadow: 0 0 4px var(--rc);
+  letter-spacing: .5px;
+}
+.roulette-pointer {
+  position: absolute;
+  top: -6px; bottom: -6px;
+  left: 50%;
+  width: 3px;
+  background: linear-gradient(180deg, transparent, var(--gold), var(--gold), transparent);
+  transform: translateX(-50%);
+  z-index: 3;
+  box-shadow: 0 0 16px var(--gold), 0 0 6px var(--gold);
+  pointer-events: none;
+}
+.roulette-pointer::before,
+.roulette-pointer::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  background: var(--gold);
+  transform: translateX(-50%) rotate(45deg);
+  box-shadow: 0 0 12px var(--gold);
+}
+.roulette-pointer::before { top: -8px; }
+.roulette-pointer::after { bottom: -8px; }
 /* Reveal Card */
 .reveal-card {
   position: absolute;
   width: 88vw;
-  max-width: 260px;
+  max-width: 270px;
   background: linear-gradient(160deg, var(--g1), var(--g2));
   border: 4px solid var(--rc);
-  border-radius: 8px;
-  padding: 22px 14px;
+  border-radius: 10px;
+  padding: 24px 16px;
   text-align: center;
-  box-shadow: 0 0 70px var(--rc), inset 0 0 40px rgba(255,255,255,0.06);
+  box-shadow: 0 0 70px var(--rc), inset 0 0 50px rgba(255,255,255,0.06);
   display: none;
 }
 .reveal-card.show {
@@ -622,11 +706,11 @@ main {
   100% { transform: perspective(800px) rotateY(0deg) scale(1); opacity: 1; }
 }
 .rc-pixel {
-  width: 130px;
-  height: 130px;
+  width: 140px;
+  height: 140px;
   margin: 0 auto 12px;
   image-rendering: pixelated;
-  filter: drop-shadow(0 0 14px var(--rc));
+  filter: drop-shadow(0 0 16px var(--rc));
   animation: floatPx 2.5s ease-in-out infinite;
 }
 @keyframes floatPx {
@@ -639,29 +723,28 @@ main {
   color: var(--rc);
   letter-spacing: 3px;
   margin-bottom: 10px;
-  text-shadow: 0 0 14px var(--rc);
+  text-shadow: 0 0 16px var(--rc);
   animation: pulseRarity 1s ease-in-out infinite;
 }
 @keyframes pulseRarity {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+  50% { opacity: 0.65; }
 }
 .rc-name {
   font-family: 'Press Start 2P', monospace;
-  font-size: 11px;
+  font-size: 12px;
   color: #fff;
   letter-spacing: 1px;
   line-height: 1.8;
   margin-bottom: 12px;
-  text-shadow: 2px 2px 0 rgba(0,0,0,0.7);
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.8);
 }
 .rc-cps {
   color: var(--green);
-  font-size: 22px;
+  font-size: 24px;
   font-weight: bold;
-  text-shadow: 0 0 10px rgba(74,222,128,0.6);
+  text-shadow: 0 0 12px rgba(74,222,128,0.6);
 }
-
 /* Particles */
 .particle {
   position: absolute;
@@ -674,11 +757,10 @@ main {
   0% { opacity: 1; transform: translate(0,0) scale(1) rotate(0); }
   100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0) rotate(var(--rot)); }
 }
-
 /* Reveal Hint */
 .reveal-hint {
   position: absolute;
-  bottom: 40px;
+  bottom: 30px;
   left: 50%;
   transform: translateX(-50%);
   font-family: 'Press Start 2P', monospace;
@@ -698,8 +780,106 @@ main {
   0%, 100% { opacity: 0.4; }
   50% { opacity: 1; }
 }
-
-/* === TOAST === */
+/* POOL MODAL */
+.pool-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 180;
+  background: rgba(0,0,0,0.9);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 1;
+  transition: opacity .25s;
+}
+.pool-modal.hidden { opacity: 0; pointer-events: none; }
+.pool-content {
+  background: var(--panel);
+  border: 3px solid var(--line);
+  border-radius: 8px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 0 40px rgba(124,58,237,0.3);
+}
+.pool-header {
+  padding: 14px 16px;
+  border-bottom: 2px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--panel2);
+}
+.pool-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 11px;
+  color: var(--gold);
+  letter-spacing: 1px;
+}
+.pool-close {
+  background: none;
+  border: 2px solid var(--line);
+  color: var(--text);
+  font-size: 20px;
+  width: 34px; height: 34px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: monospace;
+  touch-action: manipulation;
+}
+.pool-close:active { background: var(--red); border-color: var(--red); }
+.pool-body {
+  padding: 14px;
+  overflow-y: auto;
+  flex: 1;
+}
+.pool-rarity {
+  margin-bottom: 14px;
+}
+.pool-rarity-head {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  letter-spacing: 1px;
+  padding: 6px 0 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px dashed var(--line);
+}
+.pool-rarity-prob {
+  color: var(--muted);
+  font-size: 8px;
+}
+.pool-skins {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 6px;
+  margin-top: 8px;
+}
+.pool-skin {
+  background: var(--panel2);
+  border: 1.5px solid var(--rc);
+  border-radius: 4px;
+  padding: 6px 4px;
+  text-align: center;
+}
+.pool-skin svg { width: 40px; height: 40px; image-rendering: pixelated; }
+.pool-skin .psn {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 5px;
+  color: #fff;
+  margin-top: 4px;
+  line-height: 1.4;
+}
+/* TOAST */
 .toast {
   position: fixed;
   bottom: 24px;
@@ -723,24 +903,22 @@ main {
   line-height: 1.6;
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-/* === FLOATING COIN === */
-.float-coin {
+/* FLOATING COIN */
+.float-text {
   position: fixed;
   font-family: 'Press Start 2P', monospace;
   font-size: 10px;
   color: var(--gold);
   pointer-events: none;
   z-index: 150;
-  text-shadow: 2px 2px 0 #000;
+  text-shadow: 2px 2px 0 #000, 0 0 8px var(--gold);
   animation: floatCoin 1s ease-out forwards;
 }
 @keyframes floatCoin {
   0% { opacity: 1; transform: translateY(0) scale(1); }
-  100% { opacity: 0; transform: translateY(-40px) scale(1.3); }
+  100% { opacity: 0; transform: translateY(-50px) scale(1.3); }
 }
-
-/* === EMPTY STATE === */
+/* EMPTY */
 .empty-msg {
   grid-column: 1/-1;
   color: var(--muted);
@@ -748,24 +926,24 @@ main {
   text-align: center;
   font-size: 18px;
 }
-
-/* === RESPONSIVE === */
+/* RESPONSIVE */
 @media (max-width: 600px) {
   .logo { font-size: 9px; }
   .stat-box { min-width: 75px; padding: 3px 8px; }
   .stat-value { font-size: 18px; }
   .tab { font-size: 7px; padding: 8px 10px; }
-  .box-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
-  .inv-grid, .collection-grid { grid-template-columns: repeat(auto-fill, minmax(95px, 1fr)); }
+  .box-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .inv-grid, .collection-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
   .box-name { font-size: 7px; }
-  .box-pixel { width: 65px; height: 65px; }
-  .box { min-height: 175px; padding: 12px 8px; }
+  .box-pixel { width: 68px; height: 68px; }
+  .box { min-height: 190px; padding: 12px 8px; }
   .box-cost { font-size: 18px; }
-  .skin-pixel { width: 48px; height: 48px; }
+  .skin-pixel { width: 50px; height: 50px; }
   .skin-name { font-size: 5px; }
   .rc-pixel { width: 110px; height: 110px; }
+  .roulette-item { width: 90px; }
+  .roulette-item svg { width: 50px; height: 50px; }
 }
-
 @media (max-width: 380px) {
   .box-grid { grid-template-columns: repeat(2, 1fr); }
   .inv-grid, .collection-grid { grid-template-columns: repeat(3, 1fr); }
@@ -774,17 +952,19 @@ main {
 </head>
 <body>
 
+<canvas id="bgCanvas"></canvas>
+<div class="vignette"></div>
 <div class="scanlines"></div>
 
 <header class="topbar">
   <div class="logo">RNG <span>SKIN</span> IDLE</div>
   <div class="stats-bar">
-    <div class="stat-box coins">
+    <div class="stat-box coins" id="coinBox">
       <span class="stat-label">MÜNZEN</span>
-      <span class="stat-value" id="coinDisplay">500</span>
+      <span class="stat-value" id="coinDisplay">100</span>
     </div>
     <div class="stat-box cps">
-      <span class="stat-label">MÜNZEN/S</span>
+      <span class="stat-label">/SEK</span>
       <span class="stat-value" id="cpsDisplay">0</span>
     </div>
   </div>
@@ -824,441 +1004,443 @@ main {
 
 <div id="revealOverlay" class="reveal-overlay hidden">
   <div id="revealStage" class="reveal-stage">
-    <div class="rays" id="revealRays"></div>
-    <div class="reveal-box" id="revealBox"></div>
-    <div class="reveal-card" id="revealCard"></div>
+    <div id="revealBox" class="reveal-box"></div>
+    <div id="rouletteWrap" class="roulette-wrap">
+      <div class="roulette-window">
+        <div id="rouletteStrip" class="roulette-strip"></div>
+        <div class="roulette-pointer"></div>
+      </div>
+    </div>
+    <div id="revealCard" class="reveal-card"></div>
   </div>
-  <div class="reveal-hint" id="revealHint">TIPPEN ZUM FORTFAHREN</div>
+  <div id="revealHint" class="reveal-hint">TIPPEN ZUM FORTFAHREN</div>
 </div>
 
-<div class="flash" id="flash"></div>
-<div class="toast" id="toast"></div>
+<div id="poolModal" class="pool-modal hidden">
+  <div class="pool-content">
+    <div class="pool-header">
+      <div class="pool-title" id="poolTitle">POOL</div>
+      <button class="pool-close" id="poolClose">×</button>
+    </div>
+    <div class="pool-body" id="poolBody"></div>
+  </div>
+</div>
+
+<div id="flash" class="flash"></div>
+<div id="toast" class="toast"></div>
 
 <script>
 'use strict';
 
 /* ==========================================================
-   PIXEL ART (12x12 grids)
-   Characters map to palette colors, '.' = transparent
+   PIXEL ART — 16x16 grids
 ========================================================== */
 const ART = {
   rock_slime: {
-    p: { 1:'#1e293b', 2:'#64748b', 3:'#94a3b8', 4:'#0f172a', 5:'#cbd5e1' },
+    p: { 1:'#0f172a', 2:'#1e293b', 3:'#475569', 4:'#94a3b8', 5:'#cbd5e1' },
     g: [
-      "............",
-      "............",
-      "....1111....",
-      "...122221...",
-      "..12333321..",
-      "..12344321..",
-      "..12333321..",
-      "..12333321..",
-      "..12333321..",
-      "...122221...",
-      "....1111....",
-      "............"
+      "................",
+      "................",
+      ".....111111.....",
+      "....12222221....",
+      "...1223333221...",
+      "..122334433221..",
+      "..123345543321..",
+      "..123455443321..",
+      "..122344443321..",
+      "..122233322221..",
+      "..122222222221..",
+      "..122122212221..",
+      "..122222222221..",
+      "...1122222211...",
+      "....11111111....",
+      "................"
     ]
   },
   wood_fox: {
-    p: { 1:'#7c2d12', 2:'#ea580c', 3:'#fed7aa', 4:'#1c1917', 5:'#fbbf24' },
+    p: { 1:'#451a03', 2:'#7c2d12', 3:'#c2410c', 4:'#f97316', 5:'#fed7aa', 6:'#fbbf24' },
     g: [
-      "............",
-      ".11......11.",
-      ".121....121.",
-      ".1221111221.",
-      ".1222222221.",
-      ".1234443221.",
-      ".1222222221.",
-      ".1234443221.",
-      "..12222221..",
-      "...122221...",
-      "....1111....",
-      "............"
+      "................",
+      ".11..........11.",
+      ".121........121.",
+      ".1221......1221.",
+      ".12221111112221.",
+      ".12222222222221.",
+      ".12611111111621.",
+      ".12233333333221.",
+      ".12244444442221.",
+      ".12244411442221.",
+      ".12244444442221.",
+      ".12224444422221.",
+      "..1222444222221.",
+      "..122222222221..",
+      "...1122222211...",
+      "....11111111...."
     ]
   },
   grass_beetle: {
-    p: { 1:'#166534', 2:'#22c55e', 3:'#4ade80', 4:'#0f172a', 5:'#bef264' },
+    p: { 1:'#052e16', 2:'#166534', 3:'#22c55e', 4:'#4ade80', 5:'#bbf7d0', 6:'#84cc16' },
     g: [
-      "............",
-      "......1.....",
-      "..1...1..1..",
-      "..1..121.1..",
-      "..112232211.",
-      ".1223333221.",
-      ".1223443221.",
-      ".1223333221.",
-      ".1223333221.",
-      "..12222221..",
-      "...111111...",
-      "............"
+      "................",
+      "................",
+      ".....11..11.....",
+      "....11....11....",
+      "...1122222211...",
+      "..122334433221..",
+      "..123345543321..",
+      "..124356653321..",
+      "..123445443321..",
+      "..122334433221..",
+      "..122233322221..",
+      "...1122222211...",
+      "....11222211....",
+      ".....111111.....",
+      "................",
+      "................"
     ]
   },
-
   bronze_wolf: {
-    p: { 1:'#78350f', 2:'#b45309', 3:'#fbbf24', 4:'#1c1917', 5:'#fde68a' },
+    p: { 1:'#451a03', 2:'#78350f', 3:'#b45309', 4:'#d97706', 5:'#fde68a', 6:'#ef4444' },
     g: [
-      "............",
-      ".11......11.",
-      ".121....121.",
-      ".1221111221.",
-      ".1222222221.",
-      ".1234442221.",
-      ".1222222221.",
-      ".1234443221.",
-      "..12222221..",
-      "..12122121..",
-      "...1..1.1...",
-      "............"
+      "................",
+      ".11..........11.",
+      ".1221......1221.",
+      ".12221....12221.",
+      ".12221111112221.",
+      ".12222222222221.",
+      ".12611111111621.",
+      ".12233444433221.",
+      ".12234444443221.",
+      ".12244411444221.",
+      ".12224444442221.",
+      "..1222444422221.",
+      "..122222222221..",
+      "...1122222211...",
+      "....11111111....",
+      "................"
     ]
   },
   silver_owl: {
-    p: { 1:'#334155', 2:'#94a3b8', 3:'#cbd5e1', 4:'#fbbf24', 5:'#0f172a' },
+    p: { 1:'#0f172a', 2:'#334155', 3:'#64748b', 4:'#cbd5e1', 5:'#f1f5f9', 6:'#fbbf24' },
     g: [
-      "............",
-      "..11....11..",
-      "..121..121..",
-      "..12211221..",
-      "..12333321..",
-      "..12433421..",
-      "..12333321..",
-      "..12522521..",
-      "..12222221..",
-      "...122221...",
-      "....1221....",
-      ".....11....."
+      "................",
+      "................",
+      "..11........11..",
+      ".1221......1221.",
+      ".12221....12221.",
+      ".12221111112221.",
+      ".12233333333221.",
+      ".12364444446321.",
+      ".12364444446321.",
+      ".12234444443221.",
+      ".12233444433221.",
+      "..122334433221..",
+      "..122233322221..",
+      "...1122222211...",
+      "....11111111....",
+      "................"
     ]
   },
   crystal_hare: {
-    p: { 1:'#0e7490', 2:'#22d3ee', 3:'#a5f3fc', 4:'#0f172a', 5:'#f0f9ff' },
+    p: { 1:'#083344', 2:'#0e7490', 3:'#06b6d4', 4:'#22d3ee', 5:'#cffafe' },
     g: [
-      "............",
-      "..11....11..",
-      "..121..121..",
-      "..121..121..",
-      "..12211221..",
-      "..12333321..",
-      "..12433421..",
-      "..12333321..",
-      "...122221...",
-      "..12222221..",
-      "..1.122.1...",
-      "............"
+      "................",
+      "..11........11..",
+      ".1221......1221.",
+      ".1221......1221.",
+      ".12211....11221.",
+      ".12221111112221.",
+      ".12233333333221.",
+      ".12414444443221.",
+      ".12414444443221.",
+      ".12244444442221.",
+      ".12234444432221.",
+      "..122344322221..",
+      "..122233322221..",
+      "...1122222211...",
+      "....11111111....",
+      "................"
     ]
   },
-
   gold_dragon: {
-    p: { 1:'#78350f', 2:'#f59e0b', 3:'#fbbf24', 4:'#fef3c7', 5:'#7f1d1d' },
+    p: { 1:'#451a03', 2:'#78350f', 3:'#d97706', 4:'#fbbf24', 5:'#fef3c7', 6:'#ef4444' },
     g: [
-      "............",
-      ".11......11.",
-      ".121....121.",
-      ".1221111221.",
-      ".1232222321.",
-      ".1232442321.",
-      ".1232222321.",
-      ".1232332321.",
-      "..12222221..",
-      ".1122222211.",
-      ".1223..3221.",
-      "..11....11.."
+      "................",
+      ".11..........11.",
+      ".121........121.",
+      ".1221......1221.",
+      ".12221111112221.",
+      ".12222222222221.",
+      ".12611111111621.",
+      ".12234444443221.",
+      ".12244444444221.",
+      ".12244444444221.",
+      ".12233444433221.",
+      "..1222344432221.",
+      "..122222222221..",
+      "...1122222211...",
+      "....11111111....",
+      "................"
     ]
   },
   lava_golem: {
-    p: { 1:'#450a0a', 2:'#7f1d1d', 3:'#dc2626', 4:'#fbbf24', 5:'#fde68a' },
+    p: { 1:'#1c0a06', 2:'#7f1d1d', 3:'#dc2626', 4:'#f97316', 5:'#fbbf24' },
     g: [
-      "............",
-      "..11111111..",
-      ".1222222221.",
-      ".1242222421.",
-      "122422224221",
-      "124222224421",
-      "122444224221",
-      "122222442221",
-      ".1224222221.",
-      ".1222222221.",
-      "..11111111..",
-      "............"
+      "................",
+      "..111111111111..",
+      ".12222222222221.",
+      "1222233333322221",
+      "1222344444432221",
+      "1223444444443221",
+      "1223445445443221",
+      "1223445445443221",
+      "1223444444443221",
+      "1222344444432221",
+      "1222233333322221",
+      ".12222222222221.",
+      ".12222111122221.",
+      "..12211..11221..",
+      "...111....111...",
+      "................"
     ]
   },
   rainbow_liz: {
-    p: { 1:'#1e3a8a', 2:'#3b82f6', 3:'#22c55e', 4:'#eab308', 5:'#ec4899' },
+    p: { 1:'#1e1b4b', 2:'#3b82f6', 3:'#22c55e', 4:'#eab308', 5:'#ec4899' },
     g: [
-      "............",
-      "......111...",
-      ".....1221...",
-      "....12321...",
-      "...123421...",
-      "..12345221..",
-      "..12344221..",
-      ".1234542111.",
-      ".1234321.21.",
-      ".122321..11.",
-      "..1111......",
-      "............"
+      "................",
+      "................",
+      "......111.......",
+      ".....12221......",
+      "....1233211.....",
+      "....1234321.....",
+      "...123454321....",
+      "..1234545543211.",
+      ".12345456545432.",
+      ".12345455434321.",
+      "..123454344321..",
+      "...1234434321...",
+      "....12333321....",
+      ".....11221......",
+      "......111.......",
+      "................"
     ]
   },
-
   diamond_eagle: {
-    p: { 1:'#0e7490', 2:'#22d3ee', 3:'#a5f3fc', 4:'#0f172a', 5:'#f0f9ff' },
+    p: { 1:'#083344', 2:'#0e7490', 3:'#22d3ee', 4:'#a5f3fc', 5:'#f0f9ff', 6:'#fbbf24' },
     g: [
-      "............",
-      ".11......11.",
-      "1221....1221",
-      "12221..12221",
-      "122221122221",
-      ".1232222321.",
-      ".1234334321.",
-      "..12333321..",
-      "...122221...",
-      "..11222211..",
-      ".11.1221.11.",
-      "....1111...."
+      "................",
+      ".11..........11.",
+      "1221........1221",
+      "12221......12221",
+      "1222111111222211",
+      ".12233333333221.",
+      ".12364444446321.",
+      ".12364444446321.",
+      ".12234444443221.",
+      "..122344443221..",
+      "...1223443221...",
+      "....12233221....",
+      ".....122221.....",
+      "......1111......",
+      "................",
+      "................"
     ]
   },
   shadow_tiger: {
-    p: { 1:'#1c1917', 2:'#292524', 3:'#44403c', 4:'#dc2626', 5:'#f59e0b' },
+    p: { 1:'#0a0a0a', 2:'#1c1917', 3:'#292524', 4:'#44403c', 5:'#dc2626', 6:'#fbbf24' },
     g: [
-      "............",
-      ".11......11.",
-      ".121....121.",
-      "124211112421",
-      "122222222221",
-      "123442224431",
-      "122244444221",
-      "122344444321",
-      "122333333321",
-      ".1233333321.",
-      "..11.11.11..",
-      "............"
+      "................",
+      ".11..........11.",
+      ".1221......1221.",
+      ".12221....12221.",
+      ".12221111112221.",
+      ".12222222222221.",
+      ".12521111112521.",
+      ".12233444433221.",
+      ".12234444443221.",
+      ".12244411444221.",
+      ".12224444442221.",
+      "..1222444422221.",
+      "..122222222221..",
+      "...1122222211...",
+      "....11111111....",
+      "................"
     ]
   },
   plasma_robot: {
-    p: { 1:'#1e1b4b', 2:'#4338ca', 3:'#818cf8', 4:'#a5b4fc', 5:'#f0abfc' },
+    p: { 1:'#1e1b4b', 2:'#4338ca', 3:'#818cf8', 4:'#a5b4fc', 5:'#f0abfc', 6:'#22d3ee' },
     g: [
-      "............",
-      "..11111111..",
-      "..12222221..",
-      "..12433421..",
-      "..12333321..",
-      "..12222221..",
-      ".1122222211.",
-      "124444444421",
-      "122244442221",
-      ".12.1222.21.",
-      "...111111...",
-      "............"
+      "................",
+      "......1111......",
+      ".....122221.....",
+      "....12222221....",
+      "...1223333221...",
+      "...1263333621...",
+      "...1223333221...",
+      "....12222221....",
+      "..11122222111...",
+      ".12444444444421.",
+      "1234444444444321",
+      "1234444444444321",
+      ".12.12333.21.21.",
+      "....123.321.....",
+      ".....11.11......",
+      "................"
     ]
   },
-
   galaxy_dragon: {
-    p: { 1:'#2e1065', 2:'#6d28d9', 3:'#a78bfa', 4:'#f0abfc', 5:'#fbbf24' },
+    p: { 1:'#2e1065', 2:'#6d28d9', 3:'#a78bfa', 4:'#f0abfc', 5:'#fbbf24', 6:'#fef3c7' },
     g: [
-      "............",
-      ".11......11.",
-      ".121....121.",
-      "124211112421",
-      "123444444321",
-      "123454545321",
-      "123444444321",
-      "123454545321",
-      "123444444321",
-      ".1234444321.",
-      "..11.11.11..",
-      "............"
+      "................",
+      ".11..........11.",
+      ".121........121.",
+      ".1221......1221.",
+      ".12221111112221.",
+      ".12222222222221.",
+      ".12611111111621.",
+      ".12234544443221.",
+      ".12344454444221.",
+      ".12345444443221.",
+      ".12234444533221.",
+      "..1222444422221.",
+      "..122222222221..",
+      "...1122222211...",
+      "....11111111....",
+      "................"
     ]
   },
   time_guardian: {
-    p: { 1:'#451a03', 2:'#b45309', 3:'#fbbf24', 4:'#fef3c7', 5:'#22d3ee' },
+    p: { 1:'#451a03', 2:'#b45309', 3:'#fbbf24', 4:'#fef3c7', 5:'#22d3ee', 6:'#0e7490' },
     g: [
-      "............",
-      "....1111....",
-      "...122221...",
-      "..12344321..",
-      "..12455421..",
-      "..12455421..",
-      "..12344321..",
-      "...122221...",
-      "....1221....",
-      "....1221....",
-      "....1111....",
-      "............"
+      "................",
+      "......1111......",
+      ".....122221.....",
+      "....12333321....",
+      "...1234444321...",
+      "...1234444321...",
+      "...1234444321...",
+      "...1233333321...",
+      "..112334433211..",
+      ".1222344443221..",
+      ".122233333221...",
+      "..1222222221....",
+      "...11222221.....",
+      "....111111......",
+      "................",
+      "................"
     ]
   },
   dream_queen: {
-    p: { 1:'#831843', 2:'#ec4899', 3:'#f9a8d4', 4:'#fdf2f8', 5:'#fbbf24' },
+    p: { 1:'#831843', 2:'#ec4899', 3:'#f9a8d4', 4:'#fdf2f8', 5:'#fbbf24', 6:'#fef3c7' },
     g: [
-      "............",
-      "..5..5..5...",
-      "..51.51.51..",
-      "..51151151..",
-      "..12222221..",
-      ".1244442421.",
-      ".1233333321.",
-      ".1234444321.",
-      "..12333321..",
-      "..12333321..",
-      "...111111...",
-      "............"
+      "................",
+      "..5..5..5..5....",
+      "..51.51.51.51...",
+      "..51151151151...",
+      "..12222222221...",
+      "..12344444321...",
+      "..12344444321...",
+      "..12364446321...",
+      "..12344444321...",
+      "..12233443321...",
+      "...12344321.....",
+      "...12333321.....",
+      "....122221......",
+      ".....1111.......",
+      "................",
+      "................"
     ]
   },
-
   omega_god: {
-    p: { 1:'#450a0a', 2:'#b91c1c', 3:'#ef4444', 4:'#fbbf24', 5:'#fef3c7' },
+    p: { 1:'#450a0a', 2:'#b91c1c', 3:'#ef4444', 4:'#fbbf24', 5:'#fef3c7', 6:'#fde68a' },
     g: [
-      "............",
-      "..11....11..",
-      ".122111221..",
-      "124332112431",
-      "123455555321",
-      "123555555321",
-      "123455555321",
-      "124332112431",
-      ".122111221..",
-      "..11....11..",
-      "............",
-      "............"
+      "................",
+      "..11........11..",
+      ".1221......1221.",
+      ".12221111112221.",
+      ".12223333333221.",
+      ".12344444444321.",
+      ".12345555554321.",
+      ".12345555554321.",
+      ".12345555554321.",
+      ".12344444444321.",
+      ".12233333333221.",
+      "..122344443221..",
+      "...1223443221...",
+      "....12222211....",
+      ".....111111.....",
+      "................"
     ]
   },
   infinity_core: {
-    p: { 1:'#1e1b4b', 2:'#4338ca', 3:'#818cf8', 4:'#e0e7ff', 5:'#fbbf24' },
+    p: { 1:'#1e1b4b', 2:'#4338ca', 3:'#818cf8', 4:'#e0e7ff', 5:'#fbbf24', 6:'#fef3c7' },
     g: [
-      "............",
-      "....1111....",
-      "..11222211..",
-      ".1233333321.",
-      "123455555321",
-      "123455555321",
-      "123455555321",
-      "123355553321",
-      ".1233333321.",
-      "..11222211..",
-      "....1111....",
-      "............"
+      "................",
+      "....1111111.....",
+      "..11222222211...",
+      ".1233333333321..",
+      "1234444444444321",
+      "1234555555554321",
+      "1234556665543321",
+      "1234455555544321",
+      "1233444444443321",
+      ".1233333333321..",
+      "..11222222211...",
+      "....1111111.....",
+      "................",
+      "................",
+      "................",
+      "................"
     ]
   },
   fate_orb: {
-    p: { 1:'#3b0764', 2:'#7c3aed', 3:'#a78bfa', 4:'#f0abfc', 5:'#fef3c7' },
+    p: { 1:'#3b0764', 2:'#7c3aed', 3:'#a78bfa', 4:'#f0abfc', 5:'#fef3c7', 6:'#ffffff' },
     g: [
-      "............",
-      "....1111....",
-      "..11222211..",
-      ".1223333221.",
-      "123444444321",
-      "123455554321",
-      "123455554321",
-      "123444444321",
-      ".1223333221.",
-      "..11222211..",
-      "....1111....",
-      "............"
+      "................",
+      "................",
+      "....1111111.....",
+      "..11222222211...",
+      ".1233333333321..",
+      "1234444444444321",
+      "1234555555554321",
+      "1234566666654321",
+      "1234555555554321",
+      "1234444444444321",
+      ".1233333333321..",
+      "..11222222211...",
+      "....1111111.....",
+      "................",
+      "................",
+      "................"
     ]
   }
 };
 
-/* Box art (12x12) */
-const BOX_ART = {
-  wood: {
-    p: { 1:'#451a03', 2:'#92400e', 3:'#fbbf24', 4:'#b45309' },
-    g: [
-      "............",
-      "..11111111..",
-      ".1222222221.",
-      "123222222321",
-      "122223222221",
-      "122233222221",
-      "122233222221",
-      "122222223221",
-      "123222222321",
-      "122222222221",
-      ".1222222221.",
-      "..11111111.."
-    ]
-  },
-  silver: {
-    p: { 1:'#1e293b', 2:'#64748b', 3:'#cbd5e1', 4:'#94a3b8' },
-    g: [
-      "............",
-      "..11111111..",
-      ".1233333321.",
-      "123333333321",
-      "122233332221",
-      "122333333221",
-      "122333333221",
-      "122233332221",
-      "123333333321",
-      "123333333321",
-      ".1233333321.",
-      "..11111111.."
-    ]
-  },
-  gold: {
-    p: { 1:'#451a03', 2:'#f59e0b', 3:'#fef3c7', 4:'#b45309' },
-    g: [
-      "............",
-      "..11111111..",
-      ".1233333321.",
-      "123333333321",
-      "123323333221",
-      "123333333321",
-      "123333333321",
-      "123323333221",
-      "123333333321",
-      "123333333321",
-      ".1233333321.",
-      "..11111111.."
-    ]
-  },
-  diamond: {
-    p: { 1:'#083344', 2:'#0e7490', 3:'#a5f3fc', 4:'#22d3ee' },
-    g: [
-      "............",
-      "..11111111..",
-      ".1233333321.",
-      "123333333321",
-      "123344443321",
-      "123344443321",
-      "123344443321",
-      "123333333321",
-      "123333333321",
-      "122333333221",
-      ".1222222221.",
-      "..11111111.."
-    ]
-  },
-  cosmic: {
-    p: { 1:'#2e1065', 2:'#6d28d9', 3:'#a78bfa', 4:'#fbbf24' },
-    g: [
-      "............",
-      "..11111111..",
-      ".1322222231.",
-      "132222222231",
-      "123223223321",
-      "122322322221",
-      "122222222221",
-      "123223223321",
-      "132222222231",
-      "132222222231",
-      ".1232222321.",
-      "..11111111.."
-    ]
-  },
-  omega: {
-    p: { 1:'#450a0a', 2:'#b91c1c', 3:'#fef3c7', 4:'#fbbf24' },
-    g: [
-      "............",
-      "..11111111..",
-      ".1233333321.",
-      "123333333321",
-      "123343433321",
-      "123433333321",
-      "123333333321",
-      "123343433321",
-      "123333333321",
-      "123333333321",
-      ".1233333321.",
-      "..11111111.."
-    ]
-  }
+const BOX_SHAPE = [
+  "................",
+  "..111111111111..",
+  ".12222222222221.",
+  "1222333333333221",
+  "1223333333333221",
+  "1223333333333221",
+  "1223333333333221",
+  "1223333333333221",
+  "1223333333333221",
+  "1223333333333221",
+  "1223333333333221",
+  "1222333333333221",
+  ".12222222222221.",
+  "..111111111111..",
+  "................",
+  "................"
+];
+const BOX_PALETTES = {
+  wood:    { 1:'#3b1a06', 2:'#7c2d12', 3:'#b45309' },
+  silver:  { 1:'#0f172a', 2:'#334155', 3:'#94a3b8' },
+  gold:    { 1:'#451a03', 2:'#a16207', 3:'#fbbf24' },
+  diamond: { 1:'#083344', 2:'#0e7490', 3:'#22d3ee' },
+  cosmic:  { 1:'#2e1065', 2:'#6d28d9', 3:'#a78bfa' },
+  omega:   { 1:'#450a0a', 2:'#b91c1c', 3:'#f87171' }
 };
 
 /* ==========================================================
@@ -1274,45 +1456,39 @@ const RARITIES = [
 ];
 
 const SKINS = [
-  // Common (cps 1-3)
-  { id:'rock_slime',   name:'STEIN-SLIME',    rarity:0, cps:1   },
-  { id:'wood_fox',     name:'HOLZ-FUCHS',     rarity:0, cps:2   },
-  { id:'grass_beetle', name:'GRAS-KÄFER',     rarity:0, cps:3   },
-  // Uncommon (cps 8-18)
-  { id:'bronze_wolf',  name:'BRONZE-WOLF',    rarity:1, cps:8   },
-  { id:'silver_owl',   name:'SILBER-EULE',    rarity:1, cps:12  },
-  { id:'crystal_hare', name:'KRISTALL-HASE',  rarity:1, cps:18  },
-  // Rare (cps 50-120)
-  { id:'gold_dragon',  name:'GOLD-DRACHE',    rarity:2, cps:50  },
-  { id:'lava_golem',   name:'LAVA-GOLEM',     rarity:2, cps:80  },
-  { id:'rainbow_liz',  name:'REGENBOGEN-ECHSE',rarity:2, cps:120 },
-  // Epic (cps 500-1200)
-  { id:'diamond_eagle',name:'DIAMANT-ADLER',  rarity:3, cps:500 },
-  { id:'shadow_tiger', name:'SCHATTEN-TIGER', rarity:3, cps:800 },
-  { id:'plasma_robot', name:'PLASMA-ROBOTER', rarity:3, cps:1200},
-  // Legendary (cps 6000-15000)
-  { id:'galaxy_dragon',name:'GALAXY-DRACHE',  rarity:4, cps:6000  },
-  { id:'time_guardian',name:'ZEIT-WÄCHTER',   rarity:4, cps:10000 },
-  { id:'dream_queen',  name:'TRAUM-KÖNIGIN',  rarity:4, cps:15000 },
-  // Mythic (cps 80000+)
-  { id:'omega_god',    name:'OMEGA-GOTT',     rarity:5, cps:80000  },
-  { id:'infinity_core',name:'UNENDLICHKEIT',  rarity:5, cps:120000 },
+  { id:'rock_slime',   name:'STEIN-SLIME',     rarity:0, cps:1    },
+  { id:'wood_fox',     name:'HOLZ-FUCHS',      rarity:0, cps:2    },
+  { id:'grass_beetle', name:'GRAS-KÄFER',      rarity:0, cps:3    },
+  { id:'bronze_wolf',  name:'BRONZE-WOLF',     rarity:1, cps:6    },
+  { id:'silver_owl',   name:'SILBER-EULE',     rarity:1, cps:10   },
+  { id:'crystal_hare', name:'KRISTALL-HASE',   rarity:1, cps:15   },
+  { id:'gold_dragon',  name:'GOLD-DRACHE',     rarity:2, cps:50   },
+  { id:'lava_golem',   name:'LAVA-GOLEM',      rarity:2, cps:80   },
+  { id:'rainbow_liz',  name:'REGENBOGEN-ECHSE',rarity:2, cps:120  },
+  { id:'diamond_eagle',name:'DIAMANT-ADLER',   rarity:3, cps:400  },
+  { id:'shadow_tiger', name:'SCHATTEN-TIGER',  rarity:3, cps:700  },
+  { id:'plasma_robot', name:'PLASMA-ROBOTER',  rarity:3, cps:1000 },
+  { id:'galaxy_dragon',name:'GALAXY-DRACHE',   rarity:4, cps:5000 },
+  { id:'time_guardian',name:'ZEIT-WÄCHTER',    rarity:4, cps:8000 },
+  { id:'dream_queen',  name:'TRAUM-KÖNIGIN',   rarity:4, cps:12000},
+  { id:'omega_god',    name:'OMEGA-GOTT',      rarity:5, cps:60000 },
+  { id:'infinity_core',name:'UNENDLICHKEIT',   rarity:5, cps:100000},
   { id:'fate_orb',     name:'SCHICKSALS-KUGEL',rarity:5, cps:180000}
 ];
 
 const BOXES = [
-  { id:'wood',    name:'HOLZBOX',       cost: 100,        luck: 1.0,  c1:'#7c2d12', c2:'#3b1a06', glow:'#b45309' },
-  { id:'silver',  name:'SILBERBOX',     cost: 1500,       luck: 1.15, c1:'#475569', c2:'#1e293b', glow:'#94a3b8' },
-  { id:'gold',    name:'GOLDBOX',       cost: 25000,      luck: 1.35, c1:'#b45309', c2:'#451a03', glow:'#fbbf24' },
-  { id:'diamond', name:'DIAMANTBOX',    cost: 400000,     luck: 1.6,  c1:'#0e7490', c2:'#083344', glow:'#22d3ee' },
-  { id:'cosmic',  name:'KOSMISCHE BOX', cost: 8000000,    luck: 2.0,  c1:'#6d28d9', c2:'#2e1065', glow:'#a78bfa' },
+  { id:'wood',    name:'HOLZBOX',       cost: 50,         luck: 1.0,  c1:'#7c2d12', c2:'#3b1a06', glow:'#b45309' },
+  { id:'silver',  name:'SILBERBOX',     cost: 500,        luck: 1.15, c1:'#475569', c2:'#1e293b', glow:'#94a3b8' },
+  { id:'gold',    name:'GOLDBOX',       cost: 10000,      luck: 1.35, c1:'#b45309', c2:'#451a03', glow:'#fbbf24' },
+  { id:'diamond', name:'DIAMANTBOX',    cost: 200000,     luck: 1.6,  c1:'#0e7490', c2:'#083344', glow:'#22d3ee' },
+  { id:'cosmic',  name:'KOSMISCHE BOX', cost: 5000000,    luck: 2.0,  c1:'#6d28d9', c2:'#2e1065', glow:'#a78bfa' },
   { id:'omega',   name:'OMEGA-BOX',     cost: 150000000,  luck: 2.6,  c1:'#b91c1c', c2:'#450a0a', glow:'#f87171' }
 ];
 
 /* ==========================================================
    STATE
 ========================================================== */
-let coins = 500;
+let coins = 100;
 let owned = {};
 let logEntries = [];
 let pityCounter = 0;
@@ -1321,24 +1497,7 @@ let animating = false;
 let canCloseReveal = false;
 let audioCtx = null;
 let soundEnabled = true;
-
-/* ==========================================================
-   PIXEL RENDERING
-========================================================== */
-function renderPixel(art, size) {
-  const { p, g } = art;
-  let rects = '';
-  for (let y = 0; y < g.length; y++) {
-    const row = g[y];
-    for (let x = 0; x < row.length; x++) {
-      const c = row[x];
-      if (c !== '.' && p[c]) {
-        rects += `<rect x="${x}" y="${y}" width="1" height="1" fill="${p[c]}"/>`;
-      }
-    }
-  }
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12" width="${size}" height="${size}" shape-rendering="crispEdges">${rects}</svg>`;
-}
+let lastDisplayedCoins = 100;
 
 /* ==========================================================
    HELPERS
@@ -1352,9 +1511,8 @@ function fmt(n) {
   if (n >= 1e3) return (n/1e3).toFixed(2) + 'K';
   return n.toString();
 }
-
 function getCps() {
-  return SKINS.reduce((sum, s) => sum + (owned[s.id] || 0) * s.cps, 0);
+  return SKINS.reduce((s, skin) => s + (owned[skin.id] || 0) * skin.cps, 0);
 }
 function getSkinCount() {
   return Object.values(owned).reduce((a, b) => a + b, 0);
@@ -1362,26 +1520,43 @@ function getSkinCount() {
 function getDiscovered() {
   return Object.values(owned).filter(v => v > 0).length;
 }
+function renderPixel(art, size) {
+  const { p, g } = art;
+  let rects = '';
+  const vb = g.length;
+  for (let y = 0; y < g.length; y++) {
+    const row = g[y];
+    for (let x = 0; x < row.length; x++) {
+      const c = row[x];
+      if (c !== '.' && p[c]) {
+        rects += `<rect x="${x}" y="${y}" width="1" height="1" fill="${p[c]}"/>`;
+      }
+    }
+  }
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${vb} ${vb}" width="${size}" height="${size}" shape-rendering="crispEdges">${rects}</svg>`;
+}
+function renderBoxSprite(id, size) {
+  return renderPixel({ p: BOX_PALETTES[id], g: BOX_SHAPE }, size);
+}
 
 /* ==========================================================
-   SOUND (Web Audio)
+   SOUND
 ========================================================== */
 function initAudio() {
   if (!audioCtx) {
-    try {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    } catch (e) { audioCtx = null; }
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { audioCtx = null; }
   }
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
 }
-
-function playTone(freq, dur, type) {
+function playTone(freq, dur, type, vol) {
   if (!soundEnabled || !audioCtx) return;
   try {
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.type = type || 'square';
     osc.frequency.value = freq;
-    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+    const v = vol === undefined ? 0.06 : vol;
+    gain.gain.setValueAtTime(v, audioCtx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
     osc.connect(gain);
     gain.connect(audioCtx.destination);
@@ -1389,24 +1564,34 @@ function playTone(freq, dur, type) {
     osc.stop(audioCtx.currentTime + dur);
   } catch (e) {}
 }
-
+function playTick(freq) { playTone(freq, 0.04, 'square', 0.03); }
 function playRarityChime(rarity) {
   const notes = [
-    [220],
-    [330, 440],
-    [440, 550, 660],
-    [550, 660, 880],
-    [660, 880, 1100, 1320],
-    [880, 1100, 1320, 1650, 1980]
-  ][rarity];
-  notes.forEach((f, i) => setTimeout(() => playTone(f, 0.25, 'triangle'), i * 90));
+    [220, 330],
+    [330, 440, 550],
+    [440, 550, 660, 880],
+    [550, 660, 880, 1100],
+    [660, 880, 1100, 1320, 1650],
+    [880, 1100, 1320, 1650, 1980, 2200]
+  ][rarity] || [440];
+  notes.forEach((f, i) => setTimeout(() => playTone(f, 0.22, 'triangle', 0.08), i * 80));
 }
 
 /* ==========================================================
    RENDERING
 ========================================================== */
-function updateStats() {
-  $('coinDisplay').textContent = fmt(coins);
+function updateStats(bump) {
+  const c = Math.floor(coins);
+  if (c !== lastDisplayedCoins) {
+    $('coinDisplay').textContent = fmt(coins);
+    if (bump) {
+      const box = $('coinBox');
+      box.classList.remove('bump');
+      void box.offsetWidth;
+      box.classList.add('bump');
+    }
+    lastDisplayedCoins = c;
+  }
   $('cpsDisplay').textContent = fmt(getCps());
 }
 
@@ -1414,21 +1599,53 @@ function renderBoxes() {
   const grid = $('boxGrid');
   grid.innerHTML = '';
   BOXES.forEach((box, i) => {
-    const locked = coins < box.cost;
+    const affordable = coins >= box.cost;
     const el = document.createElement('div');
-    el.className = 'box' + (locked ? ' locked' : '');
+    el.className = 'box' + (affordable ? ' affordable' : ' locked');
     el.style.setProperty('--c1', box.c1);
     el.style.setProperty('--c2', box.c2);
     el.style.setProperty('--glow', box.glow);
     el.innerHTML = `
-      <div class="box-pixel">${renderPixel(BOX_ART[box.id], 80)}</div>
+      <button class="box-info" data-box="${i}" title="Was ist drin?">i</button>
+      <div class="box-pixel">${renderBoxSprite(box.id, 84)}</div>
       <div class="box-name">${box.name}</div>
       <div class="box-cost">${fmt(box.cost)}</div>
       <div class="box-luck">🍀 ×${box.luck}</div>
     `;
-    el.addEventListener('click', () => tryOpenBox(i));
+    el.addEventListener('click', (e) => {
+      if (e.target.classList.contains('box-info')) return;
+      tryOpenBox(i);
+    });
     grid.appendChild(el);
   });
+  // Info buttons
+  grid.querySelectorAll('.box-info').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      showPool(parseInt(btn.dataset.box, 10));
+    });
+  });
+}
+
+function renderSkinCard(id, count, unknown) {
+  const skin = SKINS.find(s => s.id === id);
+  const r = RARITIES[skin.rarity];
+  const shiny = skin.rarity >= 4 && !unknown;
+  if (unknown) {
+    return `<div class="skin-card unknown" style="--rc:${r.color};--g1:${r.g1};--g2:${r.g2}">
+      <div class="skin-pixel">${renderPixel(ART[skin.id], 60)}</div>
+      <div class="skin-name">???</div>
+      <div class="skin-rarity">${r.name}</div>
+      <div class="skin-cps">+${fmt(skin.cps)}/s</div>
+    </div>`;
+  }
+  return `<div class="skin-card${shiny ? ' shiny' : ''}" style="--rc:${r.color};--g1:${r.g1};--g2:${r.g2}">
+    <div class="skin-count">×${count}</div>
+    <div class="skin-pixel">${renderPixel(ART[skin.id], 60)}</div>
+    <div class="skin-name">${skin.name}</div>
+    <div class="skin-rarity">${r.name}</div>
+    <div class="skin-cps">+${fmt(skin.cps)}/s</div>
+  </div>`;
 }
 
 function renderInventory() {
@@ -1446,49 +1663,22 @@ function renderInventory() {
   grid.innerHTML = entries.map(([id, count]) => renderSkinCard(id, count, false)).join('');
 }
 
-function renderSkinCard(id, count, unknown) {
-  const skin = SKINS.find(s => s.id === id);
-  const r = RARITIES[skin.rarity];
-  const shiny = skin.rarity >= 4 && !unknown;
-  if (unknown) {
-    return `
-      <div class="skin-card unknown" style="--rc:${r.color};--g1:${r.g1};--g2:${r.g2}">
-        <div class="skin-pixel">${renderPixel(ART[skin.id], 56)}</div>
-        <div class="skin-name">???</div>
-        <div class="skin-rarity">${r.name}</div>
-        <div class="skin-cps">+${skin.cps}/s</div>
-      </div>
-    `;
-  }
-  return `
-    <div class="skin-card${shiny ? ' shiny' : ''}" style="--rc:${r.color};--g1:${r.g1};--g2:${r.g2}">
-      <div class="skin-count">×${count}</div>
-      <div class="skin-pixel">${renderPixel(ART[skin.id], 56)}</div>
-      <div class="skin-name">${skin.name}</div>
-      <div class="skin-rarity">${r.name}</div>
-      <div class="skin-cps">+${fmt(skin.cps)}/s</div>
-    </div>
-  `;
-}
-
 function renderCollection() {
   const grid = $('collectionGrid');
   grid.innerHTML = SKINS.map(skin => {
-    const owned_count = owned[skin.id] || 0;
-    return renderSkinCard(skin.id, owned_count, owned_count === 0);
+    const c = owned[skin.id] || 0;
+    return renderSkinCard(skin.id, c, c === 0);
   }).join('');
   $('collectionCount').textContent = `${getDiscovered()}/${SKINS.length}`;
 }
 
 function renderStats() {
-  const totalSkins = getSkinCount();
-  const discovered = getDiscovered();
   const cps = getCps();
   $('statsPanel').innerHTML = `
     <div class="stat-row"><span class="k">Münzen</span><span class="v gold">${fmt(coins)}</span></div>
     <div class="stat-row"><span class="k">Münzen/Sekunde</span><span class="v green">${fmt(cps)}</span></div>
-    <div class="stat-row"><span class="k">Skins gesamt</span><span class="v">${totalSkins}</span></div>
-    <div class="stat-row"><span class="k">Skins entdeckt</span><span class="v">${discovered}/${SKINS.length}</span></div>
+    <div class="stat-row"><span class="k">Skins gesamt</span><span class="v">${getSkinCount()}</span></div>
+    <div class="stat-row"><span class="k">Skins entdeckt</span><span class="v">${getDiscovered()}/${SKINS.length}</span></div>
     <div class="stat-row"><span class="k">Boxen geöffnet</span><span class="v">${totalOpened}</span></div>
     <div class="stat-row"><span class="k">Pity-Zähler</span><span class="v">${pityCounter}/15</span></div>
     <div class="stat-row"><span class="k">Münzen/Minute</span><span class="v green">${fmt(cps * 60)}</span></div>
@@ -1497,13 +1687,11 @@ function renderStats() {
 }
 
 function addLog(html) {
-  const now = new Date();
-  const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
-  logEntries.unshift({ time, html });
+  const d = new Date();
+  const t = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+  logEntries.unshift({ t, html });
   if (logEntries.length > 20) logEntries.pop();
-  $('log').innerHTML = logEntries.map(e => 
-    `<div class="log-entry"><span class="time">${e.time}</span>${e.html}</div>`
-  ).join('');
+  $('log').innerHTML = logEntries.map(e => `<div class="log-entry"><span class="time">${e.t}</span>${e.html}</div>`).join('');
 }
 
 function updateBoxHint() {
@@ -1512,7 +1700,7 @@ function updateBoxHint() {
 }
 
 function refreshUI() {
-  updateStats();
+  updateStats(false);
   updateBoxHint();
   renderInventory();
 }
@@ -1530,180 +1718,68 @@ function chooseRarity(luck) {
   }
   return 0;
 }
-
-/* ==========================================================
-   OPEN BOX
-========================================================== */
-function tryOpenBox(index) {
-  if (animating) return;
-  initAudio();
-
-  const box = BOXES[index];
-  if (coins < box.cost) {
-    showToast('NICHT GENUG MÜNZEN!');
-    playTone(110, 0.15, 'sawtooth');
-    return;
-  }
-
-  coins -= box.cost;
-  totalOpened++;
-  pityCounter++;
-
-  let rarityIndex = chooseRarity(box.luck);
-
-  // Pity: nach 15 Boxen ohne Rare+ gibt's eine Rare
-  if (pityCounter >= 15 && rarityIndex < 2) {
-    rarityIndex = 2;
-  }
-  if (rarityIndex >= 2) pityCounter = 0;
-
-  const pool = SKINS.filter(s => s.rarity === rarityIndex);
-  const skin = pool[Math.floor(Math.random() * pool.length)];
-  owned[skin.id] = (owned[skin.id] || 0) + 1;
-
-  const r = RARITIES[rarityIndex];
-  addLog(`<span style="color:${r.color};font-weight:bold">${r.name}</span> · ${skin.name} <span style="color:var(--green)">+${fmt(skin.cps)}/s</span>`);
-
-  updateStats();
-  renderBoxes();
-  renderInventory();
-  updateBoxHint();
-
-  if ($('skipAnim').checked) {
-    playRarityChime(rarityIndex);
-    return;
-  }
-
-  playReveal(box, skin, rarityIndex);
+function randomSkinOfRarity(rarity) {
+  const pool = SKINS.filter(s => s.rarity === rarity);
+  return pool[Math.floor(Math.random() * pool.length)];
 }
 
 /* ==========================================================
-   REVEAL ANIMATION
+   SAVE / LOAD
 ========================================================== */
-function playReveal(box, skin, rarityIndex) {
-  animating = true;
-  canCloseReveal = false;
-
-  const overlay = $('revealOverlay');
-  const stage = $('revealStage');
-  const revealBox = $('revealBox');
-  const revealCard = $('revealCard');
-  const revealRays = $('revealRays');
-  const hint = $('revealHint');
-  const flash = $('flash');
-
-  stage.querySelectorAll('.particle').forEach(p => p.remove());
-
-  revealBox.style.display = 'flex';
-  revealBox.style.setProperty('--c1', box.c1);
-  revealBox.style.setProperty('--c2', box.c2);
-  revealBox.style.setProperty('--glow', box.glow);
-  revealBox.innerHTML = renderPixel(BOX_ART[box.id], 110);
-  revealBox.className = 'reveal-box enter';
-
-  revealCard.style.display = 'none';
-  revealCard.className = 'reveal-card';
-  revealCard.innerHTML = '';
-  revealRays.className = 'rays';
-  revealRays.innerHTML = '';
-  hint.classList.remove('show');
-
-  overlay.classList.remove('hidden');
-
-  const r = RARITIES[rarityIndex];
-
-  // Phase 1: Box landet (0.6s)
-  setTimeout(() => {
-    revealBox.className = 'reveal-box shake';
-    playTone(180 + rarityIndex * 40, 0.1, 'square');
-    setTimeout(() => playTone(200 + rarityIndex * 40, 0.1, 'square'), 120);
-    setTimeout(() => playTone(220 + rarityIndex * 40, 0.1, 'square'), 240);
-    setTimeout(() => playTone(240 + rarityIndex * 40, 0.1, 'square'), 360);
-    setTimeout(() => playTone(260 + rarityIndex * 40, 0.1, 'square'), 500);
-    setTimeout(() => playTone(280 + rarityIndex * 40, 0.1, 'square'), 640);
-  }, 600);
-
-  // Phase 2: Burst (1.5s)
-  setTimeout(() => {
-    revealBox.className = 'reveal-box burst';
-    document.body.classList.add('shake-screen');
-    flash.classList.remove('go');
-    void flash.offsetWidth;
-    flash.classList.add('go');
-
-    // Rays
-    revealRays.innerHTML = `<svg viewBox="0 0 200 200">
-      <defs>
-        <radialGradient id="rg">
-          <stop offset="0%" stop-color="${r.color}" stop-opacity="0.6"/>
-          <stop offset="100%" stop-color="${r.color}" stop-opacity="0"/>
-        </radialGradient>
-      </defs>
-      ${[0, 30, 60, 90, 120, 150].map(a => 
-        `<rect x="98" y="0" width="4" height="100" fill="url(#rg)" transform="rotate(${a} 100 100)"/>`
-      ).join('')}
-    </svg>`;
-    revealRays.className = 'rays grow';
-
-    playRarityChime(rarityIndex);
-    spawnParticles(rarityIndex, r.color);
-
-    setTimeout(() => document.body.classList.remove('shake-screen'), 500);
-  }, 1500);
-
-  // Phase 3: Card Reveal (1.95s)
-  setTimeout(() => {
-    revealBox.style.display = 'none';
-
-    revealCard.style.setProperty('--rc', r.color);
-    revealCard.style.setProperty('--g1', r.g1);
-    revealCard.style.setProperty('--g2', r.g2);
-    revealCard.innerHTML = `
-      <div class="rc-pixel">${renderPixel(ART[skin.id], 130)}</div>
-      <div class="rc-rarity">${r.name}</div>
-      <div class="rc-name">${skin.name}</div>
-      <div class="rc-cps">+${fmt(skin.cps)}/s</div>
-    `;
-    revealCard.style.display = 'block';
-    revealCard.className = 'reveal-card show';
-
-    if (rarityIndex >= 3) spawnParticles(rarityIndex, r.color, 20);
-    if (rarityIndex >= 4) setTimeout(() => spawnParticles(rarityIndex, r.color, 20), 200);
-
-    hint.classList.add('show');
-    canCloseReveal = true;
-  }, 1950);
+function save() {
+  try {
+    localStorage.setItem('rng_skin_idle_v2', JSON.stringify({
+      coins, owned, pityCounter, totalOpened
+    }));
+  } catch (e) {}
+}
+function load() {
+  try {
+    const s = localStorage.getItem('rng_skin_idle_v2');
+    if (!s) return;
+    const d = JSON.parse(s);
+    if (typeof d.coins === 'number') coins = d.coins;
+    if (d.owned) owned = d.owned;
+    if (typeof d.pityCounter === 'number') pityCounter = d.pityCounter;
+    if (typeof d.totalOpened === 'number') totalOpened = d.totalOpened;
+    lastDisplayedCoins = -1;
+  } catch (e) {}
 }
 
-function spawnParticles(rarity, color, count) {
-  count = count || 14;
-  const stage = $('revealStage');
-  const cx = stage.offsetWidth / 2;
-  const cy = stage.offsetHeight / 2;
-
-  for (let i = 0; i < count; i++) {
-    const p = document.createElement('div');
-    p.className = 'particle';
-    const angle = Math.random() * Math.PI * 2;
-    const dist = 100 + Math.random() * 200;
-    p.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
-    p.style.setProperty('--dy', Math.sin(angle) * dist + 'px');
-    p.style.setProperty('--rot', Math.random() * 720 + 'deg');
-    p.style.left = cx + 'px';
-    p.style.top = cy + 'px';
-    p.style.background = color;
-    p.style.boxShadow = `0 0 12px ${color}`;
-    p.style.animation = `particleFly 1.2s ease-out ${Math.random() * 0.15}s forwards`;
-    stage.appendChild(p);
-    setTimeout(() => p.remove(), 1500);
-  }
-}
-
-function closeReveal() {
-  if (!canCloseReveal) return;
-  $('revealOverlay').classList.add('hidden');
-  animating = false;
-  canCloseReveal = false;
+/* ==========================================================
+   POOL PREVIEW
+========================================================== */
+function showPool(boxIndex) {
+  const box = BOXES[boxIndex];
+  const weights = RARITIES.map((r, i) => r.weight * Math.pow(box.luck, i));
+  const total = weights.reduce((a, b) => a + b, 0);
+  const probs = weights.map(w => (w / total) * 100);
+  
+  $('poolTitle').textContent = box.name + ' — POOL';
+  
+  let html = '';
+  RARITIES.forEach((r, i) => {
+    const prob = probs[i];
+    const skinsInRarity = SKINS.filter(s => s.rarity === i);
+    if (skinsInRarity.length === 0) return;
+    html += `<div class="pool-rarity">
+      <div class="pool-rarity-head">
+        <span style="color:${r.color};text-shadow:0 0 8px ${r.color}">${r.name}</span>
+        <span class="pool-rarity-prob">${prob.toFixed(2)}%</span>
+      </div>
+      <div class="pool-skins">
+        ${skinsInRarity.map(s => `
+          <div class="pool-skin" style="--rc:${r.color}">
+            ${renderPixel(ART[s.id], 40)}
+            <div class="psn">${s.name}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>`;
+  });
+  
+  $('poolBody').innerHTML = html;
+  $('poolModal').classList.remove('hidden');
 }
 
 /* ==========================================================
@@ -1719,7 +1795,249 @@ function showToast(msg) {
 }
 
 /* ==========================================================
-   TAB SWITCHING
+   OPEN BOX
+========================================================== */
+function tryOpenBox(index) {
+  if (animating) return;
+  initAudio();
+  
+  const box = BOXES[index];
+  if (coins < box.cost) {
+    showToast('NICHT GENUG MÜNZEN!');
+    playTone(110, 0.15, 'sawtooth', 0.05);
+    return;
+  }
+  
+  coins -= box.cost;
+  totalOpened++;
+  pityCounter++;
+  
+  let rarityIndex = chooseRarity(box.luck);
+  if (pityCounter >= 15 && rarityIndex < 2) {
+    rarityIndex = 2;
+  }
+  if (rarityIndex >= 2) pityCounter = 0;
+  
+  const skin = randomSkinOfRarity(rarityIndex);
+  owned[skin.id] = (owned[skin.id] || 0) + 1;
+  
+  const r = RARITIES[rarityIndex];
+  addLog(`<span style="color:${r.color};font-weight:bold">${r.name}</span> · ${skin.name} <span style="color:var(--green)">+${fmt(skin.cps)}/s</span>`);
+  
+  updateStats(false);
+  renderBoxes();
+  renderInventory();
+  updateBoxHint();
+  save();
+  
+  if ($('skipAnim').checked) {
+    playRarityChime(rarityIndex);
+    return;
+  }
+  
+  playReveal(box, skin, rarityIndex);
+}
+
+/* ==========================================================
+   REVEAL ANIMATION
+========================================================== */
+function playReveal(box, skin, rarityIndex) {
+  animating = true;
+  canCloseReveal = false;
+  
+  const overlay = $('revealOverlay');
+  const stage = $('revealStage');
+  const revealBox = $('revealBox');
+  const revealCard = $('revealCard');
+  const rouletteWrap = $('rouletteWrap');
+  const hint = $('revealHint');
+  
+  stage.querySelectorAll('.particle').forEach(p => p.remove());
+  
+  // Reset
+  revealBox.style.display = 'flex';
+  revealBox.style.setProperty('--c1', box.c1);
+  revealBox.style.setProperty('--c2', box.c2);
+  revealBox.style.setProperty('--glow', box.glow);
+  revealBox.innerHTML = renderBoxSprite(box.id, 120);
+  revealBox.className = 'reveal-box enter';
+  
+  revealCard.style.display = 'none';
+  revealCard.className = 'reveal-card';
+  revealCard.innerHTML = '';
+  
+  rouletteWrap.classList.remove('show');
+  rouletteWrap.style.display = 'none';
+  
+  hint.classList.remove('show');
+  overlay.classList.remove('hidden');
+  
+  const r = RARITIES[rarityIndex];
+  
+  // Phase 1: Box enters (0.6s)
+  // Phase 2: Box shakes (0.7s)
+  setTimeout(() => {
+    revealBox.className = 'reveal-box shake';
+    for (let i = 0; i < 6; i++) {
+      setTimeout(() => playTone(180 + rarityIndex * 40 + i * 15, 0.08, 'square', 0.04), i * 100);
+    }
+  }, 600);
+  
+  // Phase 3: Box bursts (0.35s)
+  setTimeout(() => {
+    revealBox.className = 'reveal-box burst';
+    document.body.classList.add('shake-screen');
+    const flash = $('flash');
+    flash.classList.remove('go');
+    void flash.offsetWidth;
+    flash.classList.add('go');
+    setTimeout(() => document.body.classList.remove('shake-screen'), 500);
+  }, 1300);
+  
+  // Phase 4: Roulette (2.4s)
+  setTimeout(() => {
+    revealBox.style.display = 'none';
+    rouletteWrap.style.display = 'flex';
+    // Force reflow
+    void rouletteWrap.offsetWidth;
+    rouletteWrap.classList.add('show');
+    runRoulette(box, skin, () => {
+      // Phase 5: Card reveal
+      rouletteWrap.classList.remove('show');
+      setTimeout(() => {
+        rouletteWrap.style.display = 'none';
+        
+        revealCard.style.setProperty('--rc', r.color);
+        revealCard.style.setProperty('--g1', r.g1);
+        revealCard.style.setProperty('--g2', r.g2);
+        revealCard.innerHTML = `
+          <div class="rc-pixel">${renderPixel(ART[skin.id], 140)}</div>
+          <div class="rc-rarity">${r.name}</div>
+          <div class="rc-name">${skin.name}</div>
+          <div class="rc-cps">+${fmt(skin.cps)}/s</div>
+        `;
+        revealCard.style.display = 'block';
+        revealCard.className = 'reveal-card show';
+        
+        playRarityChime(rarityIndex);
+        if (rarityIndex >= 2) spawnParticles(rarityIndex, r.color, 14);
+        if (rarityIndex >= 3) setTimeout(() => spawnParticles(rarityIndex, r.color, 20), 150);
+        if (rarityIndex >= 4) setTimeout(() => spawnParticles(rarityIndex, r.color, 24), 300);
+        
+        hint.classList.add('show');
+        canCloseReveal = true;
+      }, 200);
+    });
+  }, 1650);
+}
+
+function runRoulette(box, winningSkin, onDone) {
+  const strip = $('rouletteStrip');
+  const winEl = document.querySelector('.roulette-window');
+  const winWidth = winEl.offsetWidth;
+  
+  // Compute item width from CSS (fallback 100)
+  const isMobile = window.innerWidth <= 600;
+  const itemWidth = isMobile ? 90 : 110;
+  
+  const totalItems = 40;
+  const winnerIndex = totalItems - 1;
+  
+  const items = [];
+  for (let i = 0; i < totalItems - 1; i++) {
+    const rarity = chooseRarity(box.luck);
+    items.push(randomSkinOfRarity(rarity));
+  }
+  items.push(winningSkin);
+  
+  strip.innerHTML = items.map(s => {
+    const r = RARITIES[s.rarity];
+    return `<div class="roulette-item" style="--g1:${r.g1};--g2:${r.g2};--rc:${r.color};width:${itemWidth}px">
+      ${renderPixel(ART[s.id], isMobile ? 50 : 60)}
+      <div class="ri-name">${s.name}</div>
+      <div class="ri-rarity">${r.name}</div>
+    </div>`;
+  }).join('');
+  
+  // Target translation
+  const targetX = winWidth / 2 - (winnerIndex * itemWidth + itemWidth / 2);
+  const offsetX = (Math.random() - 0.5) * (itemWidth * 0.55);
+  
+  // Start: first item at left edge
+  strip.style.transition = 'none';
+  strip.style.transform = 'translateX(0px)';
+  void strip.offsetWidth;
+  
+  const duration = 2400;
+  
+  // Set transition and animate
+  strip.style.transition = `transform ${duration}ms cubic-bezier(0.1, 0.85, 0.15, 1)`;
+  strip.style.transform = `translateX(${targetX + offsetX}px)`;
+  
+  // Tick tracker
+  const centerScreenBase = winEl.getBoundingClientRect().left + winWidth / 2;
+  let lastIdx = -1;
+  const startTime = performance.now();
+  
+  function trackTicks() {
+    const stripRect = strip.getBoundingClientRect();
+    const relX = centerScreenBase - stripRect.left;
+    const idx = Math.floor(relX / itemWidth);
+    if (idx !== lastIdx && idx >= 0 && idx < items.length) {
+      lastIdx = idx;
+      const it = items[idx];
+      playTick(380 + it.rarity * 60);
+    }
+    if (performance.now() - startTime < duration + 200) {
+      requestAnimationFrame(trackTicks);
+    }
+  }
+  setTimeout(trackTicks, 30);
+  
+  // Flash + done
+  setTimeout(() => {
+    const flash = $('flash');
+    flash.classList.remove('go');
+    void flash.offsetWidth;
+    flash.classList.add('go');
+    onDone();
+  }, duration + 100);
+}
+
+function spawnParticles(rarity, color, count) {
+  count = count || 14;
+  const stage = $('revealStage');
+  const cx = stage.offsetWidth / 2;
+  const cy = stage.offsetHeight / 2;
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 100 + Math.random() * 220;
+    p.style.setProperty('--dx', (Math.cos(angle) * dist) + 'px');
+    p.style.setProperty('--dy', (Math.sin(angle) * dist) + 'px');
+    p.style.setProperty('--rot', (Math.random() * 720) + 'deg');
+    p.style.left = cx + 'px';
+    p.style.top = cy + 'px';
+    p.style.background = color;
+    p.style.boxShadow = `0 0 12px ${color}`;
+    p.style.animation = `particleFly 1.3s ease-out ${Math.random() * 0.15}s forwards`;
+    stage.appendChild(p);
+    setTimeout(() => p.remove(), 1600);
+  }
+}
+
+function closeReveal() {
+  if (!canCloseReveal) return;
+  $('revealOverlay').classList.add('hidden');
+  setTimeout(() => {
+    animating = false;
+    canCloseReveal = false;
+  }, 300);
+}
+
+/* ==========================================================
+   EVENTS
 ========================================================== */
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => {
@@ -1727,15 +2045,11 @@ document.querySelectorAll('.tab').forEach(tab => {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     tab.classList.add('active');
     $('view-' + tab.dataset.tab).classList.add('active');
-
     if (tab.dataset.tab === 'collection') renderCollection();
     if (tab.dataset.tab === 'stats') renderStats();
   });
 });
 
-/* ==========================================================
-   EVENT LISTENERS
-========================================================== */
 $('revealOverlay').addEventListener('click', closeReveal);
 
 $('soundOn').addEventListener('change', (e) => {
@@ -1743,19 +2057,19 @@ $('soundOn').addEventListener('change', (e) => {
   if (soundEnabled) initAudio();
 });
 
-$('skipAnim').addEventListener('change', () => {
-  initAudio();
-});
+$('skipAnim').addEventListener('change', () => initAudio());
 
 $('resetBtn').addEventListener('click', () => {
-  if (confirm('Wirklich ALLES zurücksetzen? Dein Fortschritt geht verloren.')) {
-    coins = 500;
+  if (confirm('Wirklich ALLES zurücksetzen?')) {
+    coins = 100;
     owned = {};
     logEntries = [];
     pityCounter = 0;
     totalOpened = 0;
-    refreshUI();
+    lastDisplayedCoins = -1;
+    save();
     renderBoxes();
+    refreshUI();
     renderStats();
     renderCollection();
     addLog('Spiel zurückgesetzt.');
@@ -1763,26 +2077,80 @@ $('resetBtn').addEventListener('click', () => {
   }
 });
 
+$('poolClose').addEventListener('click', () => $('poolModal').classList.add('hidden'));
+$('poolModal').addEventListener('click', (e) => {
+  if (e.target.id === 'poolModal') $('poolModal').classList.add('hidden');
+});
+
+/* ==========================================================
+   BACKGROUND CANVAS
+========================================================== */
+function initBgCanvas() {
+  const canvas = $('bgCanvas');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+  const colors = ['#7c3aed', '#22d3ee', '#ec4899', '#fbbf24', '#a78bfa'];
+  
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+  
+  for (let i = 0; i < 60; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      size: Math.floor(Math.random() * 3) + 2,
+      speedY: Math.random() * 0.4 + 0.1,
+      speedX: (Math.random() - 0.5) * 0.2,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      opacity: Math.random() * 0.5 + 0.15,
+      blink: Math.random() * Math.PI * 2
+    });
+  }
+  
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+      p.y -= p.speedY;
+      p.x += p.speedX;
+      p.blink += 0.03;
+      if (p.y < -10) { p.y = canvas.height + 10; p.x = Math.random() * canvas.width; }
+      if (p.x < -10) p.x = canvas.width + 10;
+      if (p.x > canvas.width + 10) p.x = -10;
+      const a = p.opacity * (0.7 + Math.sin(p.blink) * 0.3);
+      ctx.globalAlpha = a;
+      ctx.fillStyle = p.color;
+      ctx.fillRect(Math.floor(p.x), Math.floor(p.y), p.size, p.size);
+    });
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+
 /* ==========================================================
    GAME LOOP
 ========================================================== */
 let lastTick = performance.now();
-let boxRefreshTimer = 0;
+let refreshTimer = 0;
+let saveTimer = 0;
 
 function tick(now) {
   const dt = (now - lastTick) / 1000;
   lastTick = now;
-
-  const earned = getCps() * dt;
-  if (earned > 0) {
-    coins += earned;
-    updateStats();
+  
+  const cps = getCps();
+  if (cps > 0) {
+    coins += cps * dt;
+    updateStats(false);
   }
-
-  // Refresh boxes once per second
-  boxRefreshTimer += dt;
-  if (boxRefreshTimer >= 1) {
-    boxRefreshTimer = 0;
+  
+  refreshTimer += dt;
+  if (refreshTimer >= 1) {
+    refreshTimer = 0;
     const needsRefresh = BOXES.some((b, i) => {
       const card = $('boxGrid').children[i];
       if (!card) return true;
@@ -1793,19 +2161,29 @@ function tick(now) {
     if (needsRefresh) renderBoxes();
     updateBoxHint();
   }
-
+  
+  saveTimer += dt;
+  if (saveTimer >= 10) {
+    saveTimer = 0;
+    save();
+  }
+  
   requestAnimationFrame(tick);
 }
 
 /* ==========================================================
    INIT
 ========================================================== */
+initBgCanvas();
+load();
 renderBoxes();
 renderInventory();
-updateStats();
+updateStats(false);
 updateBoxHint();
-addLog('Willkommen! Du hast <span style="color:var(--gold)">500 Münzen</span> – kauf dir deine erste Holzbox!');
+addLog('Willkommen! Du hast <span style="color:var(--gold)">100 Münzen</span> — öffne deine erste Holzbox!');
 requestAnimationFrame(tick);
+
+window.addEventListener('beforeunload', save);
 </script>
 </body>
 </html>
